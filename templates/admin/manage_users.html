@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% block title %}Manage Users - CropCare{% endblock %}
+{% block user_role %}Admin Dashboard{% endblock %}
+{% block page_heading %}User Operations{% endblock %}
+
+{% block sidebar %}
+<a href="/admin/dashboard" class="sidebar-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+<a href="/admin/manage-users" class="sidebar-item active"><i class="fas fa-users"></i><span>Manage Users</span></a>
+<a href="/admin/manage-ads" class="sidebar-item"><i class="fas fa-ad"></i><span>Manage Ads</span></a>
+<a href="/admin/manage-schemes" class="sidebar-item"><i class="fas fa-hand-holding-heart"></i><span>Manage Schemes</span></a>
+<a href="/admin/manage-prices" class="sidebar-item"><i class="fas fa-chart-line"></i><span>Manage Prices</span></a>
+<a href="/admin/analytics" class="sidebar-item"><i class="fas fa-chart-bar"></i><span>Analytics</span></a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 admin-page">
+  <!-- Hero Section -->
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm relative">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-8 xl:grid-cols-[1.45fr,0.85fr] items-start">
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800">
+          <i class="fas fa-user-shield text-green-600"></i> Farmer & Operator Governance
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900 leading-tight">
+          Review, verify, and maintain farmer profiles with ease.
+        </h1>
+        <p class="max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+          Audit registration requests, verify land size and irrigation records, and manage access roles across all Karnataka districts from a unified governance surface.
+        </p>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+        <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5">
+          <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Total Registered Users</p>
+          <p class="mt-2 text-3xl font-extrabold text-gray-900">{{ users|length }}</p>
+          <p class="mt-2 text-xs font-medium text-gray-500">Farmers and extension agents</p>
+        </div>
+        <div class="bg-gradient-to-br from-green-50/80 to-emerald-50/80 border border-green-200 shadow-sm rounded-[24px] p-5">
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <span class="eyebrow text-green-800 font-bold uppercase tracking-wider text-xs">Governance Note</span>
+            <span class="w-8 h-8 rounded-xl bg-white border border-green-200 text-green-700 flex items-center justify-center shadow-2xs text-xs"><i class="fas fa-check-double"></i></span>
+          </div>
+          <p class="text-base font-bold text-gray-900">Prioritize pending queue</p>
+          <p class="mt-1.5 text-xs leading-5 text-gray-700 font-medium">
+            Aim to approve pending registrations promptly. Accurate land and irrigation data directly improves AI crop recommendation precision.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Directory Table Section -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-1 space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Platform Directory</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">User Registry</h2>
+      </div>
+      <span class="inline-flex items-center gap-2 rounded-full bg-green-50 border border-green-200 px-4 py-2 text-xs font-bold text-green-800">
+        <i class="fas fa-circle-check text-green-600"></i> Full Profile Access Enabled
+      </span>
+    </div>
+
+    <div class="overflow-x-auto rounded-[24px] border border-gray-200 bg-white shadow-2xs">
+      <table class="w-full min-w-[1050px] border-collapse text-left text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
+            <th class="py-4 px-4 font-bold">User</th>
+            <th class="py-4 px-4 font-bold">Email Address</th>
+            <th class="py-4 px-4 font-bold">District</th>
+            <th class="py-4 px-4 font-bold text-right">Land Size</th>
+            <th class="py-4 px-4 font-bold">Irrigation Type</th>
+            <th class="py-4 px-4 font-bold">Status</th>
+            <th class="py-4 px-4 font-bold">Role</th>
+            <th class="py-4 px-4 font-bold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for user in users %}
+          <tr id="user-row-{{ user.id }}" class="hover:bg-green-50/40 transition-colors">
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-3">
+                {% if user.profile_photo %}
+                <img src="{{ user.profile_photo }}" alt="{{ user.name }}" class="h-11 w-11 rounded-2xl object-cover border border-green-200 shadow-2xs" />
+                {% else %}
+                <div class="h-11 w-11 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center text-sm font-extrabold text-green-700 shadow-2xs">
+                  {{ (user.name[:1] if user.name else 'U')|upper }}
+                </div>
+                {% endif %}
+                <div>
+                  <p class="text-sm font-bold text-gray-900">{{ user.name }}</p>
+                  <p class="text-[11px] font-semibold text-gray-400">ID #{{ user.id }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 font-medium text-gray-600">{{ user.email }}</td>
+            <td class="py-3.5 px-4 font-medium text-gray-800">{{ user.district or "N/A" }}</td>
+            <td class="py-3.5 px-4 text-right font-semibold text-gray-700">{{ "%.2f"|format(user.land_size or 0) }} ac</td>
+            <td class="py-3.5 px-4 text-gray-600">{{ user.irrigation_type or "N/A" }}</td>
+            <td class="py-3.5 px-4">
+              {% if user.is_approved %}
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                <i class="fas fa-circle-check text-green-600"></i> Approved
+              </span>
+              {% else %}
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                <i class="fas fa-clock text-amber-600"></i> Pending
+              </span>
+              {% endif %}
+            </td>
+            <td class="py-3.5 px-4 font-bold text-gray-900 uppercase text-xs">{{ user.role }}</td>
+            <td class="py-3.5 px-4 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                {% if not user.is_approved %}
+                <button onclick="approveUser({{ user.id }})" class="w-9 h-9 rounded-xl bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 transition-all flex items-center justify-center cursor-pointer shadow-2xs" title="Approve Registration">
+                  <i class="fas fa-check text-xs"></i>
+                </button>
+                {% endif %}
+                <button onclick="rejectUser({{ user.id }})" class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-all flex items-center justify-center cursor-pointer shadow-2xs" title="Revoke Approval">
+                  <i class="fas fa-ban text-xs"></i>
+                </button>
+                <button onclick="editUser({{ user.id }})" class="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 hover:bg-sky-100 transition-all flex items-center justify-center cursor-pointer shadow-2xs" title="Edit Profile">
+                  <i class="fas fa-pen text-xs"></i>
+                </button>
+                <button onclick="deleteUser({{ user.id }})" class="w-9 h-9 rounded-xl bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-all flex items-center justify-center cursor-pointer shadow-2xs" title="Delete Account">
+                  <i class="fas fa-trash text-xs"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="fixed inset-0 hidden items-center justify-center p-4 z-50">
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
+  <div class="relative w-full max-w-4xl bg-white border border-gray-200 shadow-2xl rounded-[32px] p-6 lg:p-8 z-10 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between gap-4 pb-4 border-b border-gray-100">
+      <div>
+        <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Profile Editor</p>
+        <h3 class="text-2xl font-extrabold text-gray-900">Update Farmer Record</h3>
+      </div>
+      <button class="w-10 h-10 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors cursor-pointer" onclick="closeEditModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <input type="hidden" id="editUserId" />
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-[0.7fr,1.3fr] items-start">
+      <div class="bg-gray-50 border border-gray-200 rounded-[28px] p-6 flex flex-col items-center justify-center text-center">
+        <img id="editUserPhotoPreview" src="" alt="User photo" class="h-32 w-32 rounded-[24px] object-cover border-2 border-green-500 shadow-md hidden mb-4" />
+        <div id="editUserPhotoFallback" class="h-32 w-32 rounded-[24px] bg-green-50 border-2 border-green-200 flex items-center justify-center text-4xl font-extrabold text-green-700 shadow-md mb-4">U</div>
+        <p class="text-sm font-bold text-gray-900">Profile Avatar</p>
+        <p class="mt-1 text-xs text-gray-500">Visual confirmation for the farmer record you are editing.</p>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">Full Name</label>
+          <input id="editUserName" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs" placeholder="Name" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">Email Address</label>
+          <input id="editUserEmail" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-100 text-sm font-medium text-gray-500 cursor-not-allowed shadow-2xs" readonly />
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">District</label>
+          <input id="editUserDistrict" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs" placeholder="District" />
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">Land Size (Acres)</label>
+          <input id="editUserLandSize" type="number" step="0.01" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs" placeholder="Land Size" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">Irrigation Type</label>
+          <input id="editUserIrrigationType" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs" placeholder="e.g. Canal/Borewell, Rain-fed, Drip" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">Profile Photo URL</label>
+          <input id="editUserProfilePhoto" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs" placeholder="https://..." />
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">System Role</label>
+          <select id="editUserRole" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+            <option value="user">Farmer / User</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-900 mb-1.5">Approval Status</label>
+          <select id="editUserApproved" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+            <option value="false">Pending Approval</option>
+            <option value="true">Approved (Active)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-gray-100 flex flex-wrap items-center justify-end gap-3">
+      <button class="btn-secondary inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer shadow-2xs" onclick="closeEditModal()">
+        Cancel
+      </button>
+      <button class="btn-primary inline-flex items-center gap-2 rounded-2xl px-8 py-3.5 font-bold shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="saveUserEdits()">
+        <i class="fas fa-cloud-arrow-up"></i> Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(46, 125, 50, 0.08), transparent 45%),
+      radial-gradient(circle at top right, rgba(79, 195, 247, 0.08), transparent 35%);
+  }
+</style>
+
+<script>
+  function authHeaders(json = false) {
+    return getAuthHeaders(json ? { "Content-Type": "application/json" } : {});
+  }
+
+  function initials(name) {
+    if (!name) return "U";
+    const parts = name.trim().split(/\s+/).slice(0, 2);
+    return parts.map((part) => part[0]?.toUpperCase() || "").join("") || "U";
+  }
+
+  function updateEditPhotoPreview(url, name) {
+    const img = document.getElementById("editUserPhotoPreview");
+    const fallback = document.getElementById("editUserPhotoFallback");
+    fallback.textContent = initials(name);
+    if (url) {
+      img.src = url;
+      img.classList.remove("hidden");
+      fallback.classList.add("hidden");
+    } else {
+      img.classList.add("hidden");
+      fallback.classList.remove("hidden");
+    }
+  }
+
+  async function approveUser(userId) {
+    const response = await fetch(`/admin/users/${userId}/approve`, {
+      method: "POST",
+      headers: authHeaders(true),
+    });
+    if (!response.ok) return alert("Failed to approve user");
+    window.location.reload();
+  }
+
+  async function rejectUser(userId) {
+    const response = await fetch(`/admin/users/${userId}/reject`, {
+      method: "POST",
+      headers: authHeaders(true),
+    });
+    if (!response.ok) return alert("Failed to revoke approval");
+    window.location.reload();
+  }
+
+  async function editUser(userId) {
+    const response = await fetch(`/admin/users/${userId}`, {
+      headers: authHeaders(),
+    });
+    if (!response.ok) return alert("Failed to fetch user details");
+    const user = await response.json();
+    document.getElementById("editUserId").value = user.id;
+    document.getElementById("editUserName").value = user.name || "";
+    document.getElementById("editUserEmail").value = user.email || "";
+    document.getElementById("editUserDistrict").value = user.district || "";
+    document.getElementById("editUserLandSize").value = user.land_size ?? "";
+    document.getElementById("editUserIrrigationType").value = user.irrigation_type || "";
+    document.getElementById("editUserProfilePhoto").value = user.profile_photo || "";
+    document.getElementById("editUserRole").value = user.role || "user";
+    document.getElementById("editUserApproved").value = String(Boolean(user.is_approved));
+    updateEditPhotoPreview(user.profile_photo, user.name);
+    
+    const modal = document.getElementById("editUserModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  document.getElementById("editUserName").addEventListener("input", function () {
+    updateEditPhotoPreview(document.getElementById("editUserProfilePhoto").value.trim(), this.value);
+  });
+
+  document.getElementById("editUserProfilePhoto").addEventListener("input", function () {
+    updateEditPhotoPreview(this.value.trim(), document.getElementById("editUserName").value);
+  });
+
+  function closeEditModal() {
+    const modal = document.getElementById("editUserModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+
+  async function saveUserEdits() {
+    const id = document.getElementById("editUserId").value;
+    if (!id) return;
+    const landValue = document.getElementById("editUserLandSize").value;
+    const parsedLand = landValue ? parseFloat(landValue) : null;
+    if (parsedLand !== null && (!Number.isFinite(parsedLand) || parsedLand <= 0)) {
+      return alert("Land size must be a valid number greater than 0");
+    }
+    const payload = {
+      name: document.getElementById("editUserName").value,
+      district: document.getElementById("editUserDistrict").value || null,
+      land_size: parsedLand,
+      irrigation_type: document.getElementById("editUserIrrigationType").value || null,
+      profile_photo: document.getElementById("editUserProfilePhoto").value.trim() || null,
+      role: document.getElementById("editUserRole").value,
+      is_approved: document.getElementById("editUserApproved").value === "true",
+    };
+    const response = await fetch(`/admin/users/${id}`, {
+      method: "PUT",
+      headers: authHeaders(true),
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) return alert("Failed to update user profile");
+    window.location.reload();
+  }
+
+  async function deleteUser(userId) {
+    if (!confirm("Are you sure you want to permanently delete this user account?")) return;
+    const response = await fetch(`/admin/users/${userId}`, {
+      method: "DELETE",
+      headers: authHeaders(true),
+    });
+    if (!response.ok) return alert("Failed to delete user");
+    window.location.reload();
+  }
+</script>
+{% endblock %}

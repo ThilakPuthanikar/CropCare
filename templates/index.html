@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CropCare - Smart Farming Starts With Smart Decisions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root {
+        --primary: #2E7D32;
+        --primary-hover: #1B5E20;
+        --secondary: #43A047;
+        --accent: #43A047;
+        --bg-main: #F8FAF5;
+        --surface: #FFFFFF;
+        --border-color: #DDE5D5;
+        --text-primary: #1F2937;
+        --text-secondary: #6B7280;
+        --dark: #FFFFFF;
+        --darker: #F8FAF5;
+        --light-text: #1F2937;
+        --gray-text: #6B7280;
+        --card-bg: #FFFFFF;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", "Plus Jakarta Sans", sans-serif;
+        color: var(--text-primary);
+        background-color: var(--bg-main);
+        overflow-x: hidden;
+      }
+
+      /* Custom Animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      @keyframes glow {
+        0%, 100% {
+          box-shadow: 0 0 15px rgba(46, 125, 50, 0.15);
+        }
+        50% {
+          box-shadow: 0 0 25px rgba(46, 125, 50, 0.3);
+        }
+      }
+
+      .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+      }
+
+      .animate-float {
+        animation: float 4s ease-in-out infinite;
+      }
+
+      .animate-glow {
+        animation: glow 3s ease-in-out infinite alternate;
+      }
+
+      .glassmorphic {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      }
+
+      .navbar-scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        background: rgba(255, 255, 255, 0.95);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .nav-pill {
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 9999px;
+        transition: all 0.25s ease;
+      }
+
+      .nav-pill:hover,
+      .nav-pill.active {
+        color: #2E7D32;
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .hero-bg {
+        background: linear-gradient(
+          135deg,
+          rgba(46, 125, 50, 0.08) 0%,
+          rgba(67, 160, 71, 0.04) 50%,
+          rgba(248, 250, 245, 1) 100%
+        );
+      }
+
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        border-color: #43A047;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-hover);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(46, 125, 50, 0.35);
+      }
+
+      .btn-secondary {
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      /* Testimonial Slider Styles */
+      .testimonial-slider {
+        position: relative;
+        width: 100%;
+        height: 460px;
+        overflow: hidden;
+      }
+
+      .testimonial-container {
+        display: flex;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        height: calc(100% - 56px);
+      }
+
+      .testimonial-card {
+        min-width: 100%;
+        padding: 2rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .testimonial-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .testimonial-nav:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-50%) scale(1.05);
+      }
+
+      .nav-prev {
+        left: 15px;
+      }
+
+      .nav-next {
+        right: 15px;
+      }
+
+      .testimonial-dots {
+        position: absolute;
+        left: 50%;
+        bottom: 12px;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 0;
+        z-index: 20;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--border-color);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #DDE5D5;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .dot.active {
+        background: var(--primary);
+        transform: scale(1.3);
+      }
+
+      /* Scroll Progress Bar */
+      .progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        z-index: 1000;
+        transition: width 0.3s ease;
+      }
+
+      /* Section Spacing */
+      .section {
+        padding: 5rem 0;
+      }
+
+      @media (max-width: 768px) {
+        .section {
+          padding: 3rem 0;
+        }
+
+        .testimonial-slider {
+          height: 450px;
+        }
+
+        .testimonial-nav {
+          width: 45px;
+          height: 45px;
+          font-size: 18px;
+        }
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(31, 41, 55, 0.6);
+        backdrop-filter: blur(4px);
+      }
+
+      .modal-content {
+        background-color: var(--surface);
+        margin: 5% auto;
+        padding: 2.5rem;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        position: relative;
+        border: 1px solid var(--border-color);
+        scrollbar-width: none;
+      }
+
+      .modal-content::-webkit-scrollbar {
+        display: none;
+      }
+
+      .close {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        color: var(--text-secondary);
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .close:hover {
+        color: var(--text-primary);
+        background: #F3F4F6;
+      }
+
+      .modal-title {
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .modal-content p {
+        line-height: 1.7;
+        margin-bottom: 1.2rem;
+        color: var(--text-secondary);
+      }
+
+      .modal-content h3 {
+        color: var(--text-primary);
+        margin: 1.8rem 0 0.8rem 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .modal-content ul {
+        margin: 0.8rem 0 1.5rem 1.2rem;
+        color: var(--text-secondary);
+      }
+
+      .modal-content li {
+        margin-bottom: 0.7rem;
+        padding-left: 0.5rem;
+      }
+
+      /* Enhanced Testimonial Cards */
+      .testimonial-card-enhanced {
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+        transition: all 0.4s ease;
+        color: var(--text-primary);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .testimonial-card-enhanced:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+      }
+
+      .testimonial-card-enhanced:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: var(--secondary);
+      }
+
+      .testimonial-card-enhanced blockquote {
+        color: var(--text-primary);
+        font-size: 1.15rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1.5rem;
+      }
+
+      .testimonial-card-enhanced blockquote:before {
+        content: '"';
+        position: absolute;
+        top: -20px;
+        left: 0;
+        font-size: 5rem;
+        color: rgba(46, 125, 50, 0.1);
+        font-family: serif;
+        line-height: 1;
+      }
+
+      .testimonial-card-enhanced .author-name {
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .testimonial-card-enhanced .location {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      .testimonial-card-enhanced {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .testimonial-card-enhanced > * {
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans">
+    <!-- Initial Page Skeleton Loader -->
+    <div id="pageSkeletonLoader" class="fixed inset-0 z-[100] bg-[#F8FAF5] flex flex-col justify-between p-8 transition-opacity duration-500 pointer-events-none">
+      <div class="flex justify-between items-center max-w-7xl mx-auto w-full h-16 border-b border-gray-200 pb-4">
+        <div class="w-32 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div class="hidden md:flex gap-4">
+          <div class="w-20 h-8 bg-gray-100 rounded-full animate-pulse"></div>
+          <div class="w-20 h-8 bg-gray-100 rounded-full animate-pulse"></div>
+          <div class="w-20 h-8 bg-gray-100 rounded-full animate-pulse"></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-20 h-9 bg-gray-200 rounded-lg animate-pulse"></div>
+          <div class="w-24 h-9 bg-green-600/30 rounded-lg animate-pulse"></div>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center my-auto py-12">
+        <div class="space-y-6">
+          <div class="w-3/4 h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+          <div class="w-1/2 h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+          <div class="w-full h-20 bg-gray-100 rounded-xl animate-pulse"></div>
+          <div class="flex gap-4 pt-4">
+            <div class="w-40 h-12 bg-green-600/40 rounded-xl animate-pulse"></div>
+            <div class="w-36 h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+          </div>
+        </div>
+        <div class="hidden lg:block w-full h-[400px] bg-gray-100 rounded-3xl animate-pulse border border-gray-200"></div>
+      </div>
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-gray-200">
+        <div class="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
+        <div class="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
+        <div class="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
+        <div class="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
+      </div>
+    </div>
+    <script>
+      window.addEventListener("load", function () {
+        const loader = document.getElementById("pageSkeletonLoader");
+        if (loader) {
+          loader.style.opacity = "0";
+          setTimeout(() => loader.remove(), 500);
+        }
+      });
+    </script>
+    <!-- Progress Bar -->
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav
+      id="navbar"
+      class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md transition-all duration-300 border-b border-[var(--border-color)]"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-3">
+            <img
+              src="static/images/logo1.jpeg"
+              alt="CropCare Logo"
+              class="w-8 h-8 rounded-lg"
+              onerror="
+                this.style.display = 'none';
+                document.querySelector('.logo-placeholder').style.display =
+                  'block';
+              "
+            />
+            <div class="logo-placeholder" style="display: none">
+              <svg
+                class="w-8 h-8 text-green-700"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+                />
+              </svg>
+            </div>
+            <span class="text-2xl font-bold text-gray-900">CropCare</span>
+          </div>
+          <div
+            class="hidden md:flex items-center gap-2 bg-gray-100/80 border border-[var(--border-color)] rounded-full px-3 py-1.5"
+          >
+            <a href="#home" class="nav-pill active" id="nav-home">Home</a>
+            <a href="/about" class="nav-pill">About Us</a>
+            <a href="/features" class="nav-pill">Features</a>
+            <a href="/contact" class="nav-pill">Contact</a>
+          </div>
+          <div class="flex items-center space-x-3">
+            <a href="/auth/login" class="btn-secondary !py-2 !px-5 text-sm">Login</a>
+            <a href="/auth/register" class="btn-primary !py-2 !px-5 text-sm">Signup</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg section pt-28 pb-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="space-y-6 animate-fade-in-up">
+            <div class="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-1.5 rounded-full text-sm font-semibold border border-green-200">
+              <i data-lucide="sprout" class="w-4 h-4 text-green-700"></i>
+              <span>Next-Gen Agricultural Intelligence</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight tracking-tight">
+              Smart Farming Starts<br />With <span class="text-green-700">Smart Decisions</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 leading-relaxed">
+              AI-powered farming assistance that helps you make data-driven
+              decisions for better yields and higher profits. Transform your
+              farming with cutting-edge technology.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 pt-2">
+              <a href="/auth/register" class="btn-primary px-8 py-3.5 text-base text-center inline-flex items-center justify-center gap-2"
+                ><span>Get Started Free</span><i data-lucide="arrow-right" class="w-4 h-4"></i></a
+              >
+              <a href="/features" class="btn-secondary px-8 py-3.5 text-base text-center inline-flex items-center justify-center gap-2"
+                ><span>Explore Features</span></a
+              >
+            </div>
+          </div>
+          <div class="relative animate-float">
+            <img
+              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+              alt="Modern Farming Technology"
+              class="rounded-2xl shadow-xl border border-[var(--border-color)] w-full h-auto object-cover"
+            />
+            <div
+              class="absolute -top-4 -right-4 w-16 h-16 bg-green-700 rounded-2xl shadow-lg flex items-center justify-center animate-glow"
+            >
+              <i data-lucide="leaf" class="text-white w-8 h-8"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problems" class="section bg-white border-y border-[var(--border-color)]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <span class="text-green-700 font-semibold tracking-wider uppercase text-sm mb-2 block">Why CropCare?</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Challenges Farmers Face Today
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Understanding the key problems that impact farming success and profitability
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div
+            class="card-hover bg-[#F8FAF5] p-6 rounded-2xl border border-[var(--border-color)] transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-sm"
+            >
+              <i data-lucide="help-circle" class="text-red-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-center mb-3 text-gray-900">
+              Crop Uncertainty
+            </h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Don't know which crops to grow based on specific soil and climate
+              conditions.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-[#F8FAF5] p-6 rounded-2xl border border-[var(--border-color)] transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-sm"
+            >
+              <i data-lucide="cloud-rain" class="text-blue-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-center mb-3 text-gray-900">
+              Weather Unpredictability
+            </h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Unpredictable weather patterns affect crop planning, irrigation, and
+              harvest management.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-[#F8FAF5] p-6 rounded-2xl border border-[var(--border-color)] transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-sm"
+            >
+              <i data-lucide="trending-down" class="text-amber-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-center mb-3 text-gray-900">
+              Market Fluctuations
+            </h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Price volatility makes it difficult to plan sales and maximize
+              overall profits.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-[#F8FAF5] p-6 rounded-2xl border border-[var(--border-color)] transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-sm"
+            >
+              <i data-lucide="bug" class="text-orange-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-center mb-3 text-gray-900">
+              Pest & Disease Losses
+            </h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Crop diseases and pests cause significant losses without early
+              detection and intervention.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section id="features" class="section bg-[var(--bg-main)]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <span class="text-green-700 font-semibold tracking-wider uppercase text-sm mb-2 block">Our Solutions</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            How CropCare Helps
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Our AI-powered solutions address every aspect of modern farming with precision and speed
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            class="card-hover bg-white p-8 rounded-2xl border border-[var(--border-color)] shadow-sm transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm"
+            >
+              <i data-lucide="sprout" class="text-green-700 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-gray-900">
+              AI Crop Recommendations
+            </h3>
+            <p class="text-gray-600 text-sm leading-relaxed">
+              Get personalized crop suggestions based on your specific soil
+              conditions, NPK ratios, and local climate data.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-white p-8 rounded-2xl border border-[var(--border-color)] shadow-sm transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm"
+            >
+              <i data-lucide="activity" class="text-blue-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-gray-900">
+              Disease Diagnosis
+            </h3>
+            <p class="text-gray-600 text-sm leading-relaxed">
+              Upload plant images to instantly identify diseases, assess severity, and get verified treatment
+              recommendations.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-white p-8 rounded-2xl border border-[var(--border-color)] shadow-sm transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm"
+            >
+              <i data-lucide="calendar" class="text-purple-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-gray-900">
+              Dynamic Crop Planner
+            </h3>
+            <p class="text-gray-600 text-sm leading-relaxed">
+              Create detailed farming schedules with daily task timelines, irrigation alerts, and input
+              requirements.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-white p-8 rounded-2xl border border-[var(--border-color)] shadow-sm transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm"
+            >
+              <i data-lucide="dollar-sign" class="text-amber-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-gray-900">
+              Live Mandi Prices
+            </h3>
+            <p class="text-gray-600 text-sm leading-relaxed">
+              Track real-time market prices across regional mandis to optimize your selling decisions
+              and maximize profits.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-white p-8 rounded-2xl border border-[var(--border-color)] shadow-sm transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-sky-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm"
+            >
+              <i data-lucide="sun" class="text-sky-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-gray-900">
+              Weather Intelligence
+            </h3>
+            <p class="text-gray-600 text-sm leading-relaxed">
+              Access hyper-local weather forecasts and extreme climate alerts to plan farming activities
+              safely.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-white p-8 rounded-2xl border border-[var(--border-color)] shadow-sm transition-all"
+          >
+            <div
+              class="w-14 h-14 bg-teal-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm"
+            >
+              <i data-lucide="book-open" class="text-teal-600 w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-gray-900">
+              Govt Scheme Finder
+            </h3>
+            <p class="text-gray-600 text-sm leading-relaxed">
+              Discover eligible government schemes, agricultural subsidies, and financial aid for your
+              farming operations.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section bg-white border-y border-[var(--border-color)]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <span class="text-green-700 font-semibold tracking-wider uppercase text-sm mb-2 block">Simple Workflow</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            How It Works
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Three simple steps to transform your farming experience and boost yield
+          </p>
+        </div>
+        <div class="relative">
+          <div
+            class="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-green-100 transform -translate-y-1/2 -z-10"
+          ></div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="text-center relative bg-[#F8FAF5] lg:bg-transparent p-6 rounded-2xl border lg:border-none border-[var(--border-color)]">
+              <div
+                class="w-16 h-16 bg-green-700 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-md animate-glow"
+              >
+                1
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-900">
+                Create Profile
+              </h3>
+              <p class="text-gray-600 text-sm leading-relaxed max-w-xs mx-auto">
+                Set up your farm profile with location, soil type, NPK metrics, and land size
+                details.
+              </p>
+            </div>
+            <div class="text-center relative bg-[#F8FAF5] lg:bg-transparent p-6 rounded-2xl border lg:border-none border-[var(--border-color)]">
+              <div
+                class="w-16 h-16 bg-green-700 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-md animate-glow"
+              >
+                2
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-900">
+                Get Smart Insights
+              </h3>
+              <p class="text-gray-600 text-sm leading-relaxed max-w-xs mx-auto">
+                Receive AI-powered crop recommendations, weather alerts, and real-time disease
+                diagnoses.
+              </p>
+            </div>
+            <div class="text-center relative bg-[#F8FAF5] lg:bg-transparent p-6 rounded-2xl border lg:border-none border-[var(--border-color)]">
+              <div
+                class="w-16 h-16 bg-green-700 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-md animate-glow"
+              >
+                3
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-900">
+                Improve Yield & Profit
+              </h3>
+              <p class="text-gray-600 text-sm leading-relaxed max-w-xs mx-auto">
+                Implement precision farming schedules to increase productivity and maximize
+                profitability.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section bg-[var(--bg-main)]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <span class="text-green-700 font-semibold tracking-wider uppercase text-sm mb-2 block">Farmer Stories</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            What Farmers Are Saying
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Real stories from successful CropCare users across India
+          </p>
+        </div>
+        <div class="max-w-4xl mx-auto">
+          <div class="testimonial-slider bg-white rounded-3xl p-8 shadow-sm border border-[var(--border-color)]">
+            <button class="testimonial-nav nav-prev">
+              <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <div class="testimonial-container">
+              <div class="testimonial-card">
+                <div class="testimonial-card-enhanced">
+                  <div
+                    class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm"
+                  >
+                    <i data-lucide="user" class="text-green-700 w-8 h-8"></i>
+                  </div>
+                  <blockquote class="text-lg mb-6 text-gray-800">
+                    "CropCare helped me choose the right crop based on my soil
+                    report. My yield improved by 30% and I avoided major losses."
+                  </blockquote>
+                  <div class="font-bold author-name">Ramesh Gowda</div>
+                  <div class="text-sm location">Mandya, Karnataka</div>
+                </div>
+              </div>
+              <div class="testimonial-card">
+                <div class="testimonial-card-enhanced">
+                  <div
+                    class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm"
+                  >
+                    <i data-lucide="user" class="text-green-700 w-8 h-8"></i>
+                  </div>
+                  <blockquote class="text-lg mb-6 text-gray-800">
+                    "The disease diagnosis feature saved my tomato crop. I got
+                    quick solutions without waiting days for external help."
+                  </blockquote>
+                  <div class="font-bold author-name">Lakshmi Devi</div>
+                  <div class="text-sm location">Tumkur, Karnataka</div>
+                </div>
+              </div>
+              <div class="testimonial-card">
+                <div class="testimonial-card-enhanced">
+                  <div
+                    class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm"
+                  >
+                    <i data-lucide="user" class="text-green-700 w-8 h-8"></i>
+                  </div>
+                  <blockquote class="text-lg mb-6 text-gray-800">
+                    "The mandi price tracking helps me decide the right time to
+                    sell my produce. It increased my net profits significantly."
+                  </blockquote>
+                  <div class="font-bold author-name">Shankar Patil</div>
+                  <div class="text-sm location">Belagavi, Karnataka</div>
+                </div>
+              </div>
+              <div class="testimonial-card">
+                <div class="testimonial-card-enhanced">
+                  <div
+                    class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm"
+                  >
+                    <i data-lucide="user" class="text-green-700 w-8 h-8"></i>
+                  </div>
+                  <blockquote class="text-lg mb-6 text-gray-800">
+                    "The crop planner gives me clear daily tasks. It feels like
+                    having a dedicated agricultural scientist by my side."
+                  </blockquote>
+                  <div class="font-bold author-name">Anitha Reddy</div>
+                  <div class="text-sm location">Mysuru, Karnataka</div>
+                </div>
+              </div>
+            </div>
+            <button class="testimonial-nav nav-next">
+              <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+            <div class="testimonial-dots">
+              <button class="dot active" data-index="0"></button>
+              <button class="dot" data-index="1"></button>
+              <button class="dot" data-index="2"></button>
+              <button class="dot" data-index="3"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section bg-gradient-to-r from-green-800 to-green-900 text-white my-12 mx-4 sm:mx-8 lg:mx-auto max-w-7xl rounded-3xl shadow-xl relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-green-700/30 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <span class="inline-block bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-medium mb-4 border border-white/20">Start Your Free Trial</span>
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-6 tracking-tight">
+          Ready to Transform Your Farming Decisions?
+        </h2>
+        <p class="text-lg md:text-xl mb-8 text-green-100 max-w-2xl mx-auto">
+          Join thousands of farmers using CropCare to make data-driven, profitable agricultural decisions.
+        </p>
+        <a
+          href="/auth/register"
+          class="inline-flex items-center gap-2 bg-white text-green-900 px-10 py-4 rounded-xl text-lg font-bold hover:bg-green-50 transition-all shadow-lg transform hover:-translate-y-1"
+        >
+          <span>Create Free Account</span>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-green-800"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    {% include "partials/footer.html" %}
+
+    <!-- About Us Modal -->
+    <div id="about-us" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="modal-title">About CropCare</h2>
+        <p><strong>Founded:</strong> 2026</p>
+
+        <p>
+          CropCare is a revolutionary agricultural technology company dedicated
+          to empowering farmers with AI-powered decision support systems.
+          Founded by a team of agricultural scientists and technology experts,
+          we believe that every farmer deserves access to cutting-edge tools
+          that can transform their farming practices.
+        </p>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">Our Mission</h3>
+        <p>
+          To democratize agricultural intelligence and make data-driven farming
+          accessible to every farmer, regardless of scale or location.
+        </p>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">Our Vision</h3>
+        <p>
+          To create a world where farming is sustainable, profitable, and
+          resilient to climate challenges through the power of artificial
+          intelligence and data science.
+        </p>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">Our Values</h3>
+        <ul class="list-disc pl-6 mt-2 space-y-1">
+          <li>
+            <strong>Innovation:</strong> Constantly pushing boundaries in
+            agricultural technology
+          </li>
+          <li>
+            <strong>Trust:</strong> Building reliable and accurate farming
+            solutions
+          </li>
+          <li>
+            <strong>Sustainability:</strong> Promoting environmentally conscious
+            farming
+          </li>
+          <li>
+            <strong>Community:</strong> Supporting farming communities worldwide
+          </li>
+        </ul>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">Our Team</h3>
+        <p>
+          Our diverse team includes agricultural scientists, data engineers, AI
+          specialists, and passionate advocates for farmers' welfare, all
+          working together to revolutionize agriculture.
+        </p>
+      </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="modal-title">Contact Us</h2>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">
+          General Inquiries
+        </h3>
+        <p>Email: info@croppcare.com</p>
+        <p>Phone: +91-XXXXXXXXXX</p>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">Support</h3>
+        <p>Email: support@croppcare.com</p>
+        <p>Phone: +91-XXXXXXXXXX</p>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">
+          Office Address
+        </h3>
+        <p>CropCare Technologies Pvt Ltd</p>
+        <p>123 Agriculture Park, Bangalore, Karnataka 560001</p>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">
+          Business Hours
+        </h3>
+        <p>Monday - Friday: 9:00 AM - 6:00 PM IST</p>
+        <p>Saturday: 10:00 AM - 2:00 PM IST</p>
+        <p>Sunday: Closed</p>
+
+        <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900">Follow Us</h3>
+        <p>Stay connected with us for the latest updates and farming tips:</p>
+        <div class="flex space-x-4 mt-2">
+          <a href="#" class="text-green-700 hover:text-green-800 font-medium">Twitter</a>
+          <a href="#" class="text-green-700 hover:text-green-800 font-medium">LinkedIn</a>
+          <a href="#" class="text-green-700 hover:text-green-800 font-medium">YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    {% include "partials/common_modals.html" %}
+
+    <script>
+      // Navbar scroll effect
+      window.addEventListener("scroll", function () {
+        const navbar = document.getElementById("navbar");
+        if (window.scrollY > 50) {
+          navbar.classList.add("navbar-scrolled");
+        } else {
+          navbar.classList.remove("navbar-scrolled");
+        }
+      });
+
+      // Progress bar
+      window.addEventListener("scroll", function () {
+        const winScroll =
+          document.body.scrollTop || document.documentElement.scrollTop;
+        const height =
+          document.documentElement.scrollHeight -
+          document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.querySelector(".progress-bar").style.width = scrolled + "%";
+      });
+
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+          if (!href || href === "#") {
+            return;
+          }
+
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        });
+      });
+
+      // Homepage nav active state: Home vs Solutions
+      const homeNav = document.getElementById("nav-home");
+      const solutionsNav = document.getElementById("nav-solutions");
+      const featuresSection = document.getElementById("features");
+
+      if (homeNav && solutionsNav && featuresSection) {
+        const setActiveNav = (activeLink) => {
+          homeNav.classList.toggle("active", activeLink === "home");
+          solutionsNav.classList.toggle("active", activeLink === "solutions");
+        };
+
+        const featuresObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                setActiveNav("solutions");
+              } else if (window.scrollY < featuresSection.offsetTop - 120) {
+                setActiveNav("home");
+              }
+            });
+          },
+          { threshold: 0.25 },
+        );
+
+        featuresObserver.observe(featuresSection);
+
+        homeNav.addEventListener("click", () => setActiveNav("home"));
+        solutionsNav.addEventListener("click", () => setActiveNav("solutions"));
+      }
+
+      // Testimonial Slider
+      class TestimonialSlider {
+        constructor() {
+          this.container = document.querySelector(".testimonial-container");
+          this.slides = document.querySelectorAll(".testimonial-card");
+          this.prevBtn = document.querySelector(".nav-prev");
+          this.nextBtn = document.querySelector(".nav-next");
+          this.dots = document.querySelectorAll(".dot");
+          this.currentIndex = 0;
+          this.totalSlides = this.slides.length;
+
+          this.init();
+        }
+
+        init() {
+          // Set initial position
+          this.updateSlider();
+
+          // Event listeners
+          this.prevBtn.addEventListener("click", () => this.prevSlide());
+          this.nextBtn.addEventListener("click", () => this.nextSlide());
+
+          // Dot navigation
+          this.dots.forEach((dot, index) => {
+            dot.addEventListener("click", () => this.goToSlide(index));
+          });
+
+          // Auto slide
+          setInterval(() => {
+            this.nextSlide();
+          }, 5000);
+        }
+
+        updateSlider() {
+          const translateX = -this.currentIndex * 100;
+          this.container.style.transform = `translateX(${translateX}%)`;
+
+          // Update dots
+          this.dots.forEach((dot, index) => {
+            dot.classList.toggle("active", index === this.currentIndex);
+          });
+        }
+
+        nextSlide() {
+          this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
+          this.updateSlider();
+        }
+
+        prevSlide() {
+          this.currentIndex =
+            (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
+          this.updateSlider();
+        }
+
+        goToSlide(index) {
+          this.currentIndex = index;
+          this.updateSlider();
+        }
+      }
+
+      // Modal Manager Class
+      class ModalManager {
+        constructor() {
+          this.modals = document.querySelectorAll(".modal");
+          this.triggers = document.querySelectorAll(".modal-trigger");
+          this.closes = document.querySelectorAll(".close");
+
+          this.init();
+        }
+
+        init() {
+          // Add event listeners to triggers
+          this.triggers.forEach((trigger) => {
+            trigger.addEventListener("click", (e) => {
+              e.preventDefault();
+              const modalId = trigger.getAttribute("data-modal");
+              this.openModal(modalId);
+            });
+          });
+
+          // Add event listeners to close buttons
+          this.closes.forEach((close) => {
+            close.addEventListener("click", () => {
+              this.closeAllModals();
+            });
+          });
+
+          // Close modal when clicking outside content
+          window.addEventListener("click", (e) => {
+            if (e.target.classList.contains("modal")) {
+              this.closeAllModals();
+            }
+          });
+
+          // Close modals with Escape key
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+              this.closeAllModals();
+            }
+          });
+        }
+
+        openModal(modalId) {
+          this.closeAllModals();
+          const modal = document.getElementById(modalId);
+          if (modal) {
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
+          }
+        }
+
+        closeAllModals() {
+          this.modals.forEach((modal) => {
+            modal.style.display = "none";
+          });
+          document.body.style.overflow = "auto";
+        }
+      }
+
+      // Initialize everything when DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        new TestimonialSlider();
+        new ModalManager();
+        if (typeof lucide !== "undefined") { lucide.createIcons(); }
+
+        // Fix testimonial slider height for better visibility
+        const testimonialSlider = document.querySelector(".testimonial-slider");
+        const testimonialCards = document.querySelectorAll(
+          ".testimonial-card-enhanced",
+        );
+
+        // Set minimum height for testimonial cards
+        testimonialCards.forEach((card) => {
+          card.style.minHeight = "320px";
+        });
+
+        // Adjust slider height based on content
+        setTimeout(() => {
+          const maxHeight = Math.max(
+            ...Array.from(testimonialCards).map((card) => card.offsetHeight),
+          );
+          testimonialSlider.style.height = `${maxHeight + 80}px`;
+        }, 100);
+      });
+
+      // Intersection Observer for scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px",
+      };
+
+      const observer = new IntersectionObserver(function (entries) {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.animationDelay = "0.2s";
+            entry.target.classList.add("animate-fade-in-up");
+          }
+        });
+      }, observerOptions);
+
+      // Observe elements that should animate on scroll
+      document.querySelectorAll(".card-hover").forEach((card) => {
+        observer.observe(card);
+      });
+
+      // Logo image error handling
+      document.addEventListener("DOMContentLoaded", function () {
+        const logoImages = document.querySelectorAll('img[src*="logo"]');
+        logoImages.forEach((img) => {
+          img.addEventListener("error", function () {
+            this.style.display = "none";
+            const placeholder = this
+              .closest(".flex")
+              ?.querySelector(".logo-placeholder, .footer-logo-placeholder");
+            if (placeholder) {
+              placeholder.style.display = "block";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,717 @@
+<!-- templates/user/profile.html -->
+{% extends "base.html" %} {% block title %}Profile - CropCare{% endblock %} {%
+block user_role %}Farmer Dashboard{% endblock %} {% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item block py-3 px-4 rounded-lg">
+  <i class="fas fa-home mr-3"></i>Dashboard
+</a>
+<a href="/user/profile" class="sidebar-item active block py-3 px-4 rounded-lg">
+  <i class="fas fa-user mr-3"></i>Profile
+</a>
+<a href="/user/soil-library" class="sidebar-item block py-3 px-4 rounded-lg">
+  <i class="fas fa-seedling mr-3"></i>Soil Library
+</a>
+<a href="/user/weather" class="sidebar-item block py-3 px-4 rounded-lg">
+  <i class="fas fa-cloud-sun mr-3"></i>Weather
+</a>
+<a
+  href="/user/crop-recommendation"
+  class="sidebar-item block py-3 px-4 rounded-lg"
+>
+  <i class="fas fa-leaf mr-3"></i>Crop Suggestion
+</a>
+<a
+  href="/user/input-suggestions"
+  class="sidebar-item block py-3 px-4 rounded-lg"
+>
+  <i class="fas fa-tools mr-3"></i>Input Suggestions
+</a>
+<a
+  href="/user/disease-diagnosis"
+  class="sidebar-item block py-3 px-4 rounded-lg"
+>
+  <i class="fas fa-heartbeat mr-3"></i>Disease Diagnosis
+</a>
+<a href="/user/crop-planner" class="sidebar-item block py-3 px-4 rounded-lg">
+  <i class="fas fa-calendar-check mr-3"></i>Crop Planner
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item block py-3 px-4 rounded-lg">
+  <i class="fas fa-chart-line mr-3"></i>Price Tracker
+</a>
+<a href="/user/gov-schemes" class="sidebar-item block py-3 px-4 rounded-lg">
+  <i class="fas fa-hand-holding-heart mr-3"></i>Gov Schemes
+</a>
+{% endblock %} {% block content %}
+<div class="space-y-6 profile-page">
+  <!-- Profile Header Card -->
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm relative">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div class="flex items-center gap-5">
+        <div id="profileAvatarShell" class="avatar-shell">
+          <img
+            id="profileAvatarImage"
+            src="{{ user.profile_photo or '' }}"
+            alt="Profile photo"
+            class="avatar-image {% if not user.profile_photo %}hidden{% endif %}"
+          />
+          <div
+            id="profileAvatarFallback"
+            class="avatar-fallback {% if user.profile_photo %}hidden{% endif %}"
+          ></div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">{{ user.name }}</h2>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+              <i class="fas fa-circle-check text-green-600"></i> Active Farmer
+            </span>
+          </div>
+          <p class="text-sm font-medium text-gray-600 mt-1 flex items-center gap-2">
+            <i class="fas fa-location-dot text-sky-600"></i>
+            {{ user.district or "District not set" }}, {{ user.state or "State not set" }}
+          </p>
+          <p class="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+            <i class="fas fa-clock"></i>
+            Last updated: {{ user.updated_at.strftime('%Y-%m-%d') if user.updated_at else 'Never' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Profile Completion Widget -->
+      <div class="w-full lg:w-80 bg-gray-50 border border-gray-200/80 rounded-2xl p-4 shadow-2xs">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs uppercase font-bold tracking-wider text-gray-500">Profile Completion</span>
+          <span
+            class="text-sm font-extrabold text-green-700"
+            id="profileCompletionLabel"
+          >
+            0%
+          </span>
+        </div>
+        <div class="progress-track">
+          <div id="profileCompletionBar" class="progress-fill"></div>
+        </div>
+        <p class="text-[11px] text-gray-500 mt-2 font-medium">
+          Complete profile for accurate AI crop and weather recommendations.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Profile Edit Form -->
+  <form id="profileForm" class="space-y-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <!-- Left Column: Photo & Identity -->
+      <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 xl:col-span-1 fade-up stagger-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between gap-3 mb-6">
+            <div>
+              <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Identity</p>
+              <h3 class="text-xl font-extrabold text-gray-900">Profile Photo</h3>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center text-green-700">
+              <i class="fas fa-camera"></i>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div class="flex justify-center py-4">
+              <div id="photoPreviewShell" class="avatar-shell large shadow-md">
+                <img
+                  id="photoPreviewImage"
+                  src="{{ user.profile_photo or '' }}"
+                  alt="Selected profile photo"
+                  class="avatar-image {% if not user.profile_photo %}hidden{% endif %}"
+                />
+                <div
+                  id="photoPreviewFallback"
+                  class="avatar-fallback {% if user.profile_photo %}hidden{% endif %}"
+                ></div>
+              </div>
+            </div>
+
+            <div class="upload-shell">
+              <label
+                class="block text-sm font-bold text-gray-900 mb-2"
+                for="profilePhoto"
+              >
+                Upload new photo
+              </label>
+              <input
+                id="profilePhoto"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                class="input-file-field w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition-all cursor-pointer"
+              />
+              <p class="text-xs text-gray-500 mt-2">
+                Allowed: JPG, PNG, WEBP up to 5MB.
+              </p>
+            </div>
+
+            <label
+              class="flex items-start gap-3 text-sm font-medium text-gray-700 cursor-pointer p-3.5 rounded-2xl bg-gray-50 border border-gray-200 hover:bg-gray-100/80 transition-colors"
+            >
+              <input
+                id="removePhoto"
+                type="checkbox"
+                class="mt-0.5 rounded text-green-600 focus:ring-green-500 border-gray-300 w-4 h-4"
+              />
+              <span>Remove current photo and use default initials avatar</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-100">
+          <div class="flex items-center gap-3 text-xs text-gray-500 font-medium">
+            <i class="fas fa-shield-halved text-green-600 text-sm"></i>
+            <span>Your photo helps extension officers and agronomists identify your farm records.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Personal & Farm Info -->
+      <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 xl:col-span-2 fade-up stagger-2 space-y-8">
+        <!-- Personal Information Section -->
+        <div>
+          <div class="flex items-center justify-between gap-3 mb-6">
+            <div>
+              <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Contact Details</p>
+              <h3 class="text-xl font-extrabold text-gray-900">Personal Information</h3>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+              <i class="fas fa-address-card"></i>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label
+                for="name"
+                class="block text-sm font-bold text-gray-900 mb-2"
+                >Full Name</label
+              >
+              <input
+                type="text"
+                id="name"
+                value="{{ user.name }}"
+                class="input-field w-full"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-gray-900 mb-2"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                value="{{ user.email }}"
+                class="input-field w-full bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
+                disabled
+              />
+              <span class="text-[11px] text-gray-400 mt-1 block">Email address cannot be changed</span>
+            </div>
+            <div class="md:col-span-2">
+              <label
+                for="phoneNumber"
+                class="block text-sm font-bold text-gray-900 mb-2"
+                >Phone Number</label
+              >
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-500 text-sm">+91</span>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  value="{{ user.phone_number or '' }}"
+                  class="input-field w-full pl-12"
+                  placeholder="Enter 10-digit mobile number"
+                  maxlength="10"
+                  inputmode="numeric"
+                />
+              </div>
+              <p class="text-xs text-gray-500 mt-1.5">
+                Use a valid Indian mobile number starting with 6 to 9 for SMS alerts and mandi price updates.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Farm Information Section -->
+        <div class="pt-6 border-t border-gray-200">
+          <div class="flex items-center justify-between gap-3 mb-6">
+            <div>
+              <p class="eyebrow mb-1 text-amber-600 font-bold uppercase tracking-wider text-xs">Agronomy Context</p>
+              <h3 class="text-xl font-extrabold text-gray-900">Farm Information</h3>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+              <i class="fas fa-tractor"></i>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-bold text-gray-900 mb-2"
+                >State</label
+              >
+              <input
+                type="text"
+                value="{{ user.state or 'Karnataka' }}"
+                class="input-field w-full bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
+                disabled
+              />
+            </div>
+            <div>
+              <label
+                for="district"
+                class="block text-sm font-bold text-gray-900 mb-2"
+                >District</label
+              >
+              <select id="district" class="input-field theme-select w-full font-medium text-gray-900" required>
+                <option value="Bagalkot">Bagalkot</option>
+                <option value="Ballari">Ballari</option>
+                <option value="Belagavi">Belagavi</option>
+                <option value="Bengaluru Rural">Bengaluru Rural</option>
+                <option value="Bengaluru Urban">Bengaluru Urban</option>
+                <option value="Bidar">Bidar</option>
+                <option value="Chamarajanagar">Chamarajanagar</option>
+                <option value="Chikkaballapur">Chikkaballapur</option>
+                <option value="Chikkamagaluru">Chikkamagaluru</option>
+                <option value="Chitradurga">Chitradurga</option>
+                <option value="Dakshina Kannada">Dakshina Kannada</option>
+                <option value="Davanagere">Davanagere</option>
+                <option value="Dharwad">Dharwad</option>
+                <option value="Gadag">Gadag</option>
+                <option value="Hassan">Hassan</option>
+                <option value="Haveri">Haveri</option>
+                <option value="Kalaburagi">Kalaburagi</option>
+                <option value="Kodagu">Kodagu</option>
+                <option value="Kolar">Kolar</option>
+                <option value="Koppal">Koppal</option>
+                <option value="Mandya">Mandya</option>
+                <option value="Mysuru">Mysuru</option>
+                <option value="Raichur">Raichur</option>
+                <option value="Ramanagara">Ramanagara</option>
+                <option value="Shivamogga">Shivamogga</option>
+                <option value="Tumakuru">Tumakuru</option>
+                <option value="Udupi">Udupi</option>
+                <option value="Uttara Kannada">Uttara Kannada</option>
+                <option value="Vijayapura">Vijayapura</option>
+                <option value="Yadgir">Yadgir</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="landSize"
+                class="block text-sm font-bold text-gray-900 mb-2"
+                >Land Size (acres)</label
+              >
+              <div class="relative">
+                <input
+                  type="number"
+                  id="landSize"
+                  value="{{ user.land_size or '' }}"
+                  step="0.1"
+                  min="0.1"
+                  class="input-field w-full pr-16 font-medium text-gray-900"
+                  placeholder="e.g. 5.0"
+                  required
+                />
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">Acres</span>
+              </div>
+            </div>
+            <div>
+              <label
+                for="irrigationType"
+                class="block text-sm font-bold text-gray-900 mb-2"
+                >Primary Irrigation Type</label
+              >
+              <select id="irrigationType" class="input-field theme-select w-full font-medium text-gray-900" required>
+                <option value="Canal/Borewell">Canal/Borewell</option>
+                <option value="Rain-fed">Rain-fed</option>
+                <option value="Drip">Drip</option>
+                <option value="Sprinkler">Sprinkler</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[24px] p-5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span id="saveHint" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-400">
+          <i class="fas fa-circle-check text-gray-300"></i> No unsaved changes
+        </span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button
+          id="saveButton"
+          type="submit"
+          class="btn-primary inline-flex items-center gap-3 rounded-2xl px-8 py-3.5 font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
+        >
+          <i class="fas fa-cloud-arrow-up"></i>
+          Save Profile Changes
+        </button>
+      </div>
+    </div>
+
+    <div id="successMessage" class="success-message shadow-sm" style="display: none">
+      <i class="fas fa-circle-check text-green-600 mr-2 text-lg"></i>
+      <span class="font-bold">Profile updated successfully!</span> Your AI recommendations will use your new farm settings.
+    </div>
+    <div id="errorMessage" class="error-message shadow-sm" style="display: none">
+      <i class="fas fa-triangle-exclamation text-red-600 mr-2 text-lg"></i>
+      <span id="errorText" class="font-bold">Failed to update profile.</span>
+    </div>
+  </form>
+</div>
+
+<style>
+  .profile-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(46, 125, 50, 0.08), transparent 45%),
+      radial-gradient(circle at top right, rgba(79, 195, 247, 0.08), transparent 35%);
+  }
+
+  .profile-page .input-field {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    color: var(--light-text);
+    padding: 0.75rem 1rem;
+    font-size: 0.925rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .profile-page .input-field:focus {
+    outline: none;
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+  }
+
+  .profile-page .upload-shell {
+    border-radius: 1.25rem;
+    border: 1px dashed var(--border-color);
+    background: #F8FAF5;
+    padding: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .profile-page .upload-shell:hover {
+    border-color: #43A047;
+  }
+
+  .profile-page .avatar-shell {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 9999px;
+    overflow: hidden;
+    border: 3px solid #FFFFFF;
+    background: #E8F5E9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+    flex-shrink: 0;
+  }
+
+  .profile-page .avatar-shell.large {
+    width: 8.5rem;
+    height: 8.5rem;
+    border-width: 4px;
+    box-shadow: 0 12px 28px rgba(46, 125, 50, 0.18);
+  }
+
+  .profile-page .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profile-page .avatar-fallback {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #2E7D32;
+    letter-spacing: -0.02em;
+  }
+
+  .profile-page .avatar-shell.large .avatar-fallback {
+    font-size: 2.75rem;
+  }
+
+  .profile-page .progress-track {
+    width: 100%;
+    height: 0.65rem;
+    border-radius: 9999px;
+    background: #E2E8F0;
+    overflow: hidden;
+  }
+
+  .profile-page .progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #2E7D32 0%, #43A047 100%);
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .profile-page .success-message,
+  .profile-page .error-message {
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    border: 1px solid;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .profile-page .success-message {
+    background: #F0FDF4;
+    border-color: #BBF7D0;
+    color: #166534;
+  }
+
+  .profile-page .error-message {
+    background: #FEF2F2;
+    border-color: #FECACA;
+    color: #991B1B;
+  }
+</style>
+
+<script>
+  const districtSelect = document.getElementById("district");
+  const irrigationSelect = document.getElementById("irrigationType");
+  const nameInput = document.getElementById("name");
+  const phoneNumberInput = document.getElementById("phoneNumber");
+  const landSizeInput = document.getElementById("landSize");
+  const photoInput = document.getElementById("profilePhoto");
+  const removePhotoCheckbox = document.getElementById("removePhoto");
+  const saveButton = document.getElementById("saveButton");
+  const saveHint = document.getElementById("saveHint");
+
+  districtSelect.value = "{{ user.district or '' }}";
+  irrigationSelect.value = "{{ user.irrigation_type or 'Canal/Borewell' }}";
+
+  const state = {
+    currentPhotoUrl: "{{ user.profile_photo or '' }}",
+    hasUnsavedChanges: false,
+  };
+
+  function isValidName(value) {
+    return /^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(value.trim());
+  }
+
+  function isValidIndianPhone(value) {
+    const trimmed = value.trim();
+    if (!trimmed) return true;
+    return /^[6-9]\d{9}$/.test(trimmed);
+  }
+
+  function getInitials(name) {
+    if (!name) return "U";
+    const parts = name.trim().split(/\s+/).slice(0, 2);
+    return parts.map((part) => part[0]?.toUpperCase() || "").join("") || "U";
+  }
+
+  function renderFallbackInitials() {
+    const initials = getInitials(nameInput.value);
+    document.getElementById("profileAvatarFallback").textContent = initials;
+    document.getElementById("photoPreviewFallback").textContent = initials;
+  }
+
+  function setAvatar(url) {
+    const topImage = document.getElementById("profileAvatarImage");
+    const topFallback = document.getElementById("profileAvatarFallback");
+    const previewImage = document.getElementById("photoPreviewImage");
+    const previewFallback = document.getElementById("photoPreviewFallback");
+
+    if (url) {
+      topImage.src = url;
+      previewImage.src = url;
+      topImage.classList.remove("hidden");
+      previewImage.classList.remove("hidden");
+      topFallback.classList.add("hidden");
+      previewFallback.classList.add("hidden");
+    } else {
+      topImage.classList.add("hidden");
+      previewImage.classList.add("hidden");
+      topFallback.classList.remove("hidden");
+      previewFallback.classList.remove("hidden");
+    }
+  }
+
+  function updateCompletion() {
+    const values = [
+      nameInput.value.trim(),
+      "{{ user.email or '' }}",
+      phoneNumberInput.value.trim(),
+      districtSelect.value,
+      landSizeInput.value,
+      irrigationSelect.value,
+      removePhotoCheckbox.checked
+        ? ""
+        : photoInput.files[0]
+          ? "file"
+          : state.currentPhotoUrl,
+    ];
+
+    const filled = values.filter((value) => String(value).trim() !== "").length;
+    const percent = Math.round((filled / values.length) * 100);
+    document.getElementById("profileCompletionLabel").textContent =
+      `${percent}%`;
+    document.getElementById("profileCompletionBar").style.width = `${percent}%`;
+  }
+
+  function setUnsavedChanges(hasChanges) {
+    state.hasUnsavedChanges = hasChanges;
+    saveHint.innerHTML = hasChanges
+      ? '<i class="fas fa-triangle-exclamation text-amber-500"></i><span class="text-amber-600 font-bold">You have unsaved changes</span>'
+      : '<i class="fas fa-circle-check text-gray-300"></i><span class="text-gray-400">No unsaved changes</span>';
+  }
+
+  nameInput.addEventListener("input", () => {
+    renderFallbackInitials();
+    updateCompletion();
+    setUnsavedChanges(true);
+  });
+
+  phoneNumberInput.addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 10);
+    updateCompletion();
+    setUnsavedChanges(true);
+  });
+
+  [districtSelect, landSizeInput, irrigationSelect].forEach((el) => {
+    el.addEventListener("change", () => {
+      updateCompletion();
+      setUnsavedChanges(true);
+    });
+  });
+
+  photoInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const tempUrl = URL.createObjectURL(file);
+      setAvatar(tempUrl);
+      removePhotoCheckbox.checked = false;
+      setUnsavedChanges(true);
+      updateCompletion();
+    }
+  });
+
+  removePhotoCheckbox.addEventListener("change", function () {
+    if (this.checked) {
+      photoInput.value = "";
+      setAvatar("");
+    } else if (state.currentPhotoUrl) {
+      setAvatar(state.currentPhotoUrl);
+    }
+    updateCompletion();
+    setUnsavedChanges(true);
+  });
+
+  document
+    .getElementById("profileForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const nameValue = nameInput.value.trim();
+      if (!isValidName(nameValue)) {
+        document.getElementById("errorText").textContent =
+          "Name must be at least 2 characters and use letters and spaces only.";
+        document.getElementById("errorMessage").style.display = "flex";
+        document.getElementById("successMessage").style.display = "none";
+        return;
+      }
+
+      const phoneNumberValue = phoneNumberInput.value.trim();
+      if (!isValidIndianPhone(phoneNumberValue)) {
+        document.getElementById("errorText").textContent =
+          "Phone number must be 10 digits and start with 6, 7, 8, or 9.";
+        document.getElementById("errorMessage").style.display = "flex";
+        document.getElementById("successMessage").style.display = "none";
+        return;
+      }
+
+      const landSize = parseFloat(landSizeInput.value);
+      if (!Number.isFinite(landSize) || landSize <= 0) {
+        document.getElementById("errorText").textContent =
+          "Land size must be greater than zero.";
+        document.getElementById("errorMessage").style.display = "flex";
+        document.getElementById("successMessage").style.display = "none";
+        return;
+      }
+
+      saveButton.disabled = true;
+      saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+      const formData = new FormData();
+      formData.append("name", nameValue);
+      formData.append("phone_number", phoneNumberValue);
+      formData.append("district", districtSelect.value);
+      formData.append("land_size", String(landSize));
+      formData.append("irrigation_type", irrigationSelect.value);
+      formData.append(
+        "remove_profile_photo",
+        String(removePhotoCheckbox.checked),
+      );
+
+      if (photoInput.files[0]) {
+        formData.append("profile_photo", photoInput.files[0]);
+      }
+
+      try {
+        const response = await fetch("/user/profile", {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          state.currentPhotoUrl = result.user?.profile_photo || "";
+          if (state.currentPhotoUrl) {
+            setAvatar(state.currentPhotoUrl);
+          } else {
+            setAvatar("");
+          }
+
+          photoInput.value = "";
+          removePhotoCheckbox.checked = false;
+          setUnsavedChanges(false);
+          updateCompletion();
+
+          document.getElementById("successMessage").style.display = "flex";
+          document.getElementById("errorMessage").style.display = "none";
+        } else {
+          document.getElementById("errorText").textContent =
+            result.detail || "Failed to update profile.";
+          document.getElementById("errorMessage").style.display = "flex";
+          document.getElementById("successMessage").style.display = "none";
+        }
+      } catch (error) {
+        document.getElementById("errorText").textContent =
+          "Network error. Please try again.";
+        document.getElementById("errorMessage").style.display = "flex";
+        document.getElementById("successMessage").style.display = "none";
+      } finally {
+        saveButton.disabled = false;
+        saveButton.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Save Profile Changes';
+      }
+    });
+
+  window.addEventListener("beforeunload", function (event) {
+    if (state.hasUnsavedChanges) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
+
+  renderFallbackInitials();
+  setAvatar(state.currentPhotoUrl);
+  updateCompletion();
+</script>
+{% endblock %}

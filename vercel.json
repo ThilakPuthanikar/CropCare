@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/auth/:path*",
+      "destination": "https://cropcare-api.up.railway.app/auth/:path*"
+    },
+    {
+      "source": "/user/:path*",
+      "destination": "https://cropcare-api.up.railway.app/user/:path*"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://cropcare-api.up.railway.app/admin/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://cropcare-api.up.railway.app/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

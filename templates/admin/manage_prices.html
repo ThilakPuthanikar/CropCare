@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% block title %}Manage Prices - CropCare{% endblock %}
+{% block user_role %}Admin Dashboard{% endblock %}
+{% block page_heading %}Price Desk{% endblock %}
+
+{% block sidebar %}
+<a href="/admin/dashboard" class="sidebar-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+<a href="/admin/manage-users" class="sidebar-item"><i class="fas fa-users"></i><span>Manage Users</span></a>
+<a href="/admin/manage-ads" class="sidebar-item"><i class="fas fa-ad"></i><span>Manage Ads</span></a>
+<a href="/admin/manage-schemes" class="sidebar-item"><i class="fas fa-hand-holding-heart"></i><span>Manage Schemes</span></a>
+<a href="/admin/manage-prices" class="sidebar-item active"><i class="fas fa-chart-line"></i><span>Manage Prices</span></a>
+<a href="/admin/analytics" class="sidebar-item"><i class="fas fa-chart-bar"></i><span>Analytics</span></a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 admin-page">
+  <!-- Hero Section -->
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm relative">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-8 xl:grid-cols-[1.35fr,0.95fr] items-start">
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800">
+          <i class="fas fa-tower-broadcast text-amber-600"></i> Admin-Controlled Mandi Feed Import
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900 leading-tight">
+          Scrape, verify, and synchronize official Karnataka mandi rates.
+        </h1>
+        <p class="max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+          Fetch live commodity prices directly from the Karnataka Agricultural Marketing Board database. Preview and audit scraped records before replacing the live production snapshot.
+        </p>
+      </div>
+      <div class="bg-gradient-to-br from-amber-50/80 to-yellow-50/80 border border-amber-200 shadow-sm rounded-[28px] p-6">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <span class="eyebrow text-amber-800 font-bold uppercase tracking-wider text-xs">Govt Source Feed</span>
+          <span class="w-10 h-10 rounded-2xl bg-white border border-amber-200 text-amber-700 flex items-center justify-center shadow-2xs"><i class="fas fa-globe"></i></span>
+        </div>
+        <a href="{{ source_url }}" target="_blank" rel="noreferrer" class="text-base font-bold text-gray-900 hover:text-green-700 underline break-all block">{{ source_url }}</a>
+        <p class="mt-2.5 text-sm leading-6 text-gray-700 font-medium">
+          Use the fetch controls below to pull the latest report into a temporary staging buffer. Live database records remain untouched until you confirm the import.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Stat Cards Grid -->
+  <section class="grid gap-4 sm:grid-cols-2 md:grid-cols-4 fade-up stagger-1">
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Snapshot Rows</p>
+      <p class="mt-2 text-3xl font-extrabold text-gray-900" id="recordsStat">{{ total_records }}</p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Stored in `mandi_prices`</p>
+    </div>
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Latest Import</p>
+      <p class="mt-2 text-2xl font-extrabold text-green-700 truncate" id="latestImportStat">
+        {% if latest_import %}
+          {{ latest_import.strftime("%d %b %Y") }}
+        {% else %}
+          No import yet
+        {% endif %}
+      </p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Most recent sync</p>
+    </div>
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Districts Covered</p>
+      <p class="mt-2 text-3xl font-extrabold text-sky-600" id="districtStat">{{ district_count }}</p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Represented in snapshot</p>
+    </div>
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Distinct Markets</p>
+      <p class="mt-2 text-3xl font-extrabold text-amber-600" id="marketStat">{{ market_count }}</p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Active APMC mandis</p>
+    </div>
+  </section>
+
+  <!-- Fetch Controls & Staging Status -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-2 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Staging Buffer</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">Scrape & Audit Controls</h2>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <button id="fetchButton" type="button" class="btn-primary inline-flex items-center gap-2.5 rounded-2xl px-6 py-3.5 font-bold shadow-sm hover:shadow-md transition-all cursor-pointer">
+          <i class="fas fa-cloud-arrow-down"></i> Scrape Latest Karnataka Rates
+        </button>
+        <button id="importButton" type="button" class="btn-secondary inline-flex items-center gap-2.5 rounded-2xl px-6 py-3.5 font-bold bg-white border border-gray-300 text-gray-700 hover:bg-green-50 hover:text-green-800 hover:border-green-300 transition-all shadow-2xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none" disabled>
+          <i class="fas fa-database"></i> Commit to Database
+        </button>
+      </div>
+    </div>
+
+    <div class="grid gap-4 xl:grid-cols-[1fr,1.1fr]">
+      <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5 flex flex-col justify-center">
+        <span class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Telemetry Status</span>
+        <div id="statusPanel" class="text-sm font-semibold text-gray-600">No fetch has been run in this session. Ready to scrape.</div>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5">
+          <span class="block text-xs font-bold uppercase tracking-wider text-gray-400">Staged Rows</span>
+          <p class="mt-2 text-2xl font-extrabold text-gray-900" id="previewRowCount">0</p>
+        </div>
+        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5">
+          <span class="block text-xs font-bold uppercase tracking-wider text-gray-400">Scrape Time</span>
+          <p class="mt-2 text-base font-bold text-gray-800 truncate" id="fetchTimestamp">--</p>
+        </div>
+        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5">
+          <span class="block text-xs font-bold uppercase tracking-wider text-gray-400">Source Host</span>
+          <p class="mt-2 text-base font-bold text-gray-800 truncate" id="sourceWebsite">--</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Preview Table Section -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-3 space-y-6">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Staging Preview</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">Fetched Staging Records</h2>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input id="previewSearch" class="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs w-full sm:w-64" placeholder="Search staging...">
+        </div>
+        <select id="commodityFilter" class="px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+          <option value="">All Commodities</option>
+        </select>
+        <select id="marketFilter" class="px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+          <option value="">All Markets</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table Wrapper -->
+    <div class="overflow-x-auto rounded-[24px] border border-gray-200 bg-white shadow-2xs">
+      <table class="w-full min-w-[1200px] border-collapse text-left text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
+            <th class="py-4 px-4 font-bold">Commodity</th>
+            <th class="py-4 px-4 font-bold">Variety</th>
+            <th class="py-4 px-4 font-bold">Grade</th>
+            <th class="py-4 px-4 font-bold">District</th>
+            <th class="py-4 px-4 font-bold">Market (Mandi)</th>
+            <th class="py-4 px-4 font-bold text-right">Arrival</th>
+            <th class="py-4 px-4 font-bold">Unit</th>
+            <th class="py-4 px-4 font-bold text-right">Min Price</th>
+            <th class="py-4 px-4 font-bold text-right">Max Price</th>
+            <th class="py-4 px-4 font-bold text-right">Modal Price</th>
+          </tr>
+        </thead>
+        <tbody id="previewTableBody" class="divide-y divide-gray-100">
+          <tr><td colspan="10" class="py-12 text-center text-gray-400 font-medium">No staging records loaded. Click "Scrape Latest Karnataka Rates" above to fetch data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<style>
+  .admin-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(46, 125, 50, 0.08), transparent 45%),
+      radial-gradient(circle at top right, rgba(212, 160, 23, 0.08), transparent 35%);
+  }
+</style>
+
+<script>
+  let previewRecords = [];
+
+  function authHeaders(json = false) {
+    return getAuthHeaders(json ? { "Content-Type": "application/json" } : {});
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "-";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function formatCurrency(value) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A";
+    return `₹${Number(value).toLocaleString("en-IN")}`;
+  }
+
+  function formatNumber(value) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A";
+    return Number(value).toLocaleString("en-IN");
+  }
+
+  function setStatus(message, tone = "") {
+    const panel = document.getElementById("statusPanel");
+    if (tone === "success") {
+      panel.className = "text-sm font-bold text-green-700 bg-green-50 p-3.5 rounded-xl border border-green-200";
+    } else if (tone === "error") {
+      panel.className = "text-sm font-bold text-red-700 bg-red-50 p-3.5 rounded-xl border border-red-200";
+    } else {
+      panel.className = "text-sm font-semibold text-gray-700 bg-white p-3.5 rounded-xl border border-gray-200";
+    }
+    panel.innerHTML = message;
+  }
+
+  function populateSelectOptions(selectId, values, placeholder) {
+    const select = document.getElementById(selectId);
+    const options = [`<option value="">${placeholder}</option>`].concat(
+      values.map((value) => `<option value="${value}">${value}</option>`)
+    );
+    select.innerHTML = options.join("");
+  }
+
+  function renderPreviewTable(rows) {
+    const tbody = document.getElementById("previewTableBody");
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-gray-400 font-medium">No fetched staging records match your current search filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map((row) => `
+      <tr class="hover:bg-green-50/40 transition-colors">
+        <td class="py-3.5 px-4 font-bold text-gray-900">${row.crop_name}</td>
+        <td class="py-3.5 px-4 text-gray-600">${row.variety || "Standard"}</td>
+        <td class="py-3.5 px-4 text-gray-600">${row.grade || "FAQ"}</td>
+        <td class="py-3.5 px-4 font-medium text-gray-800">${row.district || "Unknown"}</td>
+        <td class="py-3.5 px-4 font-semibold text-gray-900">${row.mandi_name}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-700">${formatNumber(row.arrival)}</td>
+        <td class="py-3.5 px-4 text-gray-500">${row.unit || "Quintal"}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.min_price)}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.max_price)}</td>
+        <td class="py-3.5 px-4 text-right"><span class="inline-block bg-green-50 text-green-700 font-extrabold border border-green-200 px-3 py-1 rounded-xl shadow-2xs">${formatCurrency(row.price_per_quintal)}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  function applyPreviewFilters() {
+    const searchValue = document.getElementById("previewSearch").value.trim().toLowerCase();
+    const commodityValue = document.getElementById("commodityFilter").value;
+    const marketValue = document.getElementById("marketFilter").value;
+
+    const filtered = previewRecords.filter((row) => {
+      const matchesSearch =
+        !searchValue ||
+        (row.crop_name || "").toLowerCase().includes(searchValue) ||
+        (row.district || "").toLowerCase().includes(searchValue) ||
+        (row.mandi_name || "").toLowerCase().includes(searchValue);
+      const matchesCommodity = !commodityValue || row.crop_name === commodityValue;
+      const matchesMarket = !marketValue || row.mandi_name === marketValue;
+      return matchesSearch && matchesCommodity && matchesMarket;
+    });
+
+    renderPreviewTable(filtered);
+  }
+
+  function refreshPreviewMeta(payload) {
+    previewRecords = payload.records || [];
+    document.getElementById("previewRowCount").textContent = payload.row_count || previewRecords.length;
+    document.getElementById("fetchTimestamp").textContent = formatDateTime(payload.fetched_at);
+    document.getElementById("sourceWebsite").textContent = payload.source_url || "-";
+    document.getElementById("importButton").disabled = previewRecords.length === 0;
+
+    const commodityOptions = [...new Set(previewRecords.map((row) => row.crop_name).filter(Boolean))].sort();
+    const marketOptions = [...new Set(previewRecords.map((row) => row.mandi_name).filter(Boolean))].sort();
+    populateSelectOptions("commodityFilter", commodityOptions, "All Commodities");
+    populateSelectOptions("marketFilter", marketOptions, "All Markets");
+    applyPreviewFilters();
+  }
+
+  async function fetchLatestPrices() {
+    document.getElementById("fetchButton").disabled = true;
+    setStatus('<i class="fas fa-spinner fa-spin mr-2"></i> Scrape started. Fetching latest APMC bulletin from Karnataka Marketing Board...', "");
+
+    try {
+      const response = await fetch("/admin/mandi/fetch", {
+        method: "POST",
+        headers: authHeaders(),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.detail || "Fetch failed");
+      }
+
+      refreshPreviewMeta(payload);
+      setStatus(`<i class="fas fa-circle-check mr-2"></i> Scrape Success! <b>${payload.row_count}</b> records loaded into staging buffer. Please review below and click "Commit to Database".`, "success");
+    } catch (error) {
+      previewRecords = [];
+      document.getElementById("importButton").disabled = true;
+      renderPreviewTable([]);
+      setStatus(`<i class="fas fa-triangle-exclamation mr-2"></i> Error: ${error.message}`, "error");
+    } finally {
+      document.getElementById("fetchButton").disabled = false;
+    }
+  }
+
+  async function importPreviewRecords() {
+    if (!previewRecords.length) {
+      setStatus('<i class="fas fa-triangle-exclamation mr-2"></i> Error: Scrape records first before committing.', "error");
+      return;
+    }
+    if (!confirm("Are you sure you want to commit these previewed rows and replace the current production mandi database?")) {
+      return;
+    }
+
+    document.getElementById("importButton").disabled = true;
+    setStatus('<i class="fas fa-spinner fa-spin mr-2"></i> Commit started. Replacing production mandi records in a single database transaction...', "");
+
+    try {
+      const response = await fetch("/admin/mandi/import", {
+        method: "POST",
+        headers: {
+          ...authHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ records: previewRecords }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.detail || "Import failed");
+      }
+
+      document.getElementById("recordsStat").textContent = payload.inserted_rows;
+      document.getElementById("latestImportStat").textContent = formatDateTime(payload.imported_at);
+      document.getElementById("districtStat").textContent = new Set(previewRecords.map((row) => row.district || "Unknown")).size;
+      document.getElementById("marketStat").textContent = new Set(previewRecords.map((row) => row.mandi_name).filter(Boolean)).size;
+      setStatus(`<i class="fas fa-circle-check mr-2"></i> Commit Success! <b>${payload.inserted_rows}</b> live mandi records synchronized in database.`, "success");
+    } catch (error) {
+      setStatus(`<i class="fas fa-triangle-exclamation mr-2"></i> Error: ${error.message}`, "error");
+    } finally {
+      document.getElementById("importButton").disabled = previewRecords.length === 0;
+    }
+  }
+
+  document.getElementById("fetchButton").addEventListener("click", fetchLatestPrices);
+  document.getElementById("importButton").addEventListener("click", importPreviewRecords);
+  document.getElementById("previewSearch").addEventListener("input", applyPreviewFilters);
+  document.getElementById("commodityFilter").addEventListener("change", applyPreviewFilters);
+  document.getElementById("marketFilter").addEventListener("change", applyPreviewFilters);
+</script>
+{% endblock %}

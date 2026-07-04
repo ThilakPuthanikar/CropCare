@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - CropCare{% endblock %}
+{% block user_role %}Admin Dashboard{% endblock %}
+{% block page_heading %}Operations Command Center{% endblock %}
+
+{% block sidebar %}
+<a href="/admin/dashboard" class="sidebar-item active">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/admin/manage-users" class="sidebar-item">
+  <i class="fas fa-users"></i>
+  <span>Manage Users</span>
+</a>
+<a href="/admin/manage-ads" class="sidebar-item">
+  <i class="fas fa-ad"></i>
+  <span>Manage Ads</span>
+</a>
+<a href="/admin/manage-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Manage Schemes</span>
+</a>
+<a href="/admin/manage-prices" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Manage Prices</span>
+</a>
+<a href="/admin/analytics" class="sidebar-item">
+  <i class="fas fa-chart-bar"></i>
+  <span>Analytics</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 admin-page">
+  <!-- Hero Section -->
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm relative">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-8 xl:grid-cols-[1.55fr,0.9fr]">
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800">
+            <i class="fas fa-signal text-green-600"></i>
+            Live Administration Desk
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-700">
+            <i class="fas fa-shield-halved text-sky-600"></i>
+            Enterprise Operations Layer
+          </span>
+        </div>
+
+        <div>
+          <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900 leading-tight">
+            Run CropCare like a modern agricultural operations center.
+          </h1>
+          <p class="mt-4 max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+            Monitor farmer onboarding, system health, mandi price updates, and AI diagnostic telemetry from a unified, high-performance administrative command surface.
+          </p>
+        </div>
+
+        <!-- 4 Key Metric Cards -->
+        <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+          <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5 hover:border-green-600 transition-all">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Total Users</p>
+            <p id="totalUsersCount" class="mt-3 text-3xl font-extrabold text-gray-900">--</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5 hover:border-green-600 transition-all">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Active Farmers</p>
+            <p id="activeUsersCount" class="mt-3 text-3xl font-extrabold text-green-700">--</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5 hover:border-amber-500 transition-all">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Pending Queue</p>
+            <p id="pendingApprovalCount" class="mt-3 text-3xl font-extrabold text-amber-600">--</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5 hover:border-sky-500 transition-all">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">AI Diagnoses</p>
+            <p id="aiRequestsCount" class="mt-3 text-3xl font-extrabold text-sky-600">--</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: System Status & Focus -->
+      <div class="grid gap-6">
+        <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Infrastructure</p>
+              <h3 class="text-xl font-extrabold text-gray-900">System Status</h3>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 border border-green-100 text-green-700">
+              <i class="fas fa-server"></i>
+            </div>
+          </div>
+          <div class="mt-6 space-y-3">
+            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50 border border-gray-200/80 font-medium text-sm text-gray-800">
+              <span class="flex items-center gap-2.5"><i class="fas fa-database text-sky-600"></i> Database Engine</span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                <i class="fas fa-circle-check text-green-600"></i> Connected
+              </span>
+            </div>
+            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50 border border-gray-200/80 font-medium text-sm text-gray-800">
+              <span class="flex items-center gap-2.5"><i class="fas fa-brain text-amber-500"></i> Groq AI API</span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                <i class="fas fa-circle-check text-green-600"></i> Operational
+              </span>
+            </div>
+            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50 border border-gray-200/80 font-medium text-sm text-gray-800">
+              <span class="flex items-center gap-2.5"><i class="fas fa-cloud-sun text-sky-500"></i> Weather & Mandi Feeds</span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                <i class="fas fa-circle-check text-green-600"></i> Synchronized
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-50/80 to-emerald-50/80 border border-green-200 shadow-sm rounded-[28px] p-6">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="eyebrow mb-1 text-green-800 font-bold uppercase tracking-wider text-xs">Daily Action Plan</p>
+              <h3 class="text-xl font-extrabold text-gray-900">Admin Priority Desk</h3>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-green-200 text-green-700 shadow-2xs">
+              <i class="fas fa-list-check"></i>
+            </div>
+          </div>
+          <div class="mt-4 space-y-2.5 text-sm font-medium text-gray-800">
+            <div class="p-3.5 rounded-2xl bg-white border border-green-200/80 shadow-2xs">1. Review pending farmer onboarding approvals in User Management.</div>
+            <div class="p-3.5 rounded-2xl bg-white border border-green-200/80 shadow-2xs">2. Check Karnataka mandi arrival reports and verify daily rate imports.</div>
+            <div class="p-3.5 rounded-2xl bg-white border border-green-200/80 shadow-2xs">3. Update active notices and seasonal fertilizer offers in Ad Manager.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lower Section: Activity & Controls -->
+  <section class="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
+    <!-- Left Column: Activity & Action Cards -->
+    <div class="grid gap-6 fade-up stagger-1">
+      <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Live Telemetry</p>
+            <h3 class="text-2xl font-extrabold text-gray-900">Recent Operations Stream</h3>
+          </div>
+          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-green-50 border border-green-100 text-green-700">
+            <i class="fas fa-clock-rotate-left"></i>
+          </div>
+        </div>
+        <div id="recentActivitiesList" class="mt-6 space-y-3">
+          <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-center text-gray-500 font-medium">Loading activity stream...</div>
+        </div>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <a href="/admin/manage-users" class="dashboard-action-card bg-white border border-gray-200 shadow-sm rounded-[28px] p-6 group">
+          <div class="action-icon bg-green-100 text-green-700 border border-green-200">
+            <i class="fas fa-user-check"></i>
+          </div>
+          <p class="mt-5 text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors">User Operations</p>
+          <p class="mt-2 text-sm leading-6 text-gray-600">Approve new farmer registrations, audit land size records, and maintain onboarding quality.</p>
+          <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-green-700">
+            Open Directory <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+          </span>
+        </a>
+
+        <a href="/admin/manage-prices" class="dashboard-action-card bg-white border border-gray-200 shadow-sm rounded-[28px] p-6 group">
+          <div class="action-icon bg-amber-100 text-amber-700 border border-amber-200">
+            <i class="fas fa-coins"></i>
+          </div>
+          <p class="mt-5 text-xl font-bold text-gray-900 group-hover:text-amber-700 transition-colors">Price Desk</p>
+          <p class="mt-2 text-sm leading-6 text-gray-600">Verify APMC mandi price snapshots, update modal rates, and keep market intelligence accurate.</p>
+          <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-amber-700">
+            Manage Rates <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Right Column: Shortcuts & Notes -->
+    <div class="grid gap-6 fade-up stagger-2 items-start">
+      <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Quick Controls</p>
+            <h3 class="text-2xl font-extrabold text-gray-900">Management Shortcuts</h3>
+          </div>
+          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-50 border border-sky-100 text-sky-600">
+            <i class="fas fa-sliders"></i>
+          </div>
+        </div>
+        <div class="mt-6 grid gap-3.5">
+          <a href="/admin/manage-ads" class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-200/80 hover:border-green-600 hover:bg-white transition-all group shadow-2xs">
+            <div class="flex items-center gap-4">
+              <span class="w-11 h-11 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center text-lg"><i class="fas fa-bullhorn"></i></span>
+              <div>
+                <span class="block text-sm font-bold text-gray-900 group-hover:text-green-700 transition-colors">Manage Notices & Ads</span>
+                <span class="block text-xs text-gray-500">Publish announcements and seasonal offers</span>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right text-gray-400 group-hover:translate-x-1 transition-all"></i>
+          </a>
+
+          <a href="/admin/manage-schemes" class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-200/80 hover:border-green-600 hover:bg-white transition-all group shadow-2xs">
+            <div class="flex items-center gap-4">
+              <span class="w-11 h-11 rounded-2xl bg-green-100 text-green-700 flex items-center justify-center text-lg"><i class="fas fa-hand-holding-heart"></i></span>
+              <div>
+                <span class="block text-sm font-bold text-gray-900 group-hover:text-green-700 transition-colors">Update Gov Schemes</span>
+                <span class="block text-xs text-gray-500">Keep PM-KISAN & subsidy details current</span>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right text-gray-400 group-hover:translate-x-1 transition-all"></i>
+          </a>
+
+          <a href="/admin/analytics" class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-200/80 hover:border-green-600 hover:bg-white transition-all group shadow-2xs">
+            <div class="flex items-center gap-4">
+              <span class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg"><i class="fas fa-chart-pie"></i></span>
+              <div>
+                <span class="block text-sm font-bold text-gray-900 group-hover:text-green-700 transition-colors">Platform Analytics</span>
+                <span class="block text-xs text-gray-500">Explore AI telemetry and regional adoption</span>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right text-gray-400 group-hover:translate-x-1 transition-all"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="eyebrow mb-1 text-red-600 font-bold uppercase tracking-wider text-xs">Operational Notes</p>
+            <h3 class="text-xl font-extrabold text-gray-900">Workspace Guidelines</h3>
+          </div>
+          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 border border-red-100 text-red-600">
+            <i class="fas fa-bell"></i>
+          </div>
+        </div>
+        <div class="mt-5 space-y-3.5">
+          <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200/80 shadow-2xs">
+            <p class="text-sm font-bold text-gray-900">Approval Queue SLA</p>
+            <p class="mt-1 text-xs leading-5 text-gray-600">Aim to approve pending farmer registrations within 24 hours to maintain high engagement and trust.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200/80 shadow-2xs">
+            <p class="text-sm font-bold text-gray-900">Mandi Price Freshness</p>
+            <p class="mt-1 text-xs leading-5 text-gray-600">Always verify price imports against Karnataka KSAMB official bulletins before publishing modal rates.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  .admin-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(46, 125, 50, 0.08), transparent 45%),
+      radial-gradient(circle at top right, rgba(79, 195, 247, 0.08), transparent 35%);
+  }
+</style>
+
+<script>
+  function authHeaders(json = false) {
+    return getAuthHeaders(json ? { "Content-Type": "application/json" } : {});
+  }
+
+  async function loadDashboardStats() {
+    try {
+      const response = await fetch("/admin/stats", { headers: authHeaders() });
+      const stats = await response.json();
+
+      if (!response.ok) {
+        throw new Error(stats.detail || "Unable to load stats");
+      }
+
+      document.getElementById("totalUsersCount").textContent = stats.total_users || 0;
+      document.getElementById("activeUsersCount").textContent = stats.active_users || 0;
+      document.getElementById("pendingApprovalCount").textContent = stats.pending_approval || 0;
+      document.getElementById("aiRequestsCount").textContent = stats.ai_requests || 0;
+    } catch (error) {
+      ["totalUsersCount", "activeUsersCount", "pendingApprovalCount", "aiRequestsCount"].forEach((id) => {
+        document.getElementById(id).textContent = "--";
+      });
+    }
+  }
+
+  function renderActivity(item) {
+    const toneClass =
+      item.type === "user_approved"
+        ? "bg-green-100 text-green-700 border-green-200"
+        : item.type === "warning"
+          ? "bg-amber-100 text-amber-700 border-amber-200"
+          : "bg-sky-100 text-sky-700 border-sky-200";
+
+    return `
+      <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 shadow-2xs hover:border-green-600 transition-all">
+        <div class="flex items-start gap-3.5">
+          <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${toneClass}">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-sm font-bold text-gray-900">${item.action}</p>
+              <span class="text-[11px] font-semibold text-gray-400 whitespace-nowrap">${item.time_ago}</span>
+            </div>
+            <p class="mt-1 text-sm text-gray-600 leading-relaxed">${item.details}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadRecentActivities() {
+    const container = document.getElementById("recentActivitiesList");
+
+    try {
+      const response = await fetch("/admin/recent-activities", { headers: authHeaders() });
+      const activities = await response.json();
+
+      if (!response.ok) {
+        throw new Error(activities.detail || "Unable to load activities");
+      }
+
+      if (!activities.length) {
+        container.innerHTML = '<div class="p-6 rounded-2xl bg-gray-50 border border-gray-200 text-center text-gray-500 font-medium">No recent administrative activity recorded.</div>';
+        return;
+      }
+
+      container.innerHTML = activities.map(renderActivity).join("");
+    } catch (error) {
+      container.innerHTML = '<div class="p-6 rounded-2xl bg-red-50 border border-red-200 text-center text-red-600 font-medium">Error loading activity stream. Please check connection.</div>';
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadDashboardStats();
+    loadRecentActivities();
+  });
+</script>
+{% endblock %}

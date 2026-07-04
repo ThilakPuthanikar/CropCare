@@ -1,0 +1,288 @@
+import os
+import sys
+from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from sqlalchemy import inspect, text
+
+from .config.settings import settings
+from .database.database import engine, Base, SessionLocal
+from .models.scheme import Scheme
+from .models.price import Price
+from .models.user import User
+from .routes import auth, user, admin, system
+from .utils.schemes import DEFAULT_SCHEMES, serialize_text_list
+from .utils.auth import get_password_hash
+from .utils.logger import logger
+from .utils.api_response import error_response
+
+# Create tables if they don't already exist (including prices)
+Base.metadata.create_all(bind=engine)
+
+
+def _get_cors_origins():
+    return settings.get_cors_origins()
+
+
+def ensure_schema_columns():
+    inspector = inspect(engine)
+    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    if "profile_photo" not in user_columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE users ADD COLUMN profile_photo VARCHAR(500) NULL")
+            )
+    if "phone_number" not in user_columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE users ADD COLUMN phone_number VARCHAR(10) NULL")
+            )
+            connection.execute(
+                text("ALTER TABLE users ADD UNIQUE INDEX ix_users_phone_number (phone_number)")
+            )
+
+    scheme_columns = {column["name"] for column in inspector.get_columns("schemes")}
+    scheme_column_defs = {
+        "type": "ALTER TABLE schemes ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'national'",
+        "beneficiary": "ALTER TABLE schemes ADD COLUMN beneficiary VARCHAR(100) NULL",
+        "eligibility": "ALTER TABLE schemes ADD COLUMN eligibility TEXT NULL",
+        "duration": "ALTER TABLE schemes ADD COLUMN duration VARCHAR(255) NULL",
+        "icon": "ALTER TABLE schemes ADD COLUMN icon VARCHAR(100) NULL",
+        "state": "ALTER TABLE schemes ADD COLUMN state VARCHAR(100) NULL",
+        "district": "ALTER TABLE schemes ADD COLUMN district VARCHAR(100) NULL",
+        "is_active": "ALTER TABLE schemes ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE",
+    }
+    missing_scheme_columns = [
+        ddl for column_name, ddl in scheme_column_defs.items()
+        if column_name not in scheme_columns
+    ]
+    if missing_scheme_columns:
+        with engine.begin() as connection:
+            for ddl in missing_scheme_columns:
+                connection.execute(text(ddl))
+
+    if "mandi_prices" in inspector.get_table_names():
+        mandi_columns = {column["name"] for column in inspector.get_columns("mandi_prices")}
+        mandi_column_defs = {
+            "crop_name": "ALTER TABLE mandi_prices ADD COLUMN crop_name VARCHAR(120) NOT NULL DEFAULT ''",
+            "variety": "ALTER TABLE mandi_prices ADD COLUMN variety VARCHAR(120) NULL",
+            "grade": "ALTER TABLE mandi_prices ADD COLUMN grade VARCHAR(120) NULL",
+            "district": "ALTER TABLE mandi_prices ADD COLUMN district VARCHAR(120) NOT NULL DEFAULT ''",
+            "mandi_name": "ALTER TABLE mandi_prices ADD COLUMN mandi_name VARCHAR(180) NOT NULL DEFAULT ''",
+            "arrival": "ALTER TABLE mandi_prices ADD COLUMN arrival FLOAT NULL",
+            "unit": "ALTER TABLE mandi_prices ADD COLUMN unit VARCHAR(50) NULL",
+            "price_per_quintal": "ALTER TABLE mandi_prices ADD COLUMN price_per_quintal FLOAT NOT NULL DEFAULT 0",
+            "min_price": "ALTER TABLE mandi_prices ADD COLUMN min_price FLOAT NULL",
+            "max_price": "ALTER TABLE mandi_prices ADD COLUMN max_price FLOAT NULL",
+            "price_date": "ALTER TABLE mandi_prices ADD COLUMN price_date DATE NULL",
+            "last_updated": "ALTER TABLE mandi_prices ADD COLUMN last_updated DATETIME NULL",
+        }
+        missing_mandi_columns = [
+            ddl for column_name, ddl in mandi_column_defs.items()
+            if column_name not in mandi_columns
+        ]
+        if missing_mandi_columns:
+            with engine.begin() as connection:
+                for ddl in missing_mandi_columns:
+                    connection.execute(text(ddl))
+        with engine.begin() as connection:
+            try:
+                connection.execute(text("ALTER TABLE mandi_prices DROP INDEX uq_mandi_crop_market"))
+            except Exception:
+                pass
+            try:
+                connection.execute(
+                    text(
+                        "ALTER TABLE mandi_prices ADD UNIQUE INDEX uq_mandi_crop_market_week "
+                        "(crop_name, district, mandi_name, price_date)"
+                    )
+                )
+            except Exception:
+                pass
+
+
+def seed_default_schemes():
+    db = SessionLocal()
+    try:
+        existing_titles = {
+            row[0]
+            for row in db.query(Scheme.title).all()
+        }
+        new_records = []
+        for scheme_data in DEFAULT_SCHEMES:
+            if scheme_data["title"] in existing_titles:
+                continue
+            new_records.append(
+                Scheme(
+                    title=scheme_data["title"],
+                    description=scheme_data["description"],
+                    type=scheme_data["type"],
+                    beneficiary=scheme_data["beneficiary"],
+                    benefits=scheme_data["benefits"],
+                    eligibility=scheme_data["eligibility"],
+                    documents_required=serialize_text_list(scheme_data["documents_required"]),
+                    steps_to_apply=serialize_text_list(scheme_data["steps_to_apply"]),
+                    duration=scheme_data["duration"],
+                    official_link=scheme_data["official_link"],
+                    icon=scheme_data["icon"],
+                    state=scheme_data["state"],
+                    district=scheme_data["district"],
+                    is_active=scheme_data["is_active"],
+                )
+            )
+        if new_records:
+            db.add_all(new_records)
+            db.commit()
+    finally:
+        db.close()
+
+
+def ensure_admin_user():
+    db = SessionLocal()
+    try:
+        admin_email = (settings.ADMIN_EMAIL or "").strip().lower()
+        admin_password = settings.ADMIN_PASSWORD or ""
+        if not admin_email or not admin_password:
+            return
+
+        admin_user = db.query(User).filter(User.email == admin_email).first()
+        hashed_password = get_password_hash(admin_password)
+        if admin_user:
+            admin_user.role = "admin"
+            admin_user.is_approved = True
+            admin_user.password_hash = hashed_password
+        else:
+            admin_user = User(
+                name="Admin User",
+                email=admin_email,
+                password_hash=hashed_password,
+                role="admin",
+                is_approved=True,
+                state="Karnataka",
+            )
+            db.add(admin_user)
+        db.commit()
+    finally:
+        db.close()
+
+
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ensure_schema_columns()
+    seed_default_schemes()
+    ensure_admin_user()
+    logger.info("Starting CropCare application...")
+    yield
+
+app = FastAPI(title="CropCare API", lifespan=lifespan)
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    detail = str(exc.detail) if exc.detail else "An error occurred"
+    return error_response(
+        message=detail,
+        errors=[detail],
+        status_code=exc.status_code,
+        detail=detail
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = [f"{err.get('loc', [''])[-1]}: {err.get('msg', 'Invalid input')}" for err in exc.errors()]
+    msg = errors[0] if errors else "Validation error"
+    return error_response(
+        message="Validation error",
+        errors=errors,
+        status_code=422,
+        detail=msg
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled server exception on {request.method} {request.url.path}: {exc}", exc_info=True)
+    msg = "An unexpected internal server error occurred."
+    return error_response(
+        message=msg,
+        errors=[msg],
+        status_code=500,
+        detail=msg
+    )
+
+# GZip middleware for compressing responses
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_get_cors_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Templates
+templates = Jinja2Templates(directory="templates")
+
+
+@app.middleware("http")
+async def enforce_csrf_header(request: Request, call_next):
+    if request.method in ["POST", "PUT", "DELETE", "PATCH"]:
+        path = request.url.path
+        if path.startswith("/user/") or path.startswith("/admin/") or path == "/auth/logout":
+            if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+                from fastapi.responses import JSONResponse
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Missing anti-CSRF custom header."}
+                )
+    return await call_next(request)
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    else:
+        response.headers["Cache-Control"] = "no-store"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data: https: blob:; script-src 'self' 'unsafe-inline' https: cdn.tailwindcss.com cdnjs.cloudflare.com cdn.jsdelivr.net www.chatbase.co; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com cdnjs.cloudflare.com; font-src 'self' https: data: fonts.gstatic.com cdnjs.cloudflare.com; connect-src 'self' https: www.chatbase.co;"
+    return response
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/about", response_class=HTMLResponse)
+async def about(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
+
+@app.get("/contact", response_class=HTMLResponse)
+async def contact(request: Request):
+    return templates.TemplateResponse("contact.html", {"request": request})
+
+@app.get("/features", response_class=HTMLResponse)
+async def features(request: Request):
+    return templates.TemplateResponse("features.html", {"request": request})
+
+# Include routers
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(user.router, prefix="/user", tags=["user"])
+app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(system.router, tags=["system"])
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=settings.PORT)

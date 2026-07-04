@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - CropCare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root {
+        --primary: #2E7D32;
+        --primary-hover: #1B5E20;
+        --secondary: #43A047;
+        --accent: #43A047;
+        --bg-main: #F8FAF5;
+        --surface: #FFFFFF;
+        --border-color: #DDE5D5;
+        --text-primary: #1F2937;
+        --text-secondary: #6B7280;
+        --dark: #FFFFFF;
+        --darker: #F8FAF5;
+        --light-text: #1F2937;
+        --gray-text: #6B7280;
+        --card-bg: #FFFFFF;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", "Plus Jakarta Sans", sans-serif;
+        color: var(--text-primary);
+        background: linear-gradient(
+          135deg,
+          rgba(46, 125, 50, 0.08) 0%,
+          rgba(67, 160, 71, 0.04) 50%,
+          rgba(248, 250, 245, 1) 100%
+        );
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .auth-card {
+        background: var(--surface);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 440px;
+        padding: 36px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #F3F4F6;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .close-btn:hover {
+        background: #E5E7EB;
+        color: var(--text-primary);
+      }
+
+      .logo-container {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .logo-container img {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 16px;
+        border-radius: 14px;
+      }
+
+      .logo-container h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+        letter-spacing: -0.02em;
+      }
+
+      .logo-container p {
+        color: var(--text-secondary);
+        font-size: 14px;
+      }
+
+      .input-group {
+        margin-bottom: 22px;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+      }
+
+      .input-field {
+        width: 100%;
+        padding: 13px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background: #F8FAF5;
+        color: var(--text-primary);
+        font-size: 15px;
+        transition: all 0.2s ease;
+      }
+
+      .input-field::placeholder {
+        color: #9CA3AF;
+      }
+
+      .input-field:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+      }
+
+      select.input-field {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #F8FAF5;
+        color: var(--text-primary);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+      }
+
+      select.input-field option {
+        background-color: #FFFFFF;
+        color: var(--text-primary);
+      }
+
+      .phone-input-group {
+        display: flex;
+        gap: 8px;
+      }
+
+      .country-code {
+        flex: 0 0 80px;
+        padding: 13px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background: #F8FAF5;
+        color: var(--text-primary);
+        font-size: 15px;
+        border-right: none;
+        cursor: default;
+        font-weight: 600;
+      }
+
+      .password-input {
+        position: relative;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 16px;
+        transition: color 0.2s;
+      }
+
+      .password-toggle:hover {
+        color: var(--text-primary);
+      }
+
+      .password-strength {
+        margin-top: 8px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        color: var(--text-secondary);
+      }
+
+      .strength-bar {
+        flex: 1;
+        height: 6px;
+        background: #E5E7EB;
+        border-radius: 3px;
+        margin: 0 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .strength-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.4s ease;
+      }
+
+      .strength-label {
+        font-weight: 500;
+      }
+
+      .terms-checkbox {
+        display: flex;
+        align-items: center;
+        margin: 24px 0;
+      }
+
+      .terms-checkbox input {
+        width: 18px;
+        height: 18px;
+        margin-right: 12px;
+        accent-color: var(--primary);
+      }
+
+      .terms-checkbox label {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .terms-checkbox label a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .terms-checkbox label a:hover {
+        text-decoration: underline;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(46, 125, 50, 0.35);
+      }
+
+      .success-message {
+        background: #F0FDF4;
+        border: 1px solid #BBF7D0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 20px;
+        display: none;
+        color: #166534;
+        font-weight: 600;
+        font-size: 14px;
+        text-align: center;
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .login-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .login-link a:hover {
+        text-decoration: underline;
+      }
+
+      .strength-weak .strength-fill {
+        background: #ef5350;
+        width: 25%;
+      }
+
+      .strength-medium .strength-fill {
+        background: #fbc02d;
+        width: 50%;
+      }
+
+      .strength-strong .strength-fill {
+        background: var(--primary);
+        width: 100%;
+      }
+
+      .input-error {
+        border-color: #ef5350 !important;
+        background: #FEF2F2 !important;
+        box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.15) !important;
+      }
+
+      .error-message {
+        color: #ef5350;
+        font-size: 13px;
+        font-weight: 500;
+        margin-top: 6px;
+        display: none;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(31, 41, 55, 0.6);
+        backdrop-filter: blur(4px);
+      }
+
+      .modal-content {
+        background-color: var(--surface);
+        margin: 5% auto;
+        padding: 2.5rem;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color);
+        position: relative;
+        color: var(--text-secondary);
+      }
+
+      .close {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        color: var(--text-secondary);
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .close:hover {
+        color: var(--text-primary);
+        background: #F3F4F6;
+      }
+
+      @media (max-width: 480px) {
+        .auth-card {
+          padding: 24px;
+          border-radius: 18px;
+        }
+
+        .phone-input-group {
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .country-code {
+          border-radius: 12px 12px 0 0;
+          border-bottom: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans">
+    <div class="auth-card">
+      <button class="close-btn" id="closeBtn">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <div class="logo-container">
+        <!-- Replace with your logo image -->
+        <img
+          src="static/images/logo.png"
+          alt="CropCare Logo"
+          onerror="
+            this.style.display = 'none';
+            document.querySelector('.logo-placeholder').style.display = 'block';
+          "
+        />
+        <div class="logo-placeholder" style="display: none">
+          <svg
+            class="w-16 h-16 mx-auto text-green-600"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+            />
+          </svg>
+        </div>
+        <h1>CropCare</h1>
+        <p>Create your account to get started</p>
+      </div>
+
+      <form id="signupForm">
+        <div class="input-group">
+          <label for="fullName">Full Name</label>
+          <input
+            type="text"
+            id="fullName"
+            class="input-field"
+            placeholder="Enter your full name"
+            inputmode="text"
+            pattern="[A-Za-z ]+"
+            required
+          />
+          <div class="error-message" id="nameError">
+            Please enter a valid name using letters and spaces only
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            class="input-field"
+            placeholder="Enter your email"
+            required
+          />
+          <div class="error-message" id="emailError">
+            Please enter a valid email address
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Phone Number</label>
+          <div class="phone-input-group">
+            <div class="country-code">+91</div>
+            <input
+              type="tel"
+              id="phoneNumber"
+              class="input-field"
+              placeholder="Enter 10-digit number"
+              maxlength="10"
+              inputmode="numeric"
+              required
+            />
+          </div>
+          <div class="error-message" id="phoneError">
+            Please enter a valid phone number
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="district">District</label>
+          <select id="district" class="input-field" required>
+            <option value="">Select district</option>
+            <option value="Bagalkot">Bagalkot</option>
+            <option value="Ballari">Ballari</option>
+            <option value="Belagavi">Belagavi</option>
+            <option value="Bengaluru Rural">Bengaluru Rural</option>
+            <option value="Bengaluru Urban">Bengaluru Urban</option>
+            <option value="Bidar">Bidar</option>
+            <option value="Chamarajanagar">Chamarajanagar</option>
+            <option value="Chikkaballapur">Chikkaballapur</option>
+            <option value="Chikkamagaluru">Chikkamagaluru</option>
+            <option value="Chitradurga">Chitradurga</option>
+            <option value="Dakshina Kannada">Dakshina Kannada</option>
+            <option value="Davanagere">Davanagere</option>
+            <option value="Dharwad">Dharwad</option>
+            <option value="Gadag">Gadag</option>
+            <option value="Hassan">Hassan</option>
+            <option value="Haveri">Haveri</option>
+            <option value="Kalaburagi">Kalaburagi</option>
+            <option value="Kodagu">Kodagu</option>
+            <option value="Kolar">Kolar</option>
+            <option value="Koppal">Koppal</option>
+            <option value="Mandya">Mandya</option>
+            <option value="Mysuru">Mysuru</option>
+            <option value="Raichur">Raichur</option>
+            <option value="Ramanagara">Ramanagara</option>
+            <option value="Shivamogga">Shivamogga</option>
+            <option value="Tumakuru">Tumakuru</option>
+            <option value="Udupi">Udupi</option>
+            <option value="Uttara Kannada">Uttara Kannada</option>
+            <option value="Vijayapura">Vijayapura</option>
+            <option value="Yadgir">Yadgir</option>
+          </select>
+          <div class="error-message" id="districtError">
+            Please select your district
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="landSize">Land Size (acres)</label>
+          <input
+            type="number"
+            id="landSize"
+            class="input-field"
+            placeholder="Enter land size in acres"
+            step="0.01"
+            min="0.01"
+            required
+          />
+          <div class="error-message" id="landSizeError">
+            Please enter a valid land size greater than 0
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="irrigationType">Irrigation Type</label>
+          <select id="irrigationType" class="input-field" required>
+            <option value="">Select irrigation type</option>
+            <option value="Canal/Borewell">Canal/Borewell</option>
+            <option value="Rain-fed">Rain-fed</option>
+            <option value="Drip">Drip</option>
+            <option value="Sprinkler">Sprinkler</option>
+          </select>
+          <div class="error-message" id="irrigationError">
+            Please select irrigation type
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="password-input">
+            <input
+              type="password"
+              id="password"
+              class="input-field"
+              placeholder="Create a password"
+              required
+            />
+            <button type="button" class="password-toggle" id="togglePassword">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="password-strength" id="passwordStrength">
+            <span class="strength-label">Password strength:</span>
+            <div class="strength-bar">
+              <div class="strength-fill"></div>
+            </div>
+            <span class="strength-label" id="strengthText">Weak</span>
+          </div>
+          <div class="error-message" id="passwordError">
+            Password must be at least 8 characters with uppercase, lowercase,
+            numbers, and special characters
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="password-input">
+            <input
+              type="password"
+              id="confirmPassword"
+              class="input-field"
+              placeholder="Confirm your password"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              id="toggleConfirmPassword"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="error-message" id="confirmPasswordError">
+            Passwords do not match
+          </div>
+        </div>
+
+        <div class="terms-checkbox">
+          <input type="checkbox" id="termsCheckbox" required />
+          <label for="termsCheckbox"
+            >I agree to the
+            <a href="#" class="modal-trigger" data-modal="terms-of-service"
+              >Terms & Conditions</a
+            ></label
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+
+        <div class="success-message" id="successMessage">
+          Account created successfully! Awaiting admin approval...
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="login-link">
+          Already have an account? <a href="/auth/login">Login</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="terms-of-service" class="modal" style="display: none">
+      <div
+        class="modal-content"
+        style="
+          background: var(--surface);
+          padding: 28px;
+          border-radius: 16px;
+          max-width: 500px;
+          width: 90%;
+          margin: 5% auto;
+        "
+      >
+        <span class="close">&times;</span>
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Terms of Service</h2>
+        <p class="text-gray-600 mb-4">
+          By signing up, you agree to our Terms of Service and Privacy Policy.
+        </p>
+        <ul class="space-y-2 text-gray-600">
+          <li>• You must be at least 18 years old to use CropCare services</li>
+          <li>
+            • You are responsible for maintaining the confidentiality of your
+            account
+          </li>
+          <li>• We may update these terms at any time</li>
+          <li>
+            • CropCare is not liable for farming outcomes or decisions made
+            using our recommendations
+          </li>
+        </ul>
+        <div class="mt-6">
+          <button class="btn btn-primary w-full" id="acceptTerms">
+            I Accept
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Close button functionality
+      document
+        .getElementById("closeBtn")
+        .addEventListener("click", function () {
+          window.location.href = "/";
+        });
+
+      // Password toggle functionality
+      const togglePassword = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("password");
+
+      togglePassword.addEventListener("click", function () {
+        const type =
+          passwordInput.getAttribute("type") === "password"
+            ? "text"
+            : "password";
+        passwordInput.setAttribute("type", type);
+        this.innerHTML =
+          type === "password"
+            ? '<i class="fas fa-eye"></i>'
+            : '<i class="fas fa-eye-slash"></i>';
+      });
+
+      const toggleConfirmPassword = document.getElementById(
+        "toggleConfirmPassword",
+      );
+      const confirmPasswordInput = document.getElementById("confirmPassword");
+
+      toggleConfirmPassword.addEventListener("click", function () {
+        const type =
+          confirmPasswordInput.getAttribute("type") === "password"
+            ? "text"
+            : "password";
+        confirmPasswordInput.setAttribute("type", type);
+        this.innerHTML =
+          type === "password"
+            ? '<i class="fas fa-eye"></i>'
+            : '<i class="fas fa-eye-slash"></i>';
+      });
+
+      // Password strength meter - FIXED TO WORK IN REAL-TIME
+      const strengthBar = document.querySelector(".strength-fill");
+      const strengthText = document.getElementById("strengthText");
+      const passwordStrength = document.getElementById("passwordStrength");
+
+      // Function to calculate password strength
+      function calculatePasswordStrength(password) {
+        let strength = 0;
+
+        // Check length (min 8 chars)
+        if (password.length >= 8) strength += 25;
+
+        // Check for uppercase letters
+        if (/[A-Z]/.test(password)) strength += 25;
+
+        // Check for lowercase letters
+        if (/[a-z]/.test(password)) strength += 25;
+
+        // Check for numbers
+        if (/[0-9]/.test(password)) strength += 25;
+
+        // Check for special characters
+        if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+
+        return Math.min(strength, 100);
+      }
+
+      // Update strength meter when password changes
+      passwordInput.addEventListener("input", function () {
+        const password = this.value;
+        const strength = calculatePasswordStrength(password);
+
+        // Update strength bar width
+        strengthBar.style.width = strength + "%";
+
+        // Update strength text and class
+        if (strength < 50) {
+          strengthText.textContent = "Weak";
+          passwordStrength.className = "password-strength strength-weak";
+        } else if (strength < 75) {
+          strengthText.textContent = "Medium";
+          passwordStrength.className = "password-strength strength-medium";
+        } else {
+          strengthText.textContent = "Strong";
+          passwordStrength.className = "password-strength strength-strong";
+        }
+      });
+
+      // Form validation
+      const signupForm = document.getElementById("signupForm");
+      const fullNameInput = document.getElementById("fullName");
+      const emailInput = document.getElementById("email");
+      const phoneNumberInput = document.getElementById("phoneNumber");
+      const districtInput = document.getElementById("district");
+      const landSizeInput = document.getElementById("landSize");
+      const irrigationTypeInput = document.getElementById("irrigationType");
+      const confirmPasswordField = document.getElementById("confirmPassword");
+      const termsCheckbox = document.getElementById("termsCheckbox");
+      const successMessage = document.getElementById("successMessage");
+      const errorMessage = document.getElementById("errorMessage");
+
+      function isValidName(value) {
+        return /^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(value);
+      }
+
+      function isValidEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      }
+
+      function isValidIndianPhone(value) {
+        return /^[6-9]\d{9}$/.test(value);
+      }
+
+      function isStrongPassword(value) {
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(
+          value,
+        );
+      }
+
+      phoneNumberInput.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "").slice(0, 10);
+      });
+
+      fullNameInput.addEventListener("input", function () {
+        const cleanedValue = this.value
+          .replace(/[^A-Za-z\s]/g, "")
+          .replace(/\s{2,}/g, " ")
+          .replace(/^\s+/g, "");
+        if (this.value !== cleanedValue) {
+          this.value = cleanedValue;
+        }
+      });
+
+      fullNameInput.addEventListener("blur", function () {
+        const value = this.value.trim();
+        if (!isValidName(value)) {
+          this.classList.add("input-error");
+          document.getElementById("nameError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("nameError").style.display = "none";
+        }
+      });
+
+      // Email validation
+      emailInput.addEventListener("blur", function () {
+        const value = this.value.trim();
+        if (!isValidEmail(value)) {
+          this.classList.add("input-error");
+          document.getElementById("emailError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("emailError").style.display = "none";
+        }
+      });
+
+      // Phone number validation (Indian format: 10 digits, starts with 6-9)
+      phoneNumberInput.addEventListener("blur", function () {
+        const value = this.value.trim();
+        if (!isValidIndianPhone(value)) {
+          this.classList.add("input-error");
+          document.getElementById("phoneError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("phoneError").style.display = "none";
+        }
+      });
+
+      districtInput.addEventListener("blur", function () {
+        if (!this.value) {
+          this.classList.add("input-error");
+          document.getElementById("districtError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("districtError").style.display = "none";
+        }
+      });
+
+      landSizeInput.addEventListener("blur", function () {
+        const value = parseFloat(this.value);
+        if (!Number.isFinite(value) || value <= 0) {
+          this.classList.add("input-error");
+          document.getElementById("landSizeError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("landSizeError").style.display = "none";
+        }
+      });
+
+      irrigationTypeInput.addEventListener("blur", function () {
+        if (!this.value) {
+          this.classList.add("input-error");
+          document.getElementById("irrigationError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("irrigationError").style.display = "none";
+        }
+      });
+
+      // Password validation
+      passwordInput.addEventListener("blur", function () {
+        const value = this.value;
+        if (!isStrongPassword(value)) {
+          this.classList.add("input-error");
+          document.getElementById("passwordError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("passwordError").style.display = "none";
+        }
+      });
+
+      // Confirm password validation
+      confirmPasswordField.addEventListener("blur", function () {
+        const password = passwordInput.value;
+        const confirmPassword = this.value;
+        if (password !== confirmPassword) {
+          this.classList.add("input-error");
+          document.getElementById("confirmPasswordError").style.display =
+            "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("confirmPasswordError").style.display =
+            "none";
+        }
+      });
+
+      // Form submission
+      signupForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        // Hide previous messages
+        successMessage.style.display = "none";
+        errorMessage.style.display = "none";
+
+        // Validate all fields
+        let isValid = true;
+
+        // Check name
+        const nameValue = fullNameInput.value.trim();
+        if (!isValidName(nameValue)) {
+          fullNameInput.classList.add("input-error");
+          document.getElementById("nameError").style.display = "block";
+          isValid = false;
+        }
+
+        // Check email
+        const emailValue = emailInput.value.trim();
+        if (!isValidEmail(emailValue)) {
+          emailInput.classList.add("input-error");
+          document.getElementById("emailError").style.display = "block";
+          isValid = false;
+        }
+
+        // Check phone
+        const phoneValue = phoneNumberInput.value.trim();
+        if (!isValidIndianPhone(phoneValue)) {
+          phoneNumberInput.classList.add("input-error");
+          document.getElementById("phoneError").style.display = "block";
+          isValid = false;
+        }
+
+        const districtValue = districtInput.value;
+        if (!districtValue) {
+          districtInput.classList.add("input-error");
+          document.getElementById("districtError").style.display = "block";
+          isValid = false;
+        }
+
+        const landSizeValue = parseFloat(landSizeInput.value);
+        if (!Number.isFinite(landSizeValue) || landSizeValue <= 0) {
+          landSizeInput.classList.add("input-error");
+          document.getElementById("landSizeError").style.display = "block";
+          isValid = false;
+        }
+
+        const irrigationValue = irrigationTypeInput.value;
+        if (!irrigationValue) {
+          irrigationTypeInput.classList.add("input-error");
+          document.getElementById("irrigationError").style.display = "block";
+          isValid = false;
+        }
+
+        // Check password
+        const passwordValue = passwordInput.value;
+        if (!isStrongPassword(passwordValue)) {
+          passwordInput.classList.add("input-error");
+          document.getElementById("passwordError").style.display = "block";
+          isValid = false;
+        }
+
+        // Check confirm password
+        const confirmPasswordValue = confirmPasswordField.value;
+        if (passwordValue !== confirmPasswordValue) {
+          confirmPasswordField.classList.add("input-error");
+          document.getElementById("confirmPasswordError").style.display =
+            "block";
+          isValid = false;
+        }
+
+        // Check terms checkbox
+        if (!termsCheckbox.checked) {
+          termsCheckbox.parentElement.classList.add("error");
+          isValid = false;
+        }
+
+        if (isValid) {
+          try {
+            const formData = new FormData();
+            formData.append("name", nameValue);
+            formData.append("email", emailValue);
+            formData.append("phone_number", phoneValue);
+            formData.append("password", passwordValue);
+            formData.append("district", districtValue);
+            formData.append("land_size", String(landSizeValue));
+            formData.append("irrigation_type", irrigationValue);
+
+            const response = await fetch("/auth/register", {
+              method: "POST",
+              body: formData,
+            });
+
+            const responseText = await response.text();
+            let data = {};
+            try {
+              data = responseText ? JSON.parse(responseText) : {};
+            } catch (e) {
+              data = {};
+            }
+
+            if (response.ok) {
+              // Show success message
+              successMessage.style.display = "block";
+
+              // Redirect after 2 seconds
+              setTimeout(() => {
+                window.location.href = "/auth/login";
+              }, 2000);
+            } else {
+              errorMessage.textContent =
+                data.detail || `Registration failed (HTTP ${response.status}).`;
+              errorMessage.style.display = "block";
+            }
+          } catch (error) {
+            errorMessage.textContent =
+              "Request failed. Check server/database and try again.";
+            errorMessage.style.display = "block";
+          }
+        }
+      });
+
+      // Terms modal functionality
+      const termsModal = document.getElementById("terms-of-service");
+      const acceptTermsBtn = document.getElementById("acceptTerms");
+
+      document
+        .querySelectorAll('.modal-trigger[data-modal="terms-of-service"]')
+        .forEach((btn) => {
+          btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            termsModal.style.display = "block";
+          });
+        });
+
+      document.querySelector(".close").addEventListener("click", function () {
+        termsModal.style.display = "none";
+      });
+
+      acceptTermsBtn.addEventListener("click", function () {
+        termsModal.style.display = "none";
+        termsCheckbox.checked = true;
+      });
+
+      // Close modal when clicking outside
+      window.addEventListener("click", function (e) {
+        if (e.target === termsModal) {
+          termsModal.style.display = "none";
+        }
+      });
+
+      // Keyboard navigation for close
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          termsModal.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>

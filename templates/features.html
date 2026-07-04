@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CropCare - Features</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root {
+        --primary: #2E7D32;
+        --primary-hover: #1B5E20;
+        --secondary: #43A047;
+        --accent: #43A047;
+        --bg-main: #F8FAF5;
+        --surface: #FFFFFF;
+        --border-color: #DDE5D5;
+        --text-primary: #1F2937;
+        --text-secondary: #6B7280;
+        --dark: #FFFFFF;
+        --darker: #F8FAF5;
+        --light-text: #1F2937;
+        --gray-text: #6B7280;
+        --card-bg: #FFFFFF;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", "Plus Jakarta Sans", sans-serif;
+        color: var(--text-primary);
+        background-color: var(--bg-main);
+        overflow-x: hidden;
+      }
+
+      .glassmorphic {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      }
+
+      .navbar-scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        background: rgba(255, 255, 255, 0.95);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .nav-pill {
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 9999px;
+        transition: all 0.25s ease;
+      }
+
+      .nav-pill:hover,
+      .nav-pill.active {
+        color: #2E7D32;
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-hover);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(46, 125, 50, 0.35);
+      }
+
+      .btn-secondary {
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      .section {
+        padding: 5rem 0;
+      }
+
+      .page-hero {
+        background: linear-gradient(
+          135deg,
+          rgba(46, 125, 50, 0.08) 0%,
+          rgba(67, 160, 71, 0.04) 50%,
+          rgba(248, 250, 245, 1) 100%
+        );
+      }
+
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-6px);
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(31, 41, 55, 0.6);
+        backdrop-filter: blur(4px);
+      }
+
+      .modal-content {
+        background-color: var(--surface);
+        margin: 5% auto;
+        padding: 2.5rem;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color);
+        position: relative;
+        color: var(--text-secondary);
+        scrollbar-width: none;
+      }
+
+      .modal-content::-webkit-scrollbar {
+        display: none;
+      }
+
+      .close {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        color: var(--text-secondary);
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .close:hover {
+        color: var(--text-primary);
+        background: #F3F4F6;
+      }
+
+      .modal-title {
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+      }
+
+      .feature-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+        border-color: #A5D6A7;
+      }
+
+      .feature-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+      }
+
+      .meta-label {
+        color: var(--primary);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 1rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .timeline {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      }
+
+      .timeline-track {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .timeline-step {
+        text-align: center;
+        padding: 1.2rem 0.8rem;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        background: #F8FAF5;
+        transition: all 0.2s ease;
+      }
+
+      .timeline-step:hover {
+        border-color: #A5D6A7;
+        transform: translateY(-2px);
+      }
+
+      .timeline-index {
+        font-size: 0.75rem;
+        color: var(--primary);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+      }
+
+      .timeline-arrow {
+        color: #43A047;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .comparison-card {
+        border-radius: 20px;
+        padding: 1.75rem;
+      }
+
+      .comparison-card.before {
+        border: 1px solid #FECACA;
+        background: #FEF2F2;
+      }
+
+      .comparison-card.after {
+        border: 1px solid #BBF7D0;
+        background: #F0FDF4;
+      }
+
+      .faq-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+      }
+
+      .faq-item {
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        background: #FFFFFF;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        transition: all 0.2s ease;
+      }
+
+      .faq-item:hover {
+        border-color: #A5D6A7;
+      }
+
+      @media (max-width: 1024px) {
+        .feature-grid,
+        .comparison-grid,
+        .faq-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .timeline-track {
+          grid-template-columns: 1fr;
+        }
+
+        .timeline-arrow {
+          transform: rotate(90deg);
+          margin: 0.5rem 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans">
+    <nav
+      id="navbar"
+      class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md transition-all duration-300 border-b border-[var(--border-color)]"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-3">
+            <img
+              src="/static/images/logo1.jpeg"
+              alt="CropCare Logo"
+              class="w-8 h-8 rounded-lg"
+              onerror="
+                this.style.display = 'none';
+                document.querySelector('.logo-placeholder').style.display =
+                  'block';
+              "
+            />
+            <div class="logo-placeholder" style="display: none">
+              <svg
+                class="w-8 h-8 text-green-700"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+                />
+              </svg>
+            </div>
+            <span class="text-2xl font-bold text-gray-900">CropCare</span>
+          </div>
+          <div
+            class="hidden md:flex items-center gap-2 bg-gray-100/80 border border-[var(--border-color)] rounded-full px-3 py-1.5"
+          >
+            <a href="/" class="nav-pill">Home</a>
+            <a href="/about" class="nav-pill">About Us</a>
+            <a href="/features" class="nav-pill active">Features</a>
+            <a href="/contact" class="nav-pill">Contact</a>
+          </div>
+          <div class="flex items-center space-x-3">
+            <a href="/auth/login" class="btn-secondary !py-2 !px-5 text-sm">Login</a>
+            <a href="/auth/register" class="btn-primary !py-2 !px-5 text-sm">Signup</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <section class="page-hero section pt-32 pb-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <span class="text-green-700 font-semibold tracking-wider uppercase text-sm mb-2 block">Platform Capabilities</span>
+          <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            Everything CropCare Can Do
+          </h1>
+          <p class="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            A focused product view of CropCare tools, intelligent workflow, and measurable farmer
+            impact across the cropping lifecycle.
+          </p>
+        </div>
+
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            Feature Architecture
+          </h2>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <span class="feature-badge">01</span>
+              <h3 class="text-xl font-bold text-gray-900">
+                AI Crop Recommendations
+              </h3>
+              <p class="text-gray-600 mt-2">
+                Converts soil and climate inputs into precision-matched recommended crops.
+              </p>
+              <p class="meta-label">Who it helps</p>
+              <p class="text-gray-700">Farmers choosing season-wise crops.</p>
+              <p class="meta-label">Outcome</p>
+              <p class="text-gray-700 font-medium">
+                Lower planning uncertainty and better yield fit.
+              </p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-badge">02</span>
+              <h3 class="text-xl font-bold text-gray-900">
+                Disease Diagnosis
+              </h3>
+              <p class="text-gray-600 mt-2">
+                Image-assisted plant analysis with verified treatment direction.
+              </p>
+              <p class="meta-label">Who it helps</p>
+              <p class="text-gray-700">
+                Farmers needing fast disease identification.
+              </p>
+              <p class="meta-label">Outcome</p>
+              <p class="text-gray-700 font-medium">
+                Faster interventions and reduced spread risk.
+              </p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-badge">03</span>
+              <h3 class="text-xl font-bold text-gray-900">Crop Planner</h3>
+              <p class="text-gray-600 mt-2">
+                Breaks crop cycles into actionable daily and weekly field tasks.
+              </p>
+              <p class="meta-label">Who it helps</p>
+              <p class="text-gray-700">
+                Farmers managing multiple activities at once.
+              </p>
+              <p class="meta-label">Outcome</p>
+              <p class="text-gray-700 font-medium">
+                Better execution consistency across the season.
+              </p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-badge">04</span>
+              <h3 class="text-xl font-bold text-gray-900">
+                Weather Intelligence
+              </h3>
+              <p class="text-gray-600 mt-2">
+                Forecast context for irrigation, spraying, and harvesting plans.
+              </p>
+              <p class="meta-label">Who it helps</p>
+              <p class="text-gray-700">
+                Farmers making timing-sensitive field decisions.
+              </p>
+              <p class="meta-label">Outcome</p>
+              <p class="text-gray-700 font-medium">
+                Reduced weather-related operational mistakes.
+              </p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-badge">05</span>
+              <h3 class="text-xl font-bold text-gray-900">
+                Mandi Price Tracking
+              </h3>
+              <p class="text-gray-600 mt-2">
+                Monitors real-time price movement for better selling timing.
+              </p>
+              <p class="meta-label">Who it helps</p>
+              <p class="text-gray-700">Farmers optimizing market exits.</p>
+              <p class="meta-label">Outcome</p>
+              <p class="text-gray-700 font-medium">
+                Improved realization and pricing confidence.
+              </p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-badge">06</span>
+              <h3 class="text-xl font-bold text-gray-900">
+                Government Scheme Guide
+              </h3>
+              <p class="text-gray-600 mt-2">
+                Centralized view of agricultural schemes and application requirements.
+              </p>
+              <p class="meta-label">Who it helps</p>
+              <p class="text-gray-700">
+                Farmers seeking subsidy and support benefits.
+              </p>
+              <p class="meta-label">Outcome</p>
+              <p class="text-gray-700 font-medium">
+                Faster access to relevant support programs.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="mb-16 timeline">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">How It Works</h2>
+          <div class="timeline-track">
+            <div class="timeline-step">
+              <div class="timeline-index">Step 01</div>
+              <p class="text-gray-900 font-bold">Soil Input</p>
+            </div>
+            <div class="timeline-arrow">
+              <i data-lucide="chevron-right" class="w-5 h-5 mx-auto"></i>
+            </div>
+            <div class="timeline-step">
+              <div class="timeline-index">Step 02</div>
+              <p class="text-gray-900 font-bold">AI Recommendation</p>
+            </div>
+            <div class="timeline-arrow">
+              <i data-lucide="chevron-right" class="w-5 h-5 mx-auto"></i>
+            </div>
+            <div class="timeline-step">
+              <div class="timeline-index">Step 03</div>
+              <p class="text-gray-900 font-bold">Plan & Monitor</p>
+            </div>
+            <div class="timeline-arrow">
+              <i data-lucide="chevron-right" class="w-5 h-5 mx-auto"></i>
+            </div>
+            <div class="timeline-step">
+              <div class="timeline-index">Step 04</div>
+              <p class="text-gray-900 font-bold">Market Decision</p>
+            </div>
+            <div class="timeline-arrow">
+              <i data-lucide="chevron-right" class="w-5 h-5 mx-auto"></i>
+            </div>
+            <div class="timeline-step">
+              <div class="timeline-index">Step 05</div>
+              <p class="text-gray-900 font-bold">Outcome Review</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            Without vs With CropCare
+          </h2>
+          <div class="comparison-grid">
+            <article class="comparison-card before">
+              <h3 class="text-xl font-bold text-red-800 mb-3 flex items-center gap-2">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+                Without CropCare
+              </h3>
+              <ul class="text-gray-700 list-disc pl-5 space-y-2">
+                <li>Manual decisions with fragmented data</li>
+                <li>Late reaction to pests and diseases</li>
+                <li>Uncertain selling timing in markets</li>
+                <li>Higher planning and input inefficiencies</li>
+              </ul>
+            </article>
+            <article class="comparison-card after">
+              <h3 class="text-xl font-bold text-green-800 mb-3 flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-700"></i>
+                With CropCare
+              </h3>
+              <ul class="text-gray-800 list-disc pl-5 space-y-2">
+                <li>Data-backed crop and task planning</li>
+                <li>Earlier diagnosis and treatment action</li>
+                <li>Price-aware selling decisions</li>
+                <li>Better yield consistency and reduced waste</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Feature FAQs</h2>
+          <div class="faq-grid">
+            <article class="faq-item">
+              <h3 class="text-gray-900 font-bold mb-2">
+                How often should I update farm data?
+              </h3>
+              <p class="text-gray-600">
+                At least once per season, and whenever crop or soil context
+                changes.
+              </p>
+            </article>
+            <article class="faq-item">
+              <h3 class="text-gray-900 font-bold mb-2">
+                Can I use only one module?
+              </h3>
+              <p class="text-gray-600">
+                Yes, modules are independent, but best results come from
+                combined usage.
+              </p>
+            </article>
+            <article class="faq-item">
+              <h3 class="text-gray-900 font-bold mb-2">
+                Do I need technical expertise?
+              </h3>
+              <p class="text-gray-600">
+                No. CropCare is designed for practical, low-friction daily
+                usage.
+              </p>
+            </article>
+            <article class="faq-item">
+              <h3 class="text-gray-900 font-bold mb-2">
+                Is this suitable for small farms?
+              </h3>
+              <p class="text-gray-600">
+                Yes, recommendations and planning can be applied across small
+                and large farms.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section
+          class="bg-white rounded-3xl p-10 text-center border border-[var(--border-color)] shadow-sm"
+        >
+          <h2 class="text-3xl font-extrabold text-gray-900 mb-3">
+            Ready to use CropCare in your next season?
+          </h2>
+          <p class="text-gray-600 mb-6 max-w-xl mx-auto">
+            Start with your farm profile and activate feature-driven planning today.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/auth/register" class="btn-primary !py-3 !px-8 text-base shadow-md"
+              >Start Free</a
+            >
+          </div>
+        </section>
+      </div>
+    </section>
+
+    {% include "partials/footer.html" %} {% include
+    "partials/common_modals.html" %}
+
+    <script>
+      window.addEventListener("scroll", function () {
+        const navbar = document.getElementById("navbar");
+        if (window.scrollY > 50) {
+          navbar.classList.add("navbar-scrolled");
+        } else {
+          navbar.classList.remove("navbar-scrolled");
+        }
+      });
+
+      class ModalManager {
+        constructor() {
+          this.modals = document.querySelectorAll(".modal");
+          this.triggers = document.querySelectorAll(".modal-trigger");
+          this.closes = document.querySelectorAll(".close");
+          this.init();
+        }
+
+        init() {
+          this.triggers.forEach((trigger) => {
+            trigger.addEventListener("click", (e) => {
+              e.preventDefault();
+              const modalId = trigger.getAttribute("data-modal");
+              this.openModal(modalId);
+            });
+          });
+
+          this.closes.forEach((close) => {
+            close.addEventListener("click", () => this.closeAllModals());
+          });
+
+          window.addEventListener("click", (e) => {
+            if (e.target.classList.contains("modal")) {
+              this.closeAllModals();
+            }
+          });
+
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+              this.closeAllModals();
+            }
+          });
+        }
+
+        openModal(modalId) {
+          this.closeAllModals();
+          const modal = document.getElementById(modalId);
+          if (modal) {
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
+          }
+        }
+
+        closeAllModals() {
+          this.modals.forEach((modal) => {
+            modal.style.display = "none";
+          });
+          document.body.style.overflow = "auto";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        new ModalManager();
+        if (typeof lucide !== "undefined") { lucide.createIcons(); }
+      });
+    </script>
+  </body>
+</html>
