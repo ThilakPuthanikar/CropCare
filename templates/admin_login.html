@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Login - CropCare</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -15,20 +15,16 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       :root {
-        --primary: #2E7D32;
-        --primary-hover: #1B5E20;
-        --secondary: #43A047;
-        --accent: #43A047;
-        --bg-main: #F8FAF5;
-        --surface: #FFFFFF;
-        --border-color: #DDE5D5;
-        --text-primary: #1F2937;
-        --text-secondary: #6B7280;
-        --dark: #FFFFFF;
-        --darker: #F8FAF5;
-        --light-text: #1F2937;
-        --gray-text: #6B7280;
-        --card-bg: #FFFFFF;
+        --primary: #10B981;
+        --primary-dark: #059669;
+        --accent: #34D399;
+        --bg-main: #0F172A;
+        --surface: rgba(30, 41, 59, 0.85);
+        --border-color: rgba(16, 185, 129, 0.25);
+        --text-primary: #F8FAFC;
+        --text-secondary: #94A3B8;
+        --radius-lg: 24px;
+        --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       * {
@@ -38,54 +34,72 @@
       }
 
       body {
-        font-family: "Inter", "Plus Jakarta Sans", sans-serif;
+        font-family: "Inter", sans-serif;
         color: var(--text-primary);
-        background: linear-gradient(
-          135deg,
-          rgba(46, 125, 50, 0.08) 0%,
-          rgba(67, 160, 71, 0.04) 50%,
-          rgba(248, 250, 245, 1) 100%
-        );
+        background:
+          radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 45%),
+          radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.12) 0%, transparent 45%),
+          var(--bg-main);
         min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: 24px 16px;
+      }
+
+      h1, h2, h3, h4, h5, h6, .brand-font {
+        font-family: "Plus Jakarta Sans", "Manrope", sans-serif;
       }
 
       .auth-card {
         background: var(--surface);
-        border-radius: 24px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
         width: 100%;
-        max-width: 420px;
-        padding: 36px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
+        max-width: 440px;
+        padding: 40px 36px;
+        box-shadow: 
+          0 30px 60px -15px rgba(0, 0, 0, 0.5),
+          0 0 40px -10px rgba(16, 185, 129, 0.2),
+          inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
         border: 1px solid var(--border-color);
         position: relative;
         overflow: hidden;
+      }
+
+      .auth-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10B981, #34D399, #3B82F6);
       }
 
       .close-btn {
         position: absolute;
         top: 20px;
         right: 20px;
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
-        background: #F3F4F6;
-        border: none;
+        background: rgba(51, 65, 85, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.2);
         color: var(--text-secondary);
-        font-size: 18px;
+        font-size: 16px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease;
+        transition: var(--transition-base);
       }
 
       .close-btn:hover {
-        background: #E5E7EB;
+        background: #334155;
         color: var(--text-primary);
+        transform: rotate(90deg);
       }
 
       .logo-container {
@@ -94,14 +108,17 @@
       }
 
       .logo-container img {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 16px;
-        border-radius: 14px;
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px auto;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        object-fit: cover;
       }
 
       .logo-container h1 {
-        font-size: 28px;
+        font-size: 30px;
         font-weight: 800;
         color: var(--text-primary);
         margin-bottom: 6px;
@@ -109,8 +126,11 @@
       }
 
       .logo-container p {
-        color: var(--text-secondary);
-        font-size: 14px;
+        color: #34D399;
+        font-size: 14.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
       }
 
       .input-group {
@@ -120,31 +140,33 @@
       .input-group label {
         display: block;
         margin-bottom: 8px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.9rem;
         color: var(--text-primary);
       }
 
       .input-field {
         width: 100%;
-        padding: 13px 16px;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        background: #F8FAF5;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(15, 23, 42, 0.6);
         color: var(--text-primary);
         font-size: 15px;
-        transition: all 0.2s ease;
+        font-weight: 500;
+        transition: var(--transition-base);
       }
 
       .input-field::placeholder {
-        color: #9CA3AF;
+        color: #64748B;
+        font-weight: 400;
       }
 
       .input-field:focus {
         outline: none;
         border-color: var(--primary);
-        background: #FFFFFF;
-        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+        background: rgba(15, 23, 42, 0.9);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
       }
 
       .password-input {
@@ -161,81 +183,86 @@
         color: var(--text-secondary);
         cursor: pointer;
         font-size: 16px;
+        padding: 6px;
         transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .password-toggle:hover {
-        color: var(--text-primary);
+        color: var(--primary);
       }
 
       .btn {
         width: 100%;
-        padding: 14px;
-        border-radius: 12px;
-        font-weight: 600;
+        padding: 15px;
+        border-radius: 14px;
+        font-weight: 700;
         font-size: 16px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: var(--transition-base);
         border: none;
         position: relative;
         overflow: hidden;
       }
 
       .btn-primary {
-        background: var(--primary);
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
         color: white;
-        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+        box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
       }
 
       .btn-primary:hover {
-        background: var(--primary-hover);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(46, 125, 50, 0.35);
+        box-shadow: 0 12px 25px -4px rgba(16, 185, 129, 0.5);
       }
 
       .input-error {
-        border-color: #ef5350 !important;
-        background: #FEF2F2 !important;
-        box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.15) !important;
+        border-color: #F87171 !important;
+        background: rgba(239, 68, 68, 0.1) !important;
+        box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2) !important;
       }
 
       .error-message {
-        color: #ef5350;
+        color: #F87171;
         font-size: 13px;
-        font-weight: 500;
-        margin-top: 6px;
+        font-weight: 600;
+        margin-top: 7px;
         display: none;
       }
 
       .success-message {
-        background: #F0FDF4;
-        border: 1px solid #BBF7D0;
-        border-radius: 12px;
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 14px;
         padding: 16px;
         margin-top: 20px;
         display: none;
-        color: #166534;
-        font-weight: 600;
+        color: #34D399;
+        font-weight: 700;
         font-size: 14px;
         text-align: center;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
       }
 
       @media (max-width: 480px) {
         .auth-card {
-          padding: 24px;
-          border-radius: 18px;
+          padding: 30px 24px;
+          border-radius: 20px;
         }
       }
     </style>
   </head>
-  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans">
+  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans antialiased">
     <div class="auth-card">
-      <button class="close-btn" id="closeBtn">
+      <button class="close-btn" id="closeBtn" aria-label="Close">
         <i class="fas fa-times"></i>
       </button>
 
       <div class="logo-container">
-        <!-- Replace with your logo image -->
+        <!-- Logo Image -->
         <img
           src="static/images/logo.png"
           alt="CropCare Logo"
@@ -245,17 +272,19 @@
           "
         />
         <div class="logo-placeholder" style="display: none">
-          <svg
-            class="w-16 h-16 mx-auto text-green-600"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
-            />
-          </svg>
+          <div class="w-16 h-16 mx-auto bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/30 mb-4 shadow-lg">
+            <svg
+              class="w-10 h-10 text-emerald-400"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+              />
+            </svg>
+          </div>
         </div>
-        <h1>CropCare</h1>
+        <h1 class="brand-font">CropCare</h1>
         <p>Admin Portal</p>
       </div>
 

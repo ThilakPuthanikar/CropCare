@@ -1,12 +1,10 @@
 import os
 import sys
 from fastapi import FastAPI, Request, Depends, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.exceptions import RequestValidationError
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
 from sqlalchemy import inspect, text
 
 from .config.settings import settings
@@ -14,18 +12,18 @@ from .database.database import engine, Base, SessionLocal
 from .models.scheme import Scheme
 from .models.price import Price
 from .models.user import User
-from .routes import auth, user, admin, system
+from .models.admin import Admin
+from .routes import auth, user, admin
 from .utils.schemes import DEFAULT_SCHEMES, serialize_text_list
 from .utils.auth import get_password_hash
-from .utils.logger import logger
-from .utils.api_response import error_response
 
-# Create tables if they don't already exist (including prices)
+# Create tables if they don't already exist (including prices and admins)
 Base.metadata.create_all(bind=engine)
 
 
 def _get_cors_origins():
-    return settings.get_cors_origins()
+    origins = [origin.strip() for origin in (settings.CORS_ORIGINS or "").split(",")]
+    return [origin for origin in origins if origin]
 
 
 def ensure_schema_columns():
@@ -108,35 +106,45 @@ def ensure_schema_columns():
 def seed_default_schemes():
     db = SessionLocal()
     try:
-        existing_titles = {
-            row[0]
-            for row in db.query(Scheme.title).all()
-        }
         new_records = []
         for scheme_data in DEFAULT_SCHEMES:
-            if scheme_data["title"] in existing_titles:
-                continue
-            new_records.append(
-                Scheme(
-                    title=scheme_data["title"],
-                    description=scheme_data["description"],
-                    type=scheme_data["type"],
-                    beneficiary=scheme_data["beneficiary"],
-                    benefits=scheme_data["benefits"],
-                    eligibility=scheme_data["eligibility"],
-                    documents_required=serialize_text_list(scheme_data["documents_required"]),
-                    steps_to_apply=serialize_text_list(scheme_data["steps_to_apply"]),
-                    duration=scheme_data["duration"],
-                    official_link=scheme_data["official_link"],
-                    icon=scheme_data["icon"],
-                    state=scheme_data["state"],
-                    district=scheme_data["district"],
-                    is_active=scheme_data["is_active"],
+            existing_scheme = db.query(Scheme).filter(Scheme.title == scheme_data["title"]).first()
+            if existing_scheme:
+                existing_scheme.description = scheme_data["description"]
+                existing_scheme.type = scheme_data["type"]
+                existing_scheme.beneficiary = scheme_data["beneficiary"]
+                existing_scheme.benefits = scheme_data["benefits"]
+                existing_scheme.eligibility = scheme_data["eligibility"]
+                existing_scheme.documents_required = serialize_text_list(scheme_data["documents_required"])
+                existing_scheme.steps_to_apply = serialize_text_list(scheme_data["steps_to_apply"])
+                existing_scheme.duration = scheme_data["duration"]
+                existing_scheme.official_link = scheme_data["official_link"]
+                existing_scheme.icon = scheme_data["icon"]
+                existing_scheme.state = scheme_data["state"]
+                existing_scheme.district = scheme_data["district"]
+                existing_scheme.is_active = scheme_data["is_active"]
+            else:
+                new_records.append(
+                    Scheme(
+                        title=scheme_data["title"],
+                        description=scheme_data["description"],
+                        type=scheme_data["type"],
+                        beneficiary=scheme_data["beneficiary"],
+                        benefits=scheme_data["benefits"],
+                        eligibility=scheme_data["eligibility"],
+                        documents_required=serialize_text_list(scheme_data["documents_required"]),
+                        steps_to_apply=serialize_text_list(scheme_data["steps_to_apply"]),
+                        duration=scheme_data["duration"],
+                        official_link=scheme_data["official_link"],
+                        icon=scheme_data["icon"],
+                        state=scheme_data["state"],
+                        district=scheme_data["district"],
+                        is_active=scheme_data["is_active"],
+                    )
                 )
-            )
         if new_records:
             db.add_all(new_records)
-            db.commit()
+        db.commit()
     finally:
         db.close()
 
@@ -149,20 +157,38 @@ def ensure_admin_user():
         if not admin_email or not admin_password:
             return
 
-        admin_user = db.query(User).filter(User.email == admin_email).first()
         hashed_password = get_password_hash(admin_password)
+
+        # 1. Migrate any existing admin records out of `users` table into `admins` table first
+        old_user_admins = db.query(User).filter(User.role == "admin").all()
+        for old_u in old_user_admins:
+            existing_admin = db.query(Admin).filter(Admin.email == old_u.email).first()
+            if not existing_admin:
+                new_a = Admin(
+                    name=old_u.name or "System Admin",
+                    email=old_u.email,
+                    password_hash=old_u.password_hash,
+                    role="admin",
+                    is_approved=True,
+                    profile_photo=old_u.profile_photo,
+                )
+                db.add(new_a)
+            db.delete(old_u)
+        db.commit()
+
+        # 2. Ensure primary admin account exists inside `admins` table
+        admin_user = db.query(Admin).filter(Admin.email == admin_email).first()
         if admin_user:
             admin_user.role = "admin"
             admin_user.is_approved = True
             admin_user.password_hash = hashed_password
         else:
-            admin_user = User(
+            admin_user = Admin(
                 name="Admin User",
                 email=admin_email,
                 password_hash=hashed_password,
                 role="admin",
                 is_approved=True,
-                state="Karnataka",
             )
             db.add(admin_user)
         db.commit()
@@ -177,45 +203,10 @@ async def lifespan(app: FastAPI):
     ensure_schema_columns()
     seed_default_schemes()
     ensure_admin_user()
-    logger.info("Starting CropCare application...")
+    print("Starting CropCare application...")
     yield
 
 app = FastAPI(title="CropCare API", lifespan=lifespan)
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    detail = str(exc.detail) if exc.detail else "An error occurred"
-    return error_response(
-        message=detail,
-        errors=[detail],
-        status_code=exc.status_code,
-        detail=detail
-    )
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    errors = [f"{err.get('loc', [''])[-1]}: {err.get('msg', 'Invalid input')}" for err in exc.errors()]
-    msg = errors[0] if errors else "Validation error"
-    return error_response(
-        message="Validation error",
-        errors=errors,
-        status_code=422,
-        detail=msg
-    )
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled server exception on {request.method} {request.url.path}: {exc}", exc_info=True)
-    msg = "An unexpected internal server error occurred."
-    return error_response(
-        message=msg,
-        errors=[msg],
-        status_code=500,
-        detail=msg
-    )
-
-# GZip middleware for compressing responses
-app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS middleware
 app.add_middleware(
@@ -253,10 +244,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-    if request.url.path.startswith("/static/"):
-        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
-    else:
-        response.headers["Cache-Control"] = "no-store"
+    response.headers["Cache-Control"] = "no-store"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data: https: blob:; script-src 'self' 'unsafe-inline' https: cdn.tailwindcss.com cdnjs.cloudflare.com cdn.jsdelivr.net www.chatbase.co; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com cdnjs.cloudflare.com; font-src 'self' https: data: fonts.gstatic.com cdnjs.cloudflare.com; connect-src 'self' https: www.chatbase.co;"
     return response
@@ -281,8 +269,7 @@ async def features(request: Request):
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
-app.include_router(system.router, tags=["system"])
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=settings.PORT)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

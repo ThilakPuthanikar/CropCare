@@ -1,18 +1,49 @@
 {% extends "base.html" %}
 {% block title %}Price Tracker - CropCare{% endblock %}
 {% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Live Mandi Price Tracker{% endblock %}
 
 {% block sidebar %}
-<a href="/user/dashboard" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-home mr-3"></i>Dashboard</a>
-<a href="/user/profile" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-user mr-3"></i>Profile</a>
-<a href="/user/soil-library" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-seedling mr-3"></i>Soil Library</a>
-<a href="/user/weather" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-cloud-sun mr-3"></i>Weather</a>
-<a href="/user/crop-recommendation" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-leaf mr-3"></i>Crop Suggestion</a>
-<a href="/user/input-suggestions" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-tools mr-3"></i>Input Suggestions</a>
-<a href="/user/disease-diagnosis" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-heartbeat mr-3"></i>Disease Diagnosis</a>
-<a href="/user/crop-planner" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-calendar-check mr-3"></i>Crop Planner</a>
-<a href="/user/mandi-tracking" class="sidebar-item active block py-3 px-4 rounded-lg"><i class="fas fa-chart-line mr-3"></i>Price Tracker</a>
-<a href="/user/gov-schemes" class="sidebar-item block py-3 px-4 rounded-lg"><i class="fas fa-hand-holding-heart mr-3"></i>Gov Schemes</a>
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item active">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
 {% endblock %}
 
 {% block content %}
@@ -62,8 +93,41 @@
     </div>
   </section>
 
+  <!-- Official KRAMA Portal Hybrid Verification Section -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-1 space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-green-700 mb-1">
+          <i class="fas fa-shield-check"></i> Live Government Check
+        </div>
+        <h3 class="text-xl font-extrabold text-gray-900">Verify with Official KRAMA Portal</h3>
+        <p class="text-sm text-gray-600 mt-1">Cross-check daily rates directly on the Karnataka Agricultural Marketing Board portal without leaving CropCare.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="https://krama.karnataka.gov.in" target="_blank" rel="noopener noreferrer" class="btn-secondary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-2xs transition-all">
+          <span>Open Portal Tab</span>
+          <i class="fas fa-external-link-alt text-xs"></i>
+        </a>
+        <button id="toggleKramaBtn" type="button" class="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold bg-green-700 hover:bg-green-800 text-white shadow-sm transition-all cursor-pointer">
+          <i class="fas fa-eye"></i>
+          <span id="toggleKramaText">Show Live KRAMA Portal</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Lazy Loaded Iframe Container -->
+    <div id="kramaIframeContainer" class="hidden pt-4 border-t border-gray-100 transition-all">
+      <div id="iframeTarget" class="w-full min-h-[750px] rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+        <div class="text-center p-8 text-gray-500">
+          <i class="fas fa-spinner fa-spin text-2xl text-green-600 mb-2"></i>
+          <p class="font-medium text-sm">Connecting to KRAMA official server...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Toolbar & Table Section -->
-  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-1 space-y-6">
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-2 space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900">Mandi Price Directory</h2>
@@ -257,7 +321,30 @@
     }
   }
 
+  let iframeLoaded = false;
+  function toggleKramaPortal() {
+    const container = document.getElementById("kramaIframeContainer");
+    const target = document.getElementById("iframeTarget");
+    const btnText = document.getElementById("toggleKramaText");
+
+    if (container.classList.contains("hidden")) {
+      container.classList.remove("hidden");
+      btnText.textContent = "Hide Live KRAMA Portal";
+
+      if (!iframeLoaded) {
+        iframeLoaded = true;
+        setTimeout(() => {
+          target.innerHTML = `<iframe src="/user/proxy-krama" class="w-full h-[780px] border-0 rounded-2xl bg-white shadow-inner"></iframe>`;
+        }, 300);
+      }
+    } else {
+      container.classList.add("hidden");
+      btnText.textContent = "Show Live KRAMA Portal";
+    }
+  }
+
   document.getElementById("searchInput").addEventListener("input", applyFilters);
+  document.getElementById("toggleKramaBtn").addEventListener("click", toggleKramaPortal);
   document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("pricesTableBody").innerHTML = renderPriceTableSkeleton();
     loadMarketPrices();

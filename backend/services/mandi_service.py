@@ -193,8 +193,13 @@ def _normalize_row(
 
 
 def fetch_karnataka_mandi_prices() -> dict:
-    logger.info("Fetch started for Karnataka mandi source: %s", KARNATAKA_MANDI_SOURCE_URL)
+    """Fetch Karnataka mandi prices using standard HTTP requests and stdlib HTML parsing.
+
+    Uses the existing _HTMLTableExtractor, _pick_source_table, and _normalize_row
+    functions already defined in this module — no external scraping dependencies needed.
+    """
     fetched_at = datetime.now(timezone.utc)
+    logger.info("Fetching Karnataka mandi prices via HTTP: %s", KARNATAKA_MANDI_SOURCE_URL)
 
     try:
         with requests.Session() as session:
@@ -204,13 +209,17 @@ def fetch_karnataka_mandi_prices() -> dict:
                 timeout=REQUEST_TIMEOUT_SECONDS,
                 headers={
                     "User-Agent": USER_AGENT,
-                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.5",
                 },
             )
         response.raise_for_status()
-
         html = response.text
+
         tables = _extract_tables(html)
+        if not tables:
+            raise ValueError("No HTML tables found on the Karnataka mandi source page.")
+
         source_table, header_index = _pick_source_table(tables)
         price_date = _extract_price_date(html, fetched_at)
 
@@ -221,16 +230,18 @@ def fetch_karnataka_mandi_prices() -> dict:
                 records.append(normalized)
 
         if not records:
-            raise ValueError("Karnataka mandi source did not yield any valid price rows.")
+            raise ValueError("Parsing completed but yielded 0 valid mandi price rows.")
 
-        logger.info("Fetch completed for Karnataka mandi source")
-        logger.info("Records fetched: %s", len(records))
+        logger.info("Successfully extracted %s mandi price records.", len(records))
         return {
             "source_url": KARNATAKA_MANDI_SOURCE_URL,
             "fetched_at": fetched_at,
             "row_count": len(records),
             "records": records,
+            "method": "http_stdlib",
         }
+
     except Exception as exc:
         logger.exception("Karnataka mandi scrape failed: %s", exc)
         raise
+

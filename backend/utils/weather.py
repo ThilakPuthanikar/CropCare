@@ -1,7 +1,6 @@
 import requests
 from datetime import date
 from typing import Dict, Any, Optional
-from .logger import logger
 
 
 GEOCODE_URL = "https://geocoding-api.open-meteo.com/v1/search"
@@ -17,7 +16,7 @@ def _request_json(url: str, params: Dict[str, Any]) -> Dict[str, Any]:
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
-        logger.error(f"Weather API error: {e}")
+        print(f"Weather API error: {e}")
         return {}
 
 

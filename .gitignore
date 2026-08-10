@@ -1,7 +1,7 @@
-# Environments
+# Environments & Local Configs
 .env
 *.env
-!.env.example
+.env.local
 venv/
 env/
 ENV/
@@ -12,6 +12,14 @@ venv.bak/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Runtime & Local Process Tracking
+runtime/
+start.bat
+stop.bat
+stopper.bat
+FastAPI
+Ngrok
 
 # Distribution / packaging
 .Python
@@ -36,7 +44,7 @@ share/python-wheels/
 *.manifest
 *.spec
 
-# Unit test / coverage reports
+# Unit test & TestSprite temporary artifacts
 htmlcov/
 .tox/
 .nox/
@@ -49,13 +57,31 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+testsprite_tests/tmp/
+testsprite_tests/logs/
+testsprite_tests/reports/
 
 # Uploads and User generated content
 static/uploads/
 scratch/
+*.log
 *.pdf
 *.pptx
 *.docx
+
+# IDEs, Editors & Agent Tools
+.impeccable/
+.vscode/
+.idea/
+.gemini/
+*.swp
+*.swo
+
+# Draft Specs & Agent Documentation
+DESIGN.md
+PRODUCT.md
+PROJECT_SPECIFICATION.md
+
 
 # OS generated files
 .DS_Store
@@ -65,3 +91,5 @@ scratch/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+

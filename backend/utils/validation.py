@@ -92,24 +92,3 @@ def is_valid_purpose(purpose: str) -> bool:
 
 def is_valid_risk_preference(risk: str) -> bool:
     return (risk or "").strip() in RISK_LEVELS
-
-
-def sanitize_ai_prompt(text: str, max_length: int = 1500) -> str:
-    if not text:
-        return ""
-    cleaned = text.strip()
-    if len(cleaned) > max_length:
-        cleaned = cleaned[:max_length]
-    # Remove common prompt injection markers
-    injection_patterns = [
-        r"(?i)ignore\s+(all\s+)?previous\s+instructions",
-        r"(?i)ignore\s+above\s+instructions",
-        r"(?i)you\s+are\s+now\s+a",
-        r"(?i)system\s+prompt",
-        r"<\|im_start\|>",
-        r"<\|im_end\|>",
-        r"(?i)bypass\s+restrictions",
-    ]
-    for pattern in injection_patterns:
-        cleaned = re.sub(pattern, "[sanitized]", cleaned)
-    return cleaned

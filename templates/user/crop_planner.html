@@ -1,48 +1,49 @@
 <!-- templates/user/crop_planner.html -->
-{% extends "base.html" %} {% block title %}Crop Planner - CropCare{% endblock %}
-{% block user_role %}Farmer Dashboard{% endblock %} {% block page_heading %}Crop
-Planner{% endblock %} {% block sidebar %}
-<a href="/user/dashboard" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-home mr-3"></i>Dashboard
+{% extends "base.html" %}
+{% block title %}Crop Planner - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Crop Schedule & Planner{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
 </a>
-<a href="/user/profile" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-user mr-3"></i>Profile
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
 </a>
-<a href="/user/soil-library" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-seedling mr-3"></i>Soil Library
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
 </a>
-<a href="/user/weather" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-cloud-sun mr-3"></i>Weather
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
 </a>
-<a
-  href="/user/crop-recommendation"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-leaf mr-3"></i>Crop Suggestion
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
 </a>
-<a
-  href="/user/input-suggestions"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-tools mr-3"></i>Input Suggestions
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
 </a>
-<a
-  href="/user/disease-diagnosis"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-heartbeat mr-3"></i>Disease Diagnosis
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
 </a>
-<a
-  href="/user/crop-planner"
-  class="sidebar-item active block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-calendar-check mr-3"></i>Crop Planner
+<a href="/user/crop-planner" class="sidebar-item active">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
 </a>
-<a href="/user/mandi-tracking" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-chart-line mr-3"></i>Price Tracker
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
 </a>
-<a href="/user/gov-schemes" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-hand-holding-heart mr-3"></i>Gov Schemes
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
 </a>
 {% endblock %} {% block content %}
 <div class="space-y-6 crop-planner-page">
@@ -294,7 +295,7 @@ Planner{% endblock %} {% block sidebar %}
           <p class="mt-1.5 text-sm text-gray-600">Local climate data and previous cropping history.</p>
           <div class="mt-4 grid gap-3 sm:grid-cols-3">
             <div>
-              <label for="planRainfall" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Avg. Annual Rainfall (mm)</label>
+              <label for="planRainfall" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Avg. Annual Rainfall</label>
               <input type="number" id="planRainfall" placeholder="e.g. 800" class="planner-input w-full" />
               <p class="mt-1.5 text-xs font-medium"><a href="#" onclick="openRainfallPopup(); return false;" class="text-emerald-700 hover:text-emerald-800 hover:underline inline-flex items-center gap-1"><i class="fas fa-chart-column"></i> View annual rainfall chart</a></p>
             </div>

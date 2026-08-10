@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from ..config.settings import settings
 from ..database.database import get_db
 from ..models.user import User
+from ..models.admin import Admin
 from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
@@ -38,12 +39,20 @@ def authenticate_user(db: Session, email: str, password: str):
         return False
     return user
 
+def authenticate_admin(db: Session, email: str, password: str):
+    admin = db.query(Admin).filter(Admin.email == email).first()
+    if not admin:
+        return False
+    if not verify_password(password, admin.password_hash):
+        return False
+    return admin
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
     return encoded_jwt
@@ -76,18 +85,22 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.email == email).first()
+    if role == "admin":
+        user = db.query(Admin).filter(Admin.email == email).first()
+    else:
+        user = db.query(User).filter(User.email == email).first()
+
     if user is None:
         raise credentials_exception
-    if not user.is_approved:
+    if not getattr(user, "is_approved", True):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account pending or revoked."
         )
     return user
 
-async def get_current_admin(current_user: User = Depends(get_current_user)):
-    if current_user.role != "admin":
+async def get_current_admin(current_user = Depends(get_current_user)):
+    if getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
     return current_user
 

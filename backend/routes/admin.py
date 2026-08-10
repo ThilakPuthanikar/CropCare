@@ -7,23 +7,26 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func # Import for aggregation functions like COUNT, SUM, etc.
+from sqlalchemy import func, text # Import for aggregation functions and text queries
 from datetime import date, datetime, timedelta, timezone
 from typing import List, Optional # Import for type hints
 from pydantic import BaseModel
 
 from ..database.database import get_db
 from ..models.user import User
+from ..models.admin import Admin
 from ..models.ad import Ad
 from ..models.scheme import Scheme
 from ..models.price import Price # Assuming you created this model
 from ..schemas.user import UserInDB, UserUpdate # Assuming you have these schemas
+from ..schemas.admin import AdminCreate, AdminUpdate, AdminInDB
 from ..schemas.ad import AdCreate, AdUpdate, AdInDB # Assuming you have these schemas
 from ..schemas.scheme import SchemeCreate, SchemeUpdate, SchemeInDB # Assuming you have these schemas
 from ..schemas.price import PriceCreate, PriceUpdate, PriceInDB # Assuming you have these schemas
 from ..services.mandi_service import KARNATAKA_MANDI_SOURCE_URL, fetch_karnataka_mandi_prices
+
 from ..utils.schemes import scheme_to_payload, serialize_text_list
-from ..utils.auth import get_current_admin
+from ..utils.auth import get_current_admin, get_password_hash
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -42,6 +45,7 @@ class MandiPreviewItem(BaseModel):
     max_price: Optional[float] = None
     price_per_quintal: float
     price_date: date
+    source: Optional[str] = "KRAMA"
     last_updated: Optional[datetime] = None
 
 
@@ -62,10 +66,18 @@ class MandiImportResponse(BaseModel):
     imported_at: datetime
 
 
+class MandiSyncResponse(BaseModel):
+    success: bool
+    rowsImported: int
+    rowsUpdated: int
+    duration: float
+    message: str
+
+
 def _summary_stats(db: Session):
-    total_users = db.query(User).count()
-    active_users = db.query(User).filter(User.is_approved == True).count()
-    pending_approval = db.query(User).filter(User.is_approved == False).count()
+    total_users = db.query(User).filter(User.role == "user").count()
+    active_users = db.query(User).filter(User.role == "user", User.is_approved == True).count()
+    pending_approval = db.query(User).filter(User.role == "user", User.is_approved == False).count()
     ai_requests = 156
     return {
         "total_users": total_users,
@@ -102,17 +114,40 @@ async def get_recent_activities(
     current_user = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    users = db.query(User).order_by(User.created_at.desc()).limit(8).all()
-    activities = []
-    now = datetime.now(timezone.utc)
-
+    users = db.query(User).filter(User.role == "user").order_by(User.created_at.desc()).limit(8).all()
+    admins = db.query(Admin).order_by(Admin.created_at.desc()).limit(5).all()
+    
+    events = []
     for user in users:
-        created_at = user.created_at or now
-        if getattr(created_at, "tzinfo", None) is not None and getattr(now, "tzinfo", None) is None:
-            now_for_user = datetime.now(created_at.tzinfo)
-        else:
-            now_for_user = now
-        delta = now_for_user - created_at
+        events.append({
+            "obj": user,
+            "type": "user_approved" if user.is_approved else "user_registered",
+            "action": "Farmer approved" if user.is_approved else "Farmer registered",
+            "details": f"{user.name} ({user.email}) - {user.district or 'General'}",
+            "created_at": user.created_at
+        })
+    for admin_user in admins:
+        events.append({
+            "obj": admin_user,
+            "type": "warning" if not admin_user.is_approved else "admin_action",
+            "action": "Admin provisioned",
+            "details": f"{admin_user.name} ({admin_user.email})",
+            "created_at": admin_user.created_at
+        })
+
+    now = datetime.now(timezone.utc)
+    for ev in events:
+        created_at = ev["created_at"] or now
+        if getattr(created_at, "tzinfo", None) is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
+        ev["timestamp"] = created_at
+
+    events.sort(key=lambda x: x["timestamp"], reverse=True)
+    events = events[:8]
+
+    activities = []
+    for ev in events:
+        delta = now - ev["timestamp"]
         if delta.days > 0:
             time_ago = f"{delta.days}d ago"
         elif delta.seconds >= 3600:
@@ -121,9 +156,9 @@ async def get_recent_activities(
             time_ago = f"{max(1, delta.seconds // 60)}m ago"
 
         activities.append({
-            "type": "user_approved" if user.is_approved else "user_registered",
-            "action": "User approved" if user.is_approved else "User registered",
-            "details": f"{user.name} ({user.email})",
+            "type": ev["type"],
+            "action": ev["action"],
+            "details": ev["details"],
             "time_ago": time_ago
         })
 
@@ -135,7 +170,7 @@ async def manage_users(
     current_user = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    users = db.query(User).all()
+    users = db.query(User).filter(User.role == "user").all()
     return templates.TemplateResponse("admin/manage_users.html", {
         "request": request,
         "user": current_user,
@@ -148,7 +183,7 @@ async def get_user(
     current_user = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.role == "user").first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -160,11 +195,11 @@ async def update_user(
     current_user = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.role == "user").first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    allowed_fields = {"name", "phone_number", "district", "land_size", "irrigation_type", "role", "is_approved"}
+    allowed_fields = {"name", "phone_number", "district", "land_size", "irrigation_type", "role", "is_approved", "profile_photo"}
     update_data = user_update.dict(exclude_unset=True)
     for field, value in update_data.items():
         if field in allowed_fields:
@@ -185,7 +220,7 @@ async def approve_user(
     current_user = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.role == "user").first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -207,7 +242,7 @@ async def reject_user(
     current_user = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.role == "user").first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -226,10 +261,7 @@ async def delete_user(
     current_user = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    if user_id == current_user.id:
-        raise HTTPException(status_code=400, detail="Cannot delete your own admin account.")
-
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.role == "user").first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -241,6 +273,122 @@ async def delete_user(
         db.rollback()
         logger.error(f"Database error deleting user {user_id}: {e}")
         raise HTTPException(status_code=500, detail="Unable to delete user.")
+
+# --- ADMIN ACCOUNTS MANAGEMENT ROUTES (`Manage Admin Account`) ---
+@router.get("/manage-admins", response_class=HTMLResponse)
+async def manage_admins(
+    request: Request,
+    current_user = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    admins = db.query(Admin).all()
+    return templates.TemplateResponse("admin/manage_admins.html", {
+        "request": request,
+        "user": current_user,
+        "admins": admins
+    })
+
+@router.get("/admins", response_model=List[AdminInDB])
+async def get_admins(
+    current_user = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    return db.query(Admin).all()
+
+@router.post("/admins", response_model=AdminInDB)
+async def create_admin(
+    admin_create: AdminCreate,
+    current_user = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    email = admin_create.email.strip().lower()
+    existing = db.query(Admin).filter(Admin.email == email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Admin account with this email already exists.")
+
+    hashed_pw = get_password_hash(admin_create.password)
+    new_admin = Admin(
+        name=admin_create.name.strip(),
+        email=email,
+        password_hash=hashed_pw,
+        role="admin",
+        is_approved=True
+    )
+    try:
+        db.add(new_admin)
+        db.commit()
+        db.refresh(new_admin)
+        return new_admin
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.error(f"Database error creating admin: {e}")
+        raise HTTPException(status_code=500, detail="Unable to create admin account.")
+
+@router.put("/admins/{admin_id}", response_model=AdminInDB)
+async def update_admin(
+    admin_id: int,
+    admin_update: AdminUpdate,
+    current_user = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    admin_user = db.query(Admin).filter(Admin.id == admin_id).first()
+    if not admin_user:
+        raise HTTPException(status_code=404, detail="Admin account not found")
+
+    update_data = admin_update.dict(exclude_unset=True)
+    if "email" in update_data and update_data["email"]:
+        new_email = update_data["email"].strip().lower()
+        if new_email != admin_user.email:
+            existing = db.query(Admin).filter(Admin.email == new_email).first()
+            if existing:
+                raise HTTPException(status_code=400, detail="Email already used by another admin.")
+            admin_user.email = new_email
+
+    if "name" in update_data and update_data["name"]:
+        admin_user.name = update_data["name"].strip()
+
+    if "password" in update_data and update_data["password"]:
+        admin_user.password_hash = get_password_hash(update_data["password"])
+
+    if "is_approved" in update_data and update_data["is_approved"] is not None:
+        if admin_id == current_user.id and not update_data["is_approved"]:
+            raise HTTPException(status_code=400, detail="Cannot revoke your own admin account status.")
+        admin_user.is_approved = update_data["is_approved"]
+
+    try:
+        db.commit()
+        db.refresh(admin_user)
+        return admin_user
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.error(f"Database error updating admin {admin_id}: {e}")
+        raise HTTPException(status_code=500, detail="Unable to update admin account.")
+
+@router.delete("/admins/{admin_id}")
+async def delete_admin(
+    admin_id: int,
+    current_user = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    if admin_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own currently active admin account.")
+
+    admin_user = db.query(Admin).filter(Admin.id == admin_id).first()
+    if not admin_user:
+        raise HTTPException(status_code=404, detail="Admin account not found")
+
+    total_admins = db.query(Admin).count()
+    if total_admins <= 1:
+        raise HTTPException(status_code=400, detail="Cannot delete the last remaining admin account.")
+
+    try:
+        db.delete(admin_user)
+        db.commit()
+        return {"message": "Admin account deleted successfully"}
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.error(f"Database error deleting admin {admin_id}: {e}")
+        raise HTTPException(status_code=500, detail="Unable to delete admin account.")
 
 # --- AD ROUTES ---
 @router.get("/manage-ads", response_class=HTMLResponse)
@@ -278,7 +426,7 @@ async def create_ad(
         return new_ad
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error creating ad: {e}", exc_info=True)
+        print(f"Database error creating ad: {e}") # Log error
         raise HTTPException(status_code=500, detail="Internal server error during ad creation.")
 
 @router.get("/ads/{ad_id}", response_model=AdInDB)
@@ -313,7 +461,7 @@ async def update_ad(
         return ad
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error updating ad {ad_id}: {e}", exc_info=True)
+        print(f"Database error updating ad {ad_id}: {e}") # Log error
         raise HTTPException(status_code=500, detail="Internal server error during ad update.")
 
 @router.delete("/ads/{ad_id}")
@@ -332,7 +480,7 @@ async def delete_ad(
         return {"message": "Ad deleted successfully"}
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error deleting ad {ad_id}: {e}", exc_info=True)
+        print(f"Database error deleting ad {ad_id}: {e}") # Log error
         raise HTTPException(status_code=500, detail="Internal server error during ad deletion.")
 
 # --- SCHEME ROUTES ---
@@ -374,7 +522,7 @@ async def create_scheme(
         return scheme_to_payload(new_scheme)
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error creating scheme: {e}", exc_info=True)
+        print(f"Database error creating scheme: {e}") # Log error
         raise HTTPException(status_code=500, detail="Internal server error during scheme creation.")
 
 @router.get("/schemes/{scheme_id}", response_model=SchemeInDB)
@@ -413,7 +561,7 @@ async def update_scheme(
         return scheme_to_payload(scheme)
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error updating scheme {scheme_id}: {e}", exc_info=True)
+        print(f"Database error updating scheme {scheme_id}: {e}") # Log error
         raise HTTPException(status_code=500, detail="Internal server error during scheme update.")
 
 @router.delete("/schemes/{scheme_id}")
@@ -432,7 +580,7 @@ async def delete_scheme(
         return {"message": "Scheme deleted successfully"}
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error deleting scheme {scheme_id}: {e}", exc_info=True)
+        print(f"Database error deleting scheme {scheme_id}: {e}") # Log error
         raise HTTPException(status_code=500, detail="Internal server error during scheme deletion.")
 
 # --- PRICE ROUTES ---
@@ -481,6 +629,12 @@ async def import_mandi_prices(
     logger.info("Import started for Karnataka mandi snapshot")
 
     try:
+        try:
+            db.execute(text("ALTER TABLE mandi_prices ADD COLUMN source VARCHAR(50) DEFAULT 'KRAMA'"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         db.query(Price).delete()
         new_rows = []
         for record in payload.records:
@@ -497,6 +651,7 @@ async def import_mandi_prices(
                     min_price=record.min_price,
                     max_price=record.max_price,
                     price_date=record.price_date,
+                    source=record.source or "KRAMA",
                     last_updated=record.last_updated or imported_at,
                     created_at=imported_at,
                 )
@@ -515,6 +670,65 @@ async def import_mandi_prices(
         db.rollback()
         logger.exception("Karnataka mandi import failed: %s", exc)
         raise HTTPException(status_code=500, detail=f"Failed to import mandi prices: {exc}") from exc
+
+
+@router.post("/mandi/sync", response_model=MandiSyncResponse)
+async def sync_mandi_prices(
+    current_user = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Direct KRAMA synchronization: fetch via HTTP and upsert into DB."""
+    import time as _time
+    start_time = _time.time()
+    try:
+        fetched = fetch_karnataka_mandi_prices()
+        records = fetched.get("records", [])
+        if not records:
+            duration = round(_time.time() - start_time, 2)
+            return MandiSyncResponse(success=False, rowsImported=0, rowsUpdated=0, duration=duration, message="Sync yielded 0 valid rows. Existing data preserved.")
+
+        rows_imported = 0
+        rows_updated = 0
+        sync_time = datetime.now(timezone.utc)
+
+        for record_dict in records:
+            crop_name = record_dict["crop_name"]
+            district = record_dict.get("district", "Unknown")
+            mandi_name = record_dict.get("mandi_name", "Unknown")
+            price_date = record_dict.get("price_date")
+
+            existing = db.query(Price).filter_by(
+                crop_name=crop_name, district=district, mandi_name=mandi_name, price_date=price_date
+            ).first()
+
+            if existing:
+                existing.price_per_quintal = record_dict["price_per_quintal"]
+                existing.min_price = record_dict.get("min_price") or existing.min_price
+                existing.max_price = record_dict.get("max_price") or existing.max_price
+                existing.last_updated = sync_time
+                rows_updated += 1
+            else:
+                new_price = Price(
+                    crop_name=crop_name, variety=record_dict.get("variety"),
+                    grade=record_dict.get("grade"), district=district,
+                    mandi_name=mandi_name, arrival=record_dict.get("arrival"),
+                    unit=record_dict.get("unit") or "Quintal",
+                    price_per_quintal=record_dict["price_per_quintal"],
+                    min_price=record_dict.get("min_price"), max_price=record_dict.get("max_price"),
+                    price_date=price_date, last_updated=sync_time, created_at=sync_time,
+                )
+                db.add(new_price)
+                rows_imported += 1
+
+        db.commit()
+        duration = round(_time.time() - start_time, 2)
+        return MandiSyncResponse(success=True, rowsImported=rows_imported, rowsUpdated=rows_updated, duration=duration, message="KRAMA sync completed successfully.")
+
+    except Exception as exc:
+        db.rollback()
+        duration = round(_time.time() - start_time, 2)
+        return MandiSyncResponse(success=False, rowsImported=0, rowsUpdated=0, duration=duration, message=f"Sync failed: {exc}")
+
 
 @router.get("/prices", response_model=List[PriceInDB])
 async def get_prices(
@@ -557,7 +771,7 @@ async def create_price(
         return new_price
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error creating price: {e}", exc_info=True)
+        print(f"Database error creating price: {e}")
         raise HTTPException(status_code=500, detail="Internal server error during price creation.")
 
 @router.get("/prices/{price_id}", response_model=PriceInDB)
@@ -592,7 +806,7 @@ async def update_price(
         return price
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error updating price {price_id}: {e}", exc_info=True)
+        print(f"Database error updating price {price_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error during price update.")
 
 @router.delete("/prices/{price_id}")
@@ -611,7 +825,7 @@ async def delete_price(
         return {"message": "Price record deleted successfully"}
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error deleting price {price_id}: {e}", exc_info=True)
+        print(f"Database error deleting price {price_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error during price deletion.")
 
 @router.get("/prices/history", response_model=List[PriceInDB])

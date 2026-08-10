@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign Up - CropCare</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -15,20 +15,16 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       :root {
-        --primary: #2E7D32;
-        --primary-hover: #1B5E20;
-        --secondary: #43A047;
-        --accent: #43A047;
-        --bg-main: #F8FAF5;
+        --primary: #059669;
+        --primary-dark: #047857;
+        --accent: #10B981;
+        --bg-main: #F4F7F4;
         --surface: #FFFFFF;
-        --border-color: #DDE5D5;
-        --text-primary: #1F2937;
-        --text-secondary: #6B7280;
-        --dark: #FFFFFF;
-        --darker: #F8FAF5;
-        --light-text: #1F2937;
-        --gray-text: #6B7280;
-        --card-bg: #FFFFFF;
+        --border-color: rgba(5, 150, 105, 0.15);
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --radius-lg: 24px;
+        --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       * {
@@ -38,70 +34,91 @@
       }
 
       body {
-        font-family: "Inter", "Plus Jakarta Sans", sans-serif;
+        font-family: "Inter", sans-serif;
         color: var(--text-primary);
-        background: linear-gradient(
-          135deg,
-          rgba(46, 125, 50, 0.08) 0%,
-          rgba(67, 160, 71, 0.04) 50%,
-          rgba(248, 250, 245, 1) 100%
-        );
+        background:
+          radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
+          radial-gradient(circle at 85% 85%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
+          var(--bg-main);
         min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: 32px 16px;
+      }
+
+      h1, h2, h3, h4, h5, h6, .brand-font {
+        font-family: "Plus Jakarta Sans", "Manrope", sans-serif;
       }
 
       .auth-card {
-        background: var(--surface);
-        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
         width: 100%;
-        max-width: 440px;
-        padding: 36px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
+        max-width: 520px;
+        padding: 40px 36px;
+        box-shadow: 
+          0 30px 60px -15px rgba(0, 0, 0, 0.08),
+          0 10px 20px -5px rgba(5, 150, 105, 0.05),
+          inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
         border: 1px solid var(--border-color);
         position: relative;
         overflow: hidden;
+      }
+
+      .auth-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #059669, #10B981, #3B82F6);
       }
 
       .close-btn {
         position: absolute;
         top: 20px;
         right: 20px;
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
-        background: #F3F4F6;
-        border: none;
+        background: rgba(241, 245, 249, 0.9);
+        border: 1px solid rgba(203, 213, 225, 0.6);
         color: var(--text-secondary);
-        font-size: 18px;
+        font-size: 16px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease;
+        transition: var(--transition-base);
       }
 
       .close-btn:hover {
-        background: #E5E7EB;
+        background: #E2E8F0;
         color: var(--text-primary);
+        transform: rotate(90deg);
       }
 
       .logo-container {
         text-align: center;
-        margin-bottom: 32px;
+        margin-bottom: 28px;
       }
 
       .logo-container img {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 16px;
-        border-radius: 14px;
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px auto;
+        border-radius: 16px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(5, 150, 105, 0.2);
+        object-fit: cover;
       }
 
       .logo-container h1 {
-        font-size: 28px;
+        font-size: 30px;
         font-weight: 800;
         color: var(--text-primary);
         margin-bottom: 6px;
@@ -110,54 +127,57 @@
 
       .logo-container p {
         color: var(--text-secondary);
-        font-size: 14px;
+        font-size: 14.5px;
+        font-weight: 500;
       }
 
       .input-group {
-        margin-bottom: 22px;
+        margin-bottom: 20px;
       }
 
       .input-group label {
         display: block;
         margin-bottom: 8px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.9rem;
         color: var(--text-primary);
       }
 
       .input-field {
         width: 100%;
-        padding: 13px 16px;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        background: #F8FAF5;
+        padding: 13.5px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        background: rgba(248, 250, 245, 0.9);
         color: var(--text-primary);
         font-size: 15px;
-        transition: all 0.2s ease;
+        font-weight: 500;
+        transition: var(--transition-base);
       }
 
       .input-field::placeholder {
-        color: #9CA3AF;
+        color: #94A3B8;
+        font-weight: 400;
       }
 
       .input-field:focus {
         outline: none;
         border-color: var(--primary);
         background: #FFFFFF;
-        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+        box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
       }
 
       select.input-field {
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
-        background-color: #F8FAF5;
+        background-color: rgba(248, 250, 245, 0.9);
         color: var(--text-primary);
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.75rem center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23059669' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.85rem center;
         background-repeat: no-repeat;
         background-size: 1.5em 1.5em;
-        padding-right: 2.5rem;
+        padding-right: 2.75rem;
       }
 
       select.input-field option {
@@ -171,16 +191,18 @@
       }
 
       .country-code {
-        flex: 0 0 80px;
-        padding: 13px 16px;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        background: #F8FAF5;
+        flex: 0 0 82px;
+        padding: 13.5px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        background: rgba(241, 245, 249, 0.9);
         color: var(--text-primary);
         font-size: 15px;
-        border-right: none;
         cursor: default;
-        font-weight: 600;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .password-input {
@@ -197,39 +219,44 @@
         color: var(--text-secondary);
         cursor: pointer;
         font-size: 16px;
+        padding: 6px;
         transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .password-toggle:hover {
-        color: var(--text-primary);
+        color: var(--primary);
       }
 
       .password-strength {
-        margin-top: 8px;
+        margin-top: 10px;
         font-size: 13px;
         display: flex;
         align-items: center;
         color: var(--text-secondary);
+        font-weight: 500;
       }
 
       .strength-bar {
         flex: 1;
         height: 6px;
-        background: #E5E7EB;
-        border-radius: 3px;
-        margin: 0 8px;
+        background: #E2E8F0;
+        border-radius: 999px;
+        margin: 0 10px;
         position: relative;
         overflow: hidden;
       }
 
       .strength-fill {
         height: 100%;
-        border-radius: 3px;
-        transition: width 0.4s ease;
+        border-radius: 999px;
+        transition: width 0.4s ease, background-color 0.4s ease;
       }
 
       .strength-label {
-        font-weight: 500;
+        font-weight: 600;
       }
 
       .terms-checkbox {
@@ -239,21 +266,23 @@
       }
 
       .terms-checkbox input {
-        width: 18px;
-        height: 18px;
+        width: 19px;
+        height: 19px;
         margin-right: 12px;
         accent-color: var(--primary);
+        cursor: pointer;
       }
 
       .terms-checkbox label {
         font-size: 14px;
         color: var(--text-secondary);
+        font-weight: 500;
       }
 
       .terms-checkbox label a {
         color: var(--primary);
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
       }
 
       .terms-checkbox label a:hover {
@@ -262,53 +291,55 @@
 
       .btn {
         width: 100%;
-        padding: 14px;
-        border-radius: 12px;
-        font-weight: 600;
+        padding: 15px;
+        border-radius: 14px;
+        font-weight: 700;
         font-size: 16px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: var(--transition-base);
         border: none;
         position: relative;
         overflow: hidden;
       }
 
       .btn-primary {
-        background: var(--primary);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
         color: white;
-        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+        box-shadow: 0 8px 20px -4px rgba(5, 150, 105, 0.35);
       }
 
       .btn-primary:hover {
-        background: var(--primary-hover);
+        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(46, 125, 50, 0.35);
+        box-shadow: 0 12px 25px -4px rgba(5, 150, 105, 0.45);
       }
 
       .success-message {
         background: #F0FDF4;
         border: 1px solid #BBF7D0;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 16px;
         margin-top: 20px;
         display: none;
         color: #166534;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 14px;
         text-align: center;
+        box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
       }
 
       .login-link {
         text-align: center;
-        margin-top: 24px;
+        margin-top: 26px;
         font-size: 14px;
         color: var(--text-secondary);
+        font-weight: 500;
       }
 
       .login-link a {
         color: var(--primary);
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
       }
 
       .login-link a:hover {
@@ -316,13 +347,13 @@
       }
 
       .strength-weak .strength-fill {
-        background: #ef5350;
-        width: 25%;
+        background: #EF4444;
+        width: 30%;
       }
 
       .strength-medium .strength-fill {
-        background: #fbc02d;
-        width: 50%;
+        background: #F59E0B;
+        width: 65%;
       }
 
       .strength-strong .strength-fill {
@@ -331,16 +362,16 @@
       }
 
       .input-error {
-        border-color: #ef5350 !important;
+        border-color: #EF4444 !important;
         background: #FEF2F2 !important;
-        box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.15) !important;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
       }
 
       .error-message {
-        color: #ef5350;
+        color: #EF4444;
         font-size: 13px;
-        font-weight: 500;
-        margin-top: 6px;
+        font-weight: 600;
+        margin-top: 7px;
         display: none;
       }
 
@@ -352,20 +383,20 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(31, 41, 55, 0.6);
-        backdrop-filter: blur(4px);
+        background-color: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(8px);
       }
 
       .modal-content {
         background-color: var(--surface);
         margin: 5% auto;
-        padding: 2.5rem;
-        border-radius: 16px;
+        padding: 2.75rem;
+        border-radius: 24px;
         width: 90%;
-        max-width: 500px;
+        max-width: 520px;
         max-height: 85vh;
         overflow-y: auto;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         border: 1px solid var(--border-color);
         position: relative;
         color: var(--text-secondary);
@@ -373,53 +404,48 @@
 
       .close {
         position: absolute;
-        right: 20px;
-        top: 20px;
+        right: 24px;
+        top: 24px;
         color: var(--text-secondary);
         font-size: 24px;
         cursor: pointer;
-        background: none;
+        background: rgba(241, 245, 249, 0.8);
         border: none;
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease;
+        transition: var(--transition-base);
       }
 
       .close:hover {
         color: var(--text-primary);
-        background: #F3F4F6;
+        background: #E2E8F0;
+        transform: rotate(90deg);
       }
 
-      @media (max-width: 480px) {
+      @media (max-width: 520px) {
         .auth-card {
-          padding: 24px;
-          border-radius: 18px;
+          padding: 30px 22px;
+          border-radius: 20px;
         }
 
         .phone-input-group {
-          flex-direction: column;
-          gap: 0;
-        }
-
-        .country-code {
-          border-radius: 12px 12px 0 0;
-          border-bottom: none;
+          flex-direction: row;
         }
       }
     </style>
   </head>
-  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans">
+  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans antialiased">
     <div class="auth-card">
-      <button class="close-btn" id="closeBtn">
+      <button class="close-btn" id="closeBtn" aria-label="Close">
         <i class="fas fa-times"></i>
       </button>
 
       <div class="logo-container">
-        <!-- Replace with your logo image -->
+        <!-- Logo Image -->
         <img
           src="static/images/logo.png"
           alt="CropCare Logo"
@@ -429,17 +455,19 @@
           "
         />
         <div class="logo-placeholder" style="display: none">
-          <svg
-            class="w-16 h-16 mx-auto text-green-600"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
-            />
-          </svg>
+          <div class="w-16 h-16 mx-auto bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 mb-4">
+            <svg
+              class="w-10 h-10 text-emerald-600"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+              />
+            </svg>
+          </div>
         </div>
-        <h1>CropCare</h1>
+        <h1 class="brand-font">CropCare</h1>
         <p>Create your account to get started</p>
       </div>
 
@@ -493,59 +521,61 @@
           </div>
         </div>
 
-        <div class="input-group">
-          <label for="district">District</label>
-          <select id="district" class="input-field" required>
-            <option value="">Select district</option>
-            <option value="Bagalkot">Bagalkot</option>
-            <option value="Ballari">Ballari</option>
-            <option value="Belagavi">Belagavi</option>
-            <option value="Bengaluru Rural">Bengaluru Rural</option>
-            <option value="Bengaluru Urban">Bengaluru Urban</option>
-            <option value="Bidar">Bidar</option>
-            <option value="Chamarajanagar">Chamarajanagar</option>
-            <option value="Chikkaballapur">Chikkaballapur</option>
-            <option value="Chikkamagaluru">Chikkamagaluru</option>
-            <option value="Chitradurga">Chitradurga</option>
-            <option value="Dakshina Kannada">Dakshina Kannada</option>
-            <option value="Davanagere">Davanagere</option>
-            <option value="Dharwad">Dharwad</option>
-            <option value="Gadag">Gadag</option>
-            <option value="Hassan">Hassan</option>
-            <option value="Haveri">Haveri</option>
-            <option value="Kalaburagi">Kalaburagi</option>
-            <option value="Kodagu">Kodagu</option>
-            <option value="Kolar">Kolar</option>
-            <option value="Koppal">Koppal</option>
-            <option value="Mandya">Mandya</option>
-            <option value="Mysuru">Mysuru</option>
-            <option value="Raichur">Raichur</option>
-            <option value="Ramanagara">Ramanagara</option>
-            <option value="Shivamogga">Shivamogga</option>
-            <option value="Tumakuru">Tumakuru</option>
-            <option value="Udupi">Udupi</option>
-            <option value="Uttara Kannada">Uttara Kannada</option>
-            <option value="Vijayapura">Vijayapura</option>
-            <option value="Yadgir">Yadgir</option>
-          </select>
-          <div class="error-message" id="districtError">
-            Please select your district
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="input-group">
+            <label for="district">District</label>
+            <select id="district" class="input-field" required>
+              <option value="">Select district</option>
+              <option value="Bagalkot">Bagalkot</option>
+              <option value="Ballari">Ballari</option>
+              <option value="Belagavi">Belagavi</option>
+              <option value="Bengaluru Rural">Bengaluru Rural</option>
+              <option value="Bengaluru Urban">Bengaluru Urban</option>
+              <option value="Bidar">Bidar</option>
+              <option value="Chamarajanagar">Chamarajanagar</option>
+              <option value="Chikkaballapur">Chikkaballapur</option>
+              <option value="Chikkamagaluru">Chikkamagaluru</option>
+              <option value="Chitradurga">Chitradurga</option>
+              <option value="Dakshina Kannada">Dakshina Kannada</option>
+              <option value="Davanagere">Davanagere</option>
+              <option value="Dharwad">Dharwad</option>
+              <option value="Gadag">Gadag</option>
+              <option value="Hassan">Hassan</option>
+              <option value="Haveri">Haveri</option>
+              <option value="Kalaburagi">Kalaburagi</option>
+              <option value="Kodagu">Kodagu</option>
+              <option value="Kolar">Kolar</option>
+              <option value="Koppal">Koppal</option>
+              <option value="Mandya">Mandya</option>
+              <option value="Mysuru">Mysuru</option>
+              <option value="Raichur">Raichur</option>
+              <option value="Ramanagara">Ramanagara</option>
+              <option value="Shivamogga">Shivamogga</option>
+              <option value="Tumakuru">Tumakuru</option>
+              <option value="Udupi">Udupi</option>
+              <option value="Uttara Kannada">Uttara Kannada</option>
+              <option value="Vijayapura">Vijayapura</option>
+              <option value="Yadgir">Yadgir</option>
+            </select>
+            <div class="error-message" id="districtError">
+              Please select your district
+            </div>
           </div>
-        </div>
 
-        <div class="input-group">
-          <label for="landSize">Land Size (acres)</label>
-          <input
-            type="number"
-            id="landSize"
-            class="input-field"
-            placeholder="Enter land size in acres"
-            step="0.01"
-            min="0.01"
-            required
-          />
-          <div class="error-message" id="landSizeError">
-            Please enter a valid land size greater than 0
+          <div class="input-group">
+            <label for="landSize">Land Size (acres)</label>
+            <input
+              type="number"
+              id="landSize"
+              class="input-field"
+              placeholder="Enter land size in acres"
+              step="0.01"
+              min="0.01"
+              required
+            />
+            <div class="error-message" id="landSizeError">
+              Please enter a valid land size greater than 0
+            </div>
           </div>
         </div>
 
@@ -643,19 +673,19 @@
         class="modal-content"
         style="
           background: var(--surface);
-          padding: 28px;
-          border-radius: 16px;
-          max-width: 500px;
+          padding: 32px;
+          border-radius: 24px;
+          max-width: 520px;
           width: 90%;
           margin: 5% auto;
         "
       >
         <span class="close">&times;</span>
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Terms of Service</h2>
-        <p class="text-gray-600 mb-4">
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-4 brand-font">Terms of Service</h2>
+        <p class="text-slate-600 mb-4 leading-relaxed">
           By signing up, you agree to our Terms of Service and Privacy Policy.
         </p>
-        <ul class="space-y-2 text-gray-600">
+        <ul class="space-y-2.5 text-slate-600 text-sm">
           <li>• You must be at least 18 years old to use CropCare services</li>
           <li>
             • You are responsible for maintaining the confidentiality of your
@@ -667,7 +697,7 @@
             using our recommendations
           </li>
         </ul>
-        <div class="mt-6">
+        <div class="mt-8">
           <button class="btn btn-primary w-full" id="acceptTerms">
             I Accept
           </button>

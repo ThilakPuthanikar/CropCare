@@ -12,6 +12,10 @@
   <i class="fas fa-users"></i>
   <span>Manage Users</span>
 </a>
+<a href="/admin/manage-admins" class="sidebar-item">
+  <i class="fas fa-user-shield"></i>
+  <span>Manage Admins</span>
+</a>
 <a href="/admin/manage-ads" class="sidebar-item">
   <i class="fas fa-ad"></i>
   <span>Manage Ads</span>
@@ -189,6 +193,17 @@
           </div>
         </div>
         <div class="mt-6 grid gap-3.5">
+          <a href="/admin/manage-admins" class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-200/80 hover:border-green-600 hover:bg-white transition-all group shadow-2xs">
+            <div class="flex items-center gap-4">
+              <span class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg"><i class="fas fa-user-shield"></i></span>
+              <div>
+                <span class="block text-sm font-bold text-gray-900 group-hover:text-green-700 transition-colors">Manage Admin Accounts</span>
+                <span class="block text-xs text-gray-500">Add, edit, and audit system administrators</span>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right text-gray-400 group-hover:translate-x-1 transition-all"></i>
+          </a>
+
           <a href="/admin/manage-ads" class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-200/80 hover:border-green-600 hover:bg-white transition-all group shadow-2xs">
             <div class="flex items-center gap-4">
               <span class="w-11 h-11 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center text-lg"><i class="fas fa-bullhorn"></i></span>
@@ -264,7 +279,10 @@
 
   async function loadDashboardStats() {
     try {
-      const response = await fetch("/admin/stats", { headers: authHeaders() });
+      const response = await fetch("/admin/stats", {
+        headers: authHeaders(),
+        credentials: "same-origin",
+      });
       const stats = await response.json();
 
       if (!response.ok) {
@@ -312,7 +330,10 @@
     const container = document.getElementById("recentActivitiesList");
 
     try {
-      const response = await fetch("/admin/recent-activities", { headers: authHeaders() });
+      const response = await fetch("/admin/recent-activities", {
+        headers: authHeaders(),
+        credentials: "same-origin",
+      });
       const activities = await response.json();
 
       if (!response.ok) {

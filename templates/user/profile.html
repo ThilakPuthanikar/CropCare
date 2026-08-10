@@ -1,44 +1,49 @@
 <!-- templates/user/profile.html -->
-{% extends "base.html" %} {% block title %}Profile - CropCare{% endblock %} {%
-block user_role %}Farmer Dashboard{% endblock %} {% block sidebar %}
-<a href="/user/dashboard" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-home mr-3"></i>Dashboard
+{% extends "base.html" %}
+{% block title %}Profile - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Farmer Profile{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
 </a>
-<a href="/user/profile" class="sidebar-item active block py-3 px-4 rounded-lg">
-  <i class="fas fa-user mr-3"></i>Profile
+<a href="/user/profile" class="sidebar-item active">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
 </a>
-<a href="/user/soil-library" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-seedling mr-3"></i>Soil Library
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
 </a>
-<a href="/user/weather" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-cloud-sun mr-3"></i>Weather
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
 </a>
-<a
-  href="/user/crop-recommendation"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-leaf mr-3"></i>Crop Suggestion
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
 </a>
-<a
-  href="/user/input-suggestions"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-tools mr-3"></i>Input Suggestions
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
 </a>
-<a
-  href="/user/disease-diagnosis"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-heartbeat mr-3"></i>Disease Diagnosis
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
 </a>
-<a href="/user/crop-planner" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-calendar-check mr-3"></i>Crop Planner
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
 </a>
-<a href="/user/mandi-tracking" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-chart-line mr-3"></i>Price Tracker
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
 </a>
-<a href="/user/gov-schemes" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-hand-holding-heart mr-3"></i>Gov Schemes
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
 </a>
 {% endblock %} {% block content %}
 <div class="space-y-6 profile-page">
@@ -218,7 +223,7 @@ block user_role %}Farmer Dashboard{% endblock %} {% block sidebar %}
                 >Phone Number</label
               >
               <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-500 text-sm">+91</span>
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-500 text-sm"></span>
                 <input
                   type="tel"
                   id="phoneNumber"
@@ -376,19 +381,29 @@ block user_role %}Farmer Dashboard{% endblock %} {% block sidebar %}
 
   .profile-page .input-field {
     background: #FFFFFF;
-    border: 1px solid var(--border-color);
+    border: 1.5px solid #CBD5E1;
     border-radius: 1rem;
-    color: var(--light-text);
-    padding: 0.75rem 1rem;
-    font-size: 0.925rem;
+    color: #0F172A;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   .profile-page .input-field:focus {
     outline: none;
     border-color: #2E7D32;
-    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.12);
+  }
+
+  .profile-page .input-field:disabled,
+  .profile-page .input-field[disabled] {
+    background: #F3F4F6 !important;
+    border-color: #E2E8F0 !important;
+    color: #64748B !important;
+    cursor: not-allowed;
   }
 
   .profile-page .upload-shell {

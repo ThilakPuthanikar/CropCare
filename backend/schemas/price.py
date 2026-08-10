@@ -16,6 +16,7 @@ class PriceBase(BaseModel):
     min_price: Optional[float] = None
     max_price: Optional[float] = None
     price_date: date
+    source: Optional[str] = "KRAMA"
     last_updated: Optional[datetime] = None
 
 
@@ -35,6 +36,7 @@ class PriceUpdate(BaseModel):
     min_price: Optional[float] = None
     max_price: Optional[float] = None
     price_date: Optional[date] = None
+    source: Optional[str] = None
     last_updated: Optional[datetime] = None
 
 

@@ -6,6 +6,7 @@
 {% block sidebar %}
 <a href="/admin/dashboard" class="sidebar-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
 <a href="/admin/manage-users" class="sidebar-item active"><i class="fas fa-users"></i><span>Manage Users</span></a>
+<a href="/admin/manage-admins" class="sidebar-item"><i class="fas fa-user-shield"></i><span>Manage Admins</span></a>
 <a href="/admin/manage-ads" class="sidebar-item"><i class="fas fa-ad"></i><span>Manage Ads</span></a>
 <a href="/admin/manage-schemes" class="sidebar-item"><i class="fas fa-hand-holding-heart"></i><span>Manage Schemes</span></a>
 <a href="/admin/manage-prices" class="sidebar-item"><i class="fas fa-chart-line"></i><span>Manage Prices</span></a>
@@ -187,9 +188,8 @@
         </div>
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-1.5">System Role</label>
-          <select id="editUserRole" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+          <select id="editUserRole" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-100 text-sm font-medium text-gray-700 cursor-not-allowed shadow-2xs" disabled>
             <option value="user">Farmer / User</option>
-            <option value="admin">Administrator</option>
           </select>
         </div>
         <div>
@@ -247,43 +247,67 @@
   }
 
   async function approveUser(userId) {
-    const response = await fetch(`/admin/users/${userId}/approve`, {
-      method: "POST",
-      headers: authHeaders(true),
-    });
-    if (!response.ok) return alert("Failed to approve user");
-    window.location.reload();
+    try {
+      const response = await fetch(`/admin/users/${userId}/approve`, {
+        method: "POST",
+        headers: authHeaders(true),
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Failed to approve user" }));
+        return alert(err.detail || "Failed to approve user");
+      }
+      window.location.reload();
+    } catch (e) {
+      alert("Network error approving user.");
+    }
   }
 
   async function rejectUser(userId) {
-    const response = await fetch(`/admin/users/${userId}/reject`, {
-      method: "POST",
-      headers: authHeaders(true),
-    });
-    if (!response.ok) return alert("Failed to revoke approval");
-    window.location.reload();
+    try {
+      const response = await fetch(`/admin/users/${userId}/reject`, {
+        method: "POST",
+        headers: authHeaders(true),
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Failed to revoke approval" }));
+        return alert(err.detail || "Failed to revoke approval");
+      }
+      window.location.reload();
+    } catch (e) {
+      alert("Network error revoking approval.");
+    }
   }
 
   async function editUser(userId) {
-    const response = await fetch(`/admin/users/${userId}`, {
-      headers: authHeaders(),
-    });
-    if (!response.ok) return alert("Failed to fetch user details");
-    const user = await response.json();
-    document.getElementById("editUserId").value = user.id;
-    document.getElementById("editUserName").value = user.name || "";
-    document.getElementById("editUserEmail").value = user.email || "";
-    document.getElementById("editUserDistrict").value = user.district || "";
-    document.getElementById("editUserLandSize").value = user.land_size ?? "";
-    document.getElementById("editUserIrrigationType").value = user.irrigation_type || "";
-    document.getElementById("editUserProfilePhoto").value = user.profile_photo || "";
-    document.getElementById("editUserRole").value = user.role || "user";
-    document.getElementById("editUserApproved").value = String(Boolean(user.is_approved));
-    updateEditPhotoPreview(user.profile_photo, user.name);
-    
-    const modal = document.getElementById("editUserModal");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
+    try {
+      const response = await fetch(`/admin/users/${userId}`, {
+        headers: authHeaders(),
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Failed to fetch user details" }));
+        return alert(err.detail || "Failed to fetch user details");
+      }
+      const user = await response.json();
+      document.getElementById("editUserId").value = user.id;
+      document.getElementById("editUserName").value = user.name || "";
+      document.getElementById("editUserEmail").value = user.email || "";
+      document.getElementById("editUserDistrict").value = user.district || "";
+      document.getElementById("editUserLandSize").value = user.land_size ?? "";
+      document.getElementById("editUserIrrigationType").value = user.irrigation_type || "";
+      document.getElementById("editUserProfilePhoto").value = user.profile_photo || "";
+      document.getElementById("editUserRole").value = user.role || "user";
+      document.getElementById("editUserApproved").value = String(Boolean(user.is_approved));
+      updateEditPhotoPreview(user.profile_photo, user.name);
+      
+      const modal = document.getElementById("editUserModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    } catch (e) {
+      alert("Network error loading user details.");
+    }
   }
 
   document.getElementById("editUserName").addEventListener("input", function () {
@@ -305,35 +329,51 @@
     if (!id) return;
     const landValue = document.getElementById("editUserLandSize").value;
     const parsedLand = landValue ? parseFloat(landValue) : null;
-    if (parsedLand !== null && (!Number.isFinite(parsedLand) || parsedLand <= 0)) {
-      return alert("Land size must be a valid number greater than 0");
+    if (parsedLand !== null && (!Number.isFinite(parsedLand) || parsedLand < 0)) {
+      return alert("Land size must be a valid non-negative number");
     }
     const payload = {
-      name: document.getElementById("editUserName").value,
-      district: document.getElementById("editUserDistrict").value || null,
+      name: document.getElementById("editUserName").value.trim(),
+      district: document.getElementById("editUserDistrict").value.trim() || null,
       land_size: parsedLand,
-      irrigation_type: document.getElementById("editUserIrrigationType").value || null,
+      irrigation_type: document.getElementById("editUserIrrigationType").value.trim() || null,
       profile_photo: document.getElementById("editUserProfilePhoto").value.trim() || null,
       role: document.getElementById("editUserRole").value,
       is_approved: document.getElementById("editUserApproved").value === "true",
     };
-    const response = await fetch(`/admin/users/${id}`, {
-      method: "PUT",
-      headers: authHeaders(true),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) return alert("Failed to update user profile");
-    window.location.reload();
+    try {
+      const response = await fetch(`/admin/users/${id}`, {
+        method: "PUT",
+        headers: authHeaders(true),
+        credentials: "same-origin",
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Failed to update user profile" }));
+        return alert(err.detail || "Failed to update user profile");
+      }
+      window.location.reload();
+    } catch (e) {
+      alert("Network error saving user profile.");
+    }
   }
 
   async function deleteUser(userId) {
     if (!confirm("Are you sure you want to permanently delete this user account?")) return;
-    const response = await fetch(`/admin/users/${userId}`, {
-      method: "DELETE",
-      headers: authHeaders(true),
-    });
-    if (!response.ok) return alert("Failed to delete user");
-    window.location.reload();
+    try {
+      const response = await fetch(`/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: authHeaders(true),
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Failed to delete user" }));
+        return alert(err.detail || "Failed to delete user");
+      }
+      window.location.reload();
+    } catch (e) {
+      alert("Network error deleting user.");
+    }
   }
 </script>
 {% endblock %}

@@ -55,7 +55,6 @@ from ..utils.validation import (
     is_valid_season,
     is_valid_soil_texture,
     is_valid_soil_type,
-    sanitize_ai_prompt,
 )
 from ..utils.weather import (
     get_weather_data as fetch_current_weather_data,
@@ -63,18 +62,6 @@ from ..utils.weather import (
     get_historical_weather_data,
 )
 from ..config.settings import settings
-from ..services.storage_service import get_storage_service
-from ..services.ai_service import AIService
-from ..utils.file_validator import (
-    validate_upload_file,
-    ALLOWED_IMAGE_MIME_TYPES,
-    ALLOWED_IMAGE_EXTENSIONS,
-    MAX_IMAGE_SIZE_BYTES,
-    ALLOWED_PDF_MIME_TYPES,
-    ALLOWED_PDF_EXTENSIONS,
-    MAX_PDF_SIZE_BYTES,
-)
-import tempfile
 from pypdf import PdfReader
 
 router = APIRouter()
@@ -141,27 +128,50 @@ async def user_profile(
     )
 
 
-async def _delete_old_profile_photo(photo_path: Optional[str]) -> None:
-    if not photo_path:
+def _delete_old_profile_photo(photo_path: Optional[str]) -> None:
+    if not photo_path or not photo_path.startswith(PROFILE_UPLOAD_ROUTE_PREFIX):
         return
-    storage = get_storage_service()
-    await storage.delete_file(photo_path)
+
+    disk_path = Path(photo_path.lstrip("/"))
+    try:
+        upload_root = PROFILE_UPLOAD_DIR.resolve()
+        resolved_disk_path = disk_path.resolve()
+    except Exception:
+        return
+
+    if upload_root not in resolved_disk_path.parents:
+        return
+
+    if resolved_disk_path.exists():
+        resolved_disk_path.unlink(missing_ok=True)
 
 
 async def _save_profile_photo(file_obj: UploadFile, user_id: int) -> str:
-    file_bytes = await validate_upload_file(
-        file_obj,
-        allowed_mimes=ALLOWED_IMAGE_MIME_TYPES,
-        allowed_exts=ALLOWED_IMAGE_EXTENSIONS,
-        max_size=MAX_IMAGE_SIZE_BYTES,
-        file_type_label="Profile Photo",
-    )
-    storage = get_storage_service()
-    ext = ALLOWED_IMAGE_TYPES.get((file_obj.content_type or "").lower(), ".jpg")
-    filename = f"user_{user_id}_{uuid.uuid4().hex[:10]}{ext}"
-    return await storage.upload_bytes(
-        file_bytes, filename=filename, folder="profiles", content_type=file_obj.content_type
-    )
+    if file_obj.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only JPG, PNG, or WEBP images are allowed.",
+        )
+
+    file_bytes = await file_obj.read()
+    if not file_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded image is empty.",
+        )
+
+    if len(file_bytes) > MAX_PROFILE_PHOTO_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Profile photo size must be under 5MB.",
+        )
+
+    PROFILE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    extension = ALLOWED_IMAGE_TYPES[file_obj.content_type]
+    filename = f"user_{user_id}_{uuid.uuid4().hex[:10]}{extension}"
+    output_path = PROFILE_UPLOAD_DIR / filename
+    output_path.write_bytes(file_bytes)
+    return f"{PROFILE_UPLOAD_ROUTE_PREFIX}{filename}"
 
 
 @router.put("/profile")
@@ -233,14 +243,14 @@ async def update_profile(
         current_user.irrigation_type = irrigation_type
 
     if remove_photo:
-        await _delete_old_profile_photo(current_user.profile_photo)
+        _delete_old_profile_photo(current_user.profile_photo)
         current_user.profile_photo = None
 
     if hasattr(profile_photo, "filename") and profile_photo.filename:
         old_photo = current_user.profile_photo
         current_user.profile_photo = await _save_profile_photo(profile_photo, current_user.id)
         if old_photo and old_photo != current_user.profile_photo:
-            await _delete_old_profile_photo(old_photo)
+            _delete_old_profile_photo(old_photo)
 
     db.commit()
     db.refresh(current_user)
@@ -341,6 +351,51 @@ async def mandi_tracking(
         _build_user_template_context(request, current_user),
     )
 
+@router.get("/proxy-krama", response_class=HTMLResponse)
+async def proxy_krama():
+    """
+    Server-side proxy for the official KRAMA portal.
+    Fetches the live HTML asynchronously from https://krama.karnataka.gov.in and injects a <base> tag
+    so it embeds cleanly in the user's dashboard iframe without X-Frame-Options or SameSite=Lax blocking.
+    """
+    import asyncio
+    import requests
+    try:
+        def fetch_krama():
+            return requests.get("https://krama.karnataka.gov.in", verify=False, timeout=25, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            })
+
+        r = await asyncio.to_thread(fetch_krama)
+        html_content = r.text
+
+        # Inject base tag and frame protection so KRAMA loads images/styles without busting out of the iframe
+        safeguard = '<head><base href="https://krama.karnataka.gov.in/"><script>window.top = window.self; window.parent = window.self;</script>'
+        if "<head>" in html_content:
+            html_content = html_content.replace("<head>", safeguard)
+        elif "<HEAD>" in html_content:
+            html_content = html_content.replace("<HEAD>", safeguard)
+        else:
+            html_content = f'{safeguard}{html_content}'
+
+        html_content = html_content.replace("window.top", "window.self").replace("top.location", "self.location").replace("parent.location", "self.location")
+
+        return HTMLResponse(content=html_content, status_code=200)
+    except Exception as exc:
+        logger.error("Error proxying KRAMA portal: %s", exc)
+        return HTMLResponse(
+            content=f"""
+            <div style="font-family: 'Inter', sans-serif; padding: 40px; text-align: center; color: #1e293b;">
+                <h3 style="color: #15803d; margin-bottom: 12px;">Official Karnataka KRAMA Portal</h3>
+                <p style="margin-bottom: 24px; color: #64748b;">Live connection temporarily unavailable or experiencing high traffic from Karnataka state servers.</p>
+                <a href="https://krama.karnataka.gov.in" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    Open Official Portal in New Tab &rarr;
+                </a>
+            </div>
+            """,
+            status_code=200
+        )
+
 @router.get("/gov-schemes", response_class=HTMLResponse)
 async def gov_schemes(
     request: Request,
@@ -430,28 +485,19 @@ def _decode_text_bytes(contents: bytes) -> str:
 
 
 def _extract_pdf_text(contents: bytes) -> str:
-    temp_path = None
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(contents)
-            temp_path = Path(tmp.name)
-        reader = PdfReader(str(temp_path))
-        extracted_pages = []
-        for page in reader.pages:
-            try:
-                extracted_pages.append(page.extract_text() or "")
-            except Exception:
-                continue
-        return "\n".join(part.strip() for part in extracted_pages if part.strip()).strip()
-    except Exception as exc:
-        logger.error(f"Failed extracting text from temporary PDF: {exc}")
+        reader = PdfReader(BytesIO(contents))
+    except Exception:
         return ""
-    finally:
-        if temp_path and temp_path.exists():
-            try:
-                temp_path.unlink()
-            except Exception:
-                pass
+
+    extracted_pages = []
+    for page in reader.pages:
+        try:
+            extracted_pages.append(page.extract_text() or "")
+        except Exception:
+            continue
+
+    return "\n".join(part.strip() for part in extracted_pages if part.strip()).strip()
 
 
 def _build_image_data_url(content_type: str, contents: bytes) -> str:
@@ -804,8 +850,30 @@ def _log_ai_history(
     input_payload: Any,
     output_payload: Any,
 ) -> None:
-    """Helper delegating AI usage logging to AIService."""
-    AIService.log_history(db, user_id, feature_type, input_payload, output_payload)
+    """Helper to log AI usage to ai_usage_history without breaking API requests if DB error occurs."""
+    try:
+        input_str = (
+            json.dumps(input_payload, default=str)
+            if isinstance(input_payload, (dict, list))
+            else str(input_payload or "")
+        )
+        output_str = (
+            json.dumps(output_payload, default=str)
+            if isinstance(output_payload, (dict, list))
+            else str(output_payload or "")
+        )
+
+        history_record = AIUsageHistory(
+            user_id=user_id,
+            feature_type=feature_type,
+            input_payload=input_str,
+            output_payload=output_str,
+        )
+        db.add(history_record)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        logger.error(f"Failed to log AI history for user {user_id} ({feature_type}): {exc}")
 
 
 class AIHistoryItem(BaseModel):
@@ -902,9 +970,8 @@ async def get_crop_recommendation(
     analysis_parts: List[str] = []
     image_data_url: Optional[str] = None
 
-    cleaned_details = sanitize_ai_prompt(soil_details or "")
-    if cleaned_details:
-        analysis_parts.append(cleaned_details)
+    if soil_details and soil_details.strip():
+        analysis_parts.append(soil_details.strip())
 
     if soil_report:
         contents = await soil_report.read()
@@ -1647,7 +1714,6 @@ class DiseaseDiagnosisResponse(BaseModel):
     symptoms: str
     treatment: str
     prevention: str
-    image_url: Optional[str] = None
 
 # ... (existing routes like profile, soil-library, weather, crop-recommendation, input-suggestions, etc.) ...
 
@@ -1666,25 +1732,25 @@ async def get_disease_diagnosis(
     Calls the Groq AI API to analyze the data and diagnose the disease.
     """
     enforce_rate_limit(request, "ai_diagnosis", max_requests=10, window_seconds=60)
-    symptoms_description = sanitize_ai_prompt(symptoms_description or "")
+    symptoms_description = (symptoms_description or "").strip()
     selected_district = (district or current_user.district or "Karnataka").strip()
     image_data_url: Optional[str] = None
-    cloudinary_url: Optional[str] = None
 
-    if plant_image and plant_image.filename:
-        file_bytes = await validate_upload_file(
-            plant_image,
-            allowed_mimes=ALLOWED_IMAGE_MIME_TYPES,
-            allowed_exts=ALLOWED_IMAGE_EXTENSIONS,
-            max_size=MAX_IMAGE_SIZE_BYTES,
-            file_type_label="Plant Image",
-        )
-        content_type = (plant_image.content_type or "image/jpeg").lower()
-        image_data_url = _build_image_data_url(content_type, file_bytes)
-        storage = get_storage_service()
-        cloudinary_url = await storage.upload_bytes(
-            file_bytes, filename=plant_image.filename, folder="diagnosis", content_type=content_type
-        )
+    if plant_image:
+        content_type = (plant_image.content_type or "").lower()
+        if not content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=400,
+                detail="Plant image must be a JPG, PNG, WEBP, or another valid image format.",
+            )
+
+        contents = await plant_image.read()
+        if not contents:
+            raise HTTPException(status_code=400, detail="Uploaded plant image is empty.")
+        if len(contents) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Uploaded image exceeds 10MB limit.")
+
+        image_data_url = _build_image_data_url(content_type, contents)
 
     if not symptoms_description and not image_data_url:
         raise HTTPException(
@@ -1699,13 +1765,11 @@ async def get_disease_diagnosis(
             selected_district,
             image_data_url=image_data_url,
         )
-        if cloudinary_url:
-            ai_result["image_url"] = cloudinary_url
         _log_ai_history(
             db,
             current_user.id,
             "disease_diagnosis",
-            {"district": selected_district, "symptoms": symptoms_description, "image_url": cloudinary_url},
+            {"district": selected_district, "symptoms": symptoms_description, "has_image": bool(image_data_url)},
             ai_result,
         )
         return DiseaseDiagnosisResponse(**ai_result)

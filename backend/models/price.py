@@ -22,6 +22,7 @@ class Price(Base):
     min_price = Column(Float, nullable=True)
     max_price = Column(Float, nullable=True)
     price_date = Column(Date, nullable=False)
+    source = Column(String(50), default="KRAMA", nullable=True)
     last_updated = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

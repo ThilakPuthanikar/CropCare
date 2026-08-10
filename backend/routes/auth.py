@@ -11,11 +11,11 @@ from ..database.database import get_db
 from ..models.user import User
 from ..schemas.user import Token
 from ..utils.rate_limit import enforce_rate_limit
-from ..utils.logger import logger
 from ..utils.auth import (
     get_password_hash, 
     create_access_token,
-    authenticate_user
+    authenticate_user,
+    authenticate_admin
 )
 from ..utils.validation import (
     is_strong_password,
@@ -90,6 +90,7 @@ async def login(
     
     response = JSONResponse(content={
         "message": "Login successful",
+        "access_token": access_token,
         "token_type": "cookie",
         "role": user.role
     })
@@ -255,7 +256,7 @@ async def register(
         )
     except Exception as e:
         db.rollback()
-        logger.error(f"Unexpected registration error: {e}", exc_info=True)
+        print(f"Unexpected registration error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during registration."
@@ -283,8 +284,13 @@ async def admin_login(
             detail="Invalid email format",
         )
 
-    admin_user = authenticate_user(db, email, password)
-    if admin_user and admin_user.role == "admin" and admin_user.is_approved:
+    admin_user = authenticate_admin(db, email, password)
+    if not admin_user:
+        admin_user = authenticate_user(db, email, password)
+        if not (admin_user and getattr(admin_user, "role", "") == "admin"):
+            admin_user = None
+
+    if admin_user and getattr(admin_user, "role", "") == "admin" and getattr(admin_user, "is_approved", True):
         access_token_expires = timedelta(minutes=30)
         access_token = create_access_token(
             data={"sub": admin_user.email, "role": "admin"},
@@ -292,6 +298,7 @@ async def admin_login(
         )
         response = JSONResponse(content={
             "message": "Login successful",
+            "access_token": access_token,
             "token_type": "cookie",
             "role": "admin"
         })

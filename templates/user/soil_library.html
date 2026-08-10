@@ -1,47 +1,49 @@
 <!-- templates/user/soil_library.html -->
-{% extends "base.html" %} {% block title %}Soil Library - CropCare{% endblock %}
-{% block user_role %}Farmer Dashboard{% endblock %} {% block sidebar %}
-<a href="/user/dashboard" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-home mr-3"></i>Dashboard
+{% extends "base.html" %}
+{% block title %}Soil Library - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Soil Library & Reports{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
 </a>
-<a href="/user/profile" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-user mr-3"></i>Profile
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
 </a>
-<a
-  href="/user/soil-library"
-  class="sidebar-item active block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-seedling mr-3"></i>Soil Library
+<a href="/user/soil-library" class="sidebar-item active">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
 </a>
-<a href="/user/weather" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-cloud-sun mr-3"></i>Weather
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
 </a>
-<a
-  href="/user/crop-recommendation"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-leaf mr-3"></i>Crop Suggestion
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
 </a>
-<a
-  href="/user/input-suggestions"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-tools mr-3"></i>Input Suggestions
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
 </a>
-<a
-  href="/user/disease-diagnosis"
-  class="sidebar-item block py-3 px-4 rounded-lg"
->
-  <i class="fas fa-heartbeat mr-3"></i>Disease Diagnosis
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
 </a>
-<a href="/user/crop-planner" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-calendar-check mr-3"></i>Crop Planner
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
 </a>
-<a href="/user/mandi-tracking" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-chart-line mr-3"></i>Price Tracker
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
 </a>
-<a href="/user/gov-schemes" class="sidebar-item block py-3 px-4 rounded-lg">
-  <i class="fas fa-hand-holding-heart mr-3"></i>Gov Schemes
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
 </a>
 {% endblock %} {% block content %}
 <div class="space-y-6 soil-library-page">
