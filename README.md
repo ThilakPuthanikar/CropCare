@@ -8,7 +8,8 @@ An advanced AI-powered precision agriculture web platform designed for farmers, 
 
 - **Backend**: Python 3.11+ / FastAPI / SQLAlchemy ORM
 - **Frontend**: Responsive HTML5, Vanilla CSS, Tailwind CSS, JavaScript
-- **Database**: MySQL (Production connection pooling configured for Railway)
+- **Database**: Neon PostgreSQL (Serverless Cloud PostgreSQL with SQLAlchemy connection pooling)
+
 - **AI Engine**: Groq API (Llama 3 / Vision analysis for Crop Recommendations & Disease Diagnosis)
 - **Persistent File Storage**: Cloudinary (Profiles & Diagnosis images)
 - **Weather Integration**: Open-Meteo Geocoding & Historical/Forecast APIs

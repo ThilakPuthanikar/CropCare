@@ -9,7 +9,8 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-KARNATAKA_MANDI_SOURCE_URL = "https://krama.karnataka.gov.in/reports/state"
+KARNATAKA_MANDI_SOURCE_URL = "https://krama.karnataka.gov.in/Reports/Main_rep"
+
 REQUEST_TIMEOUT_SECONDS = 45
 USER_AGENT = "CropCare/1.0"
 

@@ -81,6 +81,9 @@ scratch/
 DESIGN.md
 PRODUCT.md
 PROJECT_SPECIFICATION.md
+implementation_plan.md
+walkthrough.md
+*_backup.sql
 
 
 # OS generated files
@@ -90,6 +93,5 @@ PROJECT_SPECIFICATION.md
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db
 
 

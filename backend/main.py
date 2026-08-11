@@ -28,40 +28,45 @@ def _get_cors_origins():
 
 def ensure_schema_columns():
     inspector = inspect(engine)
-    user_columns = {column["name"] for column in inspector.get_columns("users")}
-    if "profile_photo" not in user_columns:
-        with engine.begin() as connection:
-            connection.execute(
-                text("ALTER TABLE users ADD COLUMN profile_photo VARCHAR(500) NULL")
-            )
-    if "phone_number" not in user_columns:
-        with engine.begin() as connection:
-            connection.execute(
-                text("ALTER TABLE users ADD COLUMN phone_number VARCHAR(10) NULL")
-            )
-            connection.execute(
-                text("ALTER TABLE users ADD UNIQUE INDEX ix_users_phone_number (phone_number)")
-            )
+    if "users" in inspector.get_table_names():
+        user_columns = {column["name"] for column in inspector.get_columns("users")}
+        if "profile_photo" not in user_columns:
+            with engine.begin() as connection:
+                connection.execute(
+                    text("ALTER TABLE users ADD COLUMN profile_photo VARCHAR(500) NULL")
+                )
+        if "phone_number" not in user_columns:
+            with engine.begin() as connection:
+                connection.execute(
+                    text("ALTER TABLE users ADD COLUMN phone_number VARCHAR(10) NULL")
+                )
+                try:
+                    connection.execute(
+                        text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_phone_number ON users (phone_number)")
+                    )
+                except Exception:
+                    pass
 
-    scheme_columns = {column["name"] for column in inspector.get_columns("schemes")}
-    scheme_column_defs = {
-        "type": "ALTER TABLE schemes ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'national'",
-        "beneficiary": "ALTER TABLE schemes ADD COLUMN beneficiary VARCHAR(100) NULL",
-        "eligibility": "ALTER TABLE schemes ADD COLUMN eligibility TEXT NULL",
-        "duration": "ALTER TABLE schemes ADD COLUMN duration VARCHAR(255) NULL",
-        "icon": "ALTER TABLE schemes ADD COLUMN icon VARCHAR(100) NULL",
-        "state": "ALTER TABLE schemes ADD COLUMN state VARCHAR(100) NULL",
-        "district": "ALTER TABLE schemes ADD COLUMN district VARCHAR(100) NULL",
-        "is_active": "ALTER TABLE schemes ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE",
-    }
-    missing_scheme_columns = [
-        ddl for column_name, ddl in scheme_column_defs.items()
-        if column_name not in scheme_columns
-    ]
-    if missing_scheme_columns:
-        with engine.begin() as connection:
-            for ddl in missing_scheme_columns:
-                connection.execute(text(ddl))
+    if "schemes" in inspector.get_table_names():
+        scheme_columns = {column["name"] for column in inspector.get_columns("schemes")}
+        scheme_column_defs = {
+            "type": "ALTER TABLE schemes ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'national'",
+            "beneficiary": "ALTER TABLE schemes ADD COLUMN beneficiary VARCHAR(100) NULL",
+            "eligibility": "ALTER TABLE schemes ADD COLUMN eligibility TEXT NULL",
+            "duration": "ALTER TABLE schemes ADD COLUMN duration VARCHAR(255) NULL",
+            "icon": "ALTER TABLE schemes ADD COLUMN icon VARCHAR(100) NULL",
+            "state": "ALTER TABLE schemes ADD COLUMN state VARCHAR(100) NULL",
+            "district": "ALTER TABLE schemes ADD COLUMN district VARCHAR(100) NULL",
+            "is_active": "ALTER TABLE schemes ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE",
+        }
+        missing_scheme_columns = [
+            ddl for column_name, ddl in scheme_column_defs.items()
+            if column_name not in scheme_columns
+        ]
+        if missing_scheme_columns:
+            with engine.begin() as connection:
+                for ddl in missing_scheme_columns:
+                    connection.execute(text(ddl))
 
     if "mandi_prices" in inspector.get_table_names():
         mandi_columns = {column["name"] for column in inspector.get_columns("mandi_prices")}
@@ -77,7 +82,7 @@ def ensure_schema_columns():
             "min_price": "ALTER TABLE mandi_prices ADD COLUMN min_price FLOAT NULL",
             "max_price": "ALTER TABLE mandi_prices ADD COLUMN max_price FLOAT NULL",
             "price_date": "ALTER TABLE mandi_prices ADD COLUMN price_date DATE NULL",
-            "last_updated": "ALTER TABLE mandi_prices ADD COLUMN last_updated DATETIME NULL",
+            "last_updated": "ALTER TABLE mandi_prices ADD COLUMN last_updated TIMESTAMP WITH TIME ZONE NULL",
         }
         missing_mandi_columns = [
             ddl for column_name, ddl in mandi_column_defs.items()
@@ -89,18 +94,19 @@ def ensure_schema_columns():
                     connection.execute(text(ddl))
         with engine.begin() as connection:
             try:
-                connection.execute(text("ALTER TABLE mandi_prices DROP INDEX uq_mandi_crop_market"))
+                connection.execute(text("DROP INDEX IF EXISTS uq_mandi_crop_market"))
             except Exception:
                 pass
             try:
                 connection.execute(
                     text(
-                        "ALTER TABLE mandi_prices ADD UNIQUE INDEX uq_mandi_crop_market_week "
-                        "(crop_name, district, mandi_name, price_date)"
+                        "CREATE UNIQUE INDEX IF NOT EXISTS uq_mandi_crop_market_week "
+                        "ON mandi_prices (crop_name, district, mandi_name, price_date)"
                     )
                 )
             except Exception:
                 pass
+
 
 
 def seed_default_schemes():
@@ -240,14 +246,20 @@ async def enforce_csrf_header(request: Request, call_next):
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
-    response.headers["X-Frame-Options"] = "DENY"
+    if not request.url.path.startswith("/user/proxy-krama"):
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    else:
+        if "X-Frame-Options" in response.headers:
+            del response.headers["X-Frame-Options"]
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     response.headers["Cache-Control"] = "no-store"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data: https: blob:; script-src 'self' 'unsafe-inline' https: cdn.tailwindcss.com cdnjs.cloudflare.com cdn.jsdelivr.net www.chatbase.co; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com cdnjs.cloudflare.com; font-src 'self' https: data: fonts.gstatic.com cdnjs.cloudflare.com; connect-src 'self' https: www.chatbase.co;"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data: https: blob:; script-src 'self' 'unsafe-inline' https: cdn.tailwindcss.com cdnjs.cloudflare.com cdn.jsdelivr.net www.chatbase.co; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com cdnjs.cloudflare.com; font-src 'self' https: data: fonts.gstatic.com cdnjs.cloudflare.com; frame-src 'self' https: https://krama.karnataka.gov.in; connect-src 'self' https: www.chatbase.co;"
     return response
+
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):

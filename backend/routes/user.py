@@ -355,14 +355,14 @@ async def mandi_tracking(
 async def proxy_krama():
     """
     Server-side proxy for the official KRAMA portal.
-    Fetches the live HTML asynchronously from https://krama.karnataka.gov.in and injects a <base> tag
+    Fetches the live HTML asynchronously from https://krama.karnataka.gov.in/Reports/Main_rep and injects a <base> tag
     so it embeds cleanly in the user's dashboard iframe without X-Frame-Options or SameSite=Lax blocking.
     """
     import asyncio
     import requests
     try:
         def fetch_krama():
-            return requests.get("https://krama.karnataka.gov.in", verify=False, timeout=25, headers={
+            return requests.get("https://krama.karnataka.gov.in/Reports/Main_rep", verify=False, timeout=25, headers={
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             })
 
@@ -370,7 +370,7 @@ async def proxy_krama():
         html_content = r.text
 
         # Inject base tag and frame protection so KRAMA loads images/styles without busting out of the iframe
-        safeguard = '<head><base href="https://krama.karnataka.gov.in/"><script>window.top = window.self; window.parent = window.self;</script>'
+        safeguard = '<head><base href="https://krama.karnataka.gov.in/Reports/Main_rep"><script>window.top = window.self; window.parent = window.self;</script>'
         if "<head>" in html_content:
             html_content = html_content.replace("<head>", safeguard)
         elif "<HEAD>" in html_content:
@@ -380,7 +380,11 @@ async def proxy_krama():
 
         html_content = html_content.replace("window.top", "window.self").replace("top.location", "self.location").replace("parent.location", "self.location")
 
-        return HTMLResponse(content=html_content, status_code=200)
+        response = HTMLResponse(content=html_content, status_code=200)
+        if "X-Frame-Options" in response.headers:
+            del response.headers["X-Frame-Options"]
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        return response
     except Exception as exc:
         logger.error("Error proxying KRAMA portal: %s", exc)
         return HTMLResponse(
@@ -388,13 +392,14 @@ async def proxy_krama():
             <div style="font-family: 'Inter', sans-serif; padding: 40px; text-align: center; color: #1e293b;">
                 <h3 style="color: #15803d; margin-bottom: 12px;">Official Karnataka KRAMA Portal</h3>
                 <p style="margin-bottom: 24px; color: #64748b;">Live connection temporarily unavailable or experiencing high traffic from Karnataka state servers.</p>
-                <a href="https://krama.karnataka.gov.in" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                <a href="https://krama.karnataka.gov.in/Reports/Main_rep" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                     Open Official Portal in New Tab &rarr;
                 </a>
             </div>
             """,
             status_code=200
         )
+
 
 @router.get("/gov-schemes", response_class=HTMLResponse)
 async def gov_schemes(

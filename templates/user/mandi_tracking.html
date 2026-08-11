@@ -104,7 +104,7 @@
         <p class="text-sm text-gray-600 mt-1">Cross-check daily rates directly on the Karnataka Agricultural Marketing Board portal without leaving CropCare.</p>
       </div>
       <div class="flex items-center gap-3">
-        <a href="https://krama.karnataka.gov.in" target="_blank" rel="noopener noreferrer" class="btn-secondary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-2xs transition-all">
+        <a href="https://krama.karnataka.gov.in/Reports/Main_rep" target="_blank" rel="noopener noreferrer" class="btn-secondary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-2xs transition-all">
           <span>Open Portal Tab</span>
           <i class="fas fa-external-link-alt text-xs"></i>
         </a>
@@ -115,7 +115,7 @@
       </div>
     </div>
 
-    <!-- Lazy Loaded Iframe Container -->
+    <!-- Lazy Loaded Inline Iframe Container -->
     <div id="kramaIframeContainer" class="hidden pt-4 border-t border-gray-100 transition-all">
       <div id="iframeTarget" class="w-full min-h-[750px] rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
         <div class="text-center p-8 text-gray-500">
@@ -125,6 +125,8 @@
       </div>
     </div>
   </section>
+
+
 
   <!-- Toolbar & Table Section -->
   <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-2 space-y-6">
@@ -334,7 +336,7 @@
       if (!iframeLoaded) {
         iframeLoaded = true;
         setTimeout(() => {
-          target.innerHTML = `<iframe src="/user/proxy-krama" class="w-full h-[780px] border-0 rounded-2xl bg-white shadow-inner"></iframe>`;
+          target.innerHTML = `<iframe src="/user/proxy-krama" class="w-full h-[780px] border-0 rounded-2xl bg-white shadow-inner" allow="geolocation"></iframe>`;
         }, 300);
       }
     } else {
@@ -351,3 +353,5 @@
   });
 </script>
 {% endblock %}
+
+

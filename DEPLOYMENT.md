@@ -1,25 +1,24 @@
 # CropCare Production Deployment Guide 🚀
 
-This guide explains how to deploy CropCare securely and reliably in production using **Railway** (Backend API + MySQL Database) and **Vercel** (Edge CDN Frontend + Rewrites).
+This guide explains how to deploy CropCare securely and reliably in production using **Neon PostgreSQL** (Database), **Railway / Render** (Backend API), and **Vercel** (Edge CDN Frontend + Rewrites).
 
 ---
 
-## Part 1: Railway Backend & MySQL Setup
+## Part 1: Neon PostgreSQL Setup
 
-### Step 1: Provision MySQL Database on Railway
-1. Log in to [Railway](https://railway.app/).
-2. Click **New Project** -> **Provision MySQL**.
-3. Once created, click on the MySQL card -> **Connect** tab -> copy the **MySQL Connection URL** (e.g., `mysql+pymysql://root:password@roundhouse.proxy.rlwy.net:3306/railway`).
+1. Log in to [Neon](https://neon.tech/).
+2. Create a new PostgreSQL project and copy your connection string.
+3. Update `DATABASE_URL` format to use `postgresql+psycopg://`:
+   `postgresql+psycopg://username:password@ep-xxxx.neon.tech/neondb?sslmode=require`
 
 ### Step 2: Deploy FastAPI Backend Service
-1. In your Railway project dashboard, click **New** -> **GitHub Repo** -> select `CropCare`.
-2. Railway will automatically detect the `nixpacks.toml` and `Procfile` and begin building Python 3.11 with dependencies.
-3. In the Railway backend service -> **Variables** tab, add the following production variables:
+1. In your deployment dashboard (Railway / Render), add the following environment variables:
    ```env
    ENVIRONMENT=production
    DEBUG=false
    PORT=8000
-   DATABASE_URL=mysql+pymysql://root:password@roundhouse.proxy.rlwy.net:3306/railway
+   DATABASE_URL=postgresql+psycopg://neondb_owner:password@ep-xxx.neon.tech/neondb?sslmode=require
+
    SECRET_KEY=<generate-long-random-string>
    JWT_SECRET=<generate-long-random-string>
    JWT_ALGORITHM=HS256

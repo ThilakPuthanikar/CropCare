@@ -19,38 +19,9 @@ if (-not (Test-Path $runtimeDir)) {
     New-Item -ItemType Directory -Force -Path $runtimeDir | Out-Null
 }
 
-# 1. XAMPP Initialization
-$xamppDirs = @(
-    "C:\xampp",
-    "D:\xampp",
-    "E:\xampp",
-    "$env:ProgramFiles\xampp",
-    "${env:ProgramFiles(x86)}\xampp"
-)
-$xamppDir = $null
-foreach ($d in $xamppDirs) {
-    if (Test-Path (Join-Path $d "xampp-control.exe")) {
-        $xamppDir = $d
-        break
-    }
-}
+# 1. Database Initialization
+Write-Host "`nUsing Cloud Neon PostgreSQL Database (configured via DATABASE_URL)." -ForegroundColor Green
 
-if ($xamppDir) {
-    Write-Host "`nFound XAMPP at: $xamppDir" -ForegroundColor Green
-    $apacheStart = Join-Path $xamppDir "apache_start.bat"
-    $mysqlStart = Join-Path $xamppDir "mysql_start.bat"
-    
-    if (Test-Path $apacheStart) {
-        Write-Host "Starting Apache..." -ForegroundColor Yellow
-        Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "`"$apacheStart`"" -WindowStyle Minimized
-    }
-    if (Test-Path $mysqlStart) {
-        Write-Host "Starting MySQL..." -ForegroundColor Yellow
-        Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "`"$mysqlStart`"" -WindowStyle Minimized
-    }
-} else {
-    Write-Host "`nXAMPP not found in common paths. Make sure your database is running if needed." -ForegroundColor DarkGray
-}
 
 # 2. Virtual Environment & Requirements
 $venvPy = Join-Path $ProjectDir "venv\Scripts\python.exe"

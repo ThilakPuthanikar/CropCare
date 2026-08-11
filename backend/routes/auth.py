@@ -199,7 +199,7 @@ async def register(
     except OperationalError:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database connection error. Please ensure MySQL is running and accessible."
+            detail="Database connection error. Please ensure the database is running and accessible."
         )
     except SQLAlchemyError:
         raise HTTPException(
