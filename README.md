@@ -10,9 +10,11 @@ An advanced AI-powered precision agriculture web platform designed for farmers, 
 - **Frontend**: Responsive HTML5, Vanilla CSS, Tailwind CSS, JavaScript
 - **Database**: Neon PostgreSQL (Serverless Cloud PostgreSQL with SQLAlchemy connection pooling)
 
-- **AI Engine**: Groq API (Llama 3 / Vision analysis for Crop Recommendations & Disease Diagnosis)
+- **AI Engine**: Groq API (Llama 3 / Vision analysis for Crop Recommendations, Disease Diagnosis, and Land Lease Strategic Assessments)
+- **PDF Report Engine**: ReportLab 5.0 (Automated, downloadable Land Lease Estimation reports)
 - **Persistent File Storage**: Cloudinary (Profiles & Diagnosis images)
 - **Weather Integration**: Open-Meteo Geocoding & Historical/Forecast APIs
+
 
 ---
 

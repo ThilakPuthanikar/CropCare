@@ -13,7 +13,7 @@ from .models.scheme import Scheme
 from .models.price import Price
 from .models.user import User
 from .models.admin import Admin
-from .routes import auth, user, admin
+from .routes import auth, user, admin, land_leasing
 from .utils.schemes import DEFAULT_SCHEMES, serialize_text_list
 from .utils.auth import get_password_hash
 
@@ -281,6 +281,7 @@ async def features(request: Request):
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(land_leasing.router)
 
 if __name__ == "__main__":
     import uvicorn

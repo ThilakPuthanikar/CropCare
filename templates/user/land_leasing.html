@@ -1,0 +1,787 @@
+{% extends "base.html" %}
+
+{% block title %}Land Lease Estimation — CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Land Lease Estimation{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item active">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-7xl mx-auto pb-12">
+
+  <!-- Header Banner & Mode Selector -->
+  <div class="bg-gradient-to-r from-emerald-800 via-green-700 to-teal-800 rounded-3xl p-6 lg:p-8 text-white shadow-xl relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
+      <i class="fas fa-file-signature text-[220px]"></i>
+    </div>
+    <div class="relative z-10 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 text-xs font-semibold backdrop-blur-md border border-emerald-400/30">
+            <i class="fas fa-award text-amber-300"></i> Deterministic Engine & Groq AI
+          </span>
+          <h1 class="text-2xl lg:text-3xl font-extrabold mt-2 tracking-tight">Agricultural Land Lease Estimation</h1>
+          <p class="text-emerald-100 text-sm max-w-2xl mt-1">
+            Calculate accurate fair-market annual lease rates for agricultural land in Karnataka, backed by regional baseline data, multi-factor scoring, and AI strategic assessment.
+          </p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex items-center bg-emerald-950/50 p-1.5 rounded-2xl border border-emerald-500/30 backdrop-blur-md">
+          <button id="tabNewEstimate" onclick="switchTab('new')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm bg-white text-emerald-900">
+            <i class="fas fa-calculator mr-1.5"></i> New Estimate
+          </button>
+          <button id="tabHistory" onclick="switchTab('history')" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-emerald-100 hover:text-white transition-all">
+            <i class="fas fa-history mr-1.5"></i> History & Reports
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1: NEW ESTIMATE FORM & RESULTS -->
+  <div id="newEstimateContainer" class="space-y-6">
+
+    <!-- FORM CARD -->
+    <div id="formCard" class="bg-white rounded-3xl border border-gray-200 shadow-md p-6 lg:p-8 space-y-8">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+        <div>
+          <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-map-location-dot text-emerald-600"></i> Land Details & Facility Attributes
+          </h2>
+          <p class="text-xs text-gray-500 mt-0.5">Enter your agricultural land characteristics for an instant valuation assessment.</p>
+        </div>
+        <span class="text-xs text-gray-400 font-medium">* Required fields</span>
+      </div>
+
+      <form id="landLeaseForm" onsubmit="handleFormSubmit(event)" class="space-y-8">
+
+        <!-- Section A: Location -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-location-pin"></i> Section A: Location & Geography
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">State *</label>
+              <input type="text" name="state" value="Karnataka" readonly class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-700 font-semibold cursor-not-allowed">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">District *</label>
+              <select name="district" required class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                <option value="Bagalkot" {% if user.district == 'Bagalkot' %}selected{% endif %}>Bagalkot</option>
+                <option value="Ballari" {% if user.district == 'Ballari' %}selected{% endif %}>Ballari</option>
+                <option value="Belagavi" {% if user.district == 'Belagavi' %}selected{% endif %}>Belagavi</option>
+                <option value="Bengaluru Rural" {% if user.district == 'Bengaluru Rural' %}selected{% endif %}>Bengaluru Rural</option>
+                <option value="Bengaluru Urban" {% if user.district == 'Bengaluru Urban' %}selected{% endif %}>Bengaluru Urban</option>
+                <option value="Bidar" {% if user.district == 'Bidar' %}selected{% endif %}>Bidar</option>
+                <option value="Chamarajanagar" {% if user.district == 'Chamarajanagar' %}selected{% endif %}>Chamarajanagar</option>
+                <option value="Chikkaballapur" {% if user.district == 'Chikkaballapur' %}selected{% endif %}>Chikkaballapur</option>
+                <option value="Chikkamagaluru" {% if user.district == 'Chikkamagaluru' %}selected{% endif %}>Chikkamagaluru</option>
+                <option value="Chitradurga" {% if user.district == 'Chitradurga' %}selected{% endif %}>Chitradurga</option>
+                <option value="Dakshina Kannada" {% if user.district == 'Dakshina Kannada' %}selected{% endif %}>Dakshina Kannada</option>
+                <option value="Davanagere" {% if user.district == 'Davanagere' %}selected{% endif %}>Davanagere</option>
+                <option value="Dharwad" {% if user.district == 'Dharwad' %}selected{% endif %}>Dharwad</option>
+                <option value="Gadag" {% if user.district == 'Gadag' %}selected{% endif %}>Gadag</option>
+                <option value="Hassan" {% if user.district == 'Hassan' %}selected{% endif %}>Hassan</option>
+                <option value="Haveri" {% if user.district == 'Haveri' %}selected{% endif %}>Haveri</option>
+                <option value="Kalaburagi" {% if user.district == 'Kalaburagi' %}selected{% endif %}>Kalaburagi</option>
+                <option value="Kodagu" {% if user.district == 'Kodagu' %}selected{% endif %}>Kodagu</option>
+                <option value="Kolar" {% if user.district == 'Kolar' %}selected{% endif %}>Kolar</option>
+                <option value="Koppal" {% if user.district == 'Koppal' %}selected{% endif %}>Koppal</option>
+                <option value="Mandya" {% if user.district == 'Mandya' %}selected{% endif %}>Mandya</option>
+                <option value="Mysuru" {% if user.district == 'Mysuru' %}selected{% endif %}>Mysuru</option>
+                <option value="Raichur" {% if user.district == 'Raichur' %}selected{% endif %}>Raichur</option>
+                <option value="Ramanagara" {% if user.district == 'Ramanagara' %}selected{% endif %}>Ramanagara</option>
+                <option value="Shivamogga" {% if user.district == 'Shivamogga' %}selected{% endif %}>Shivamogga</option>
+                <option value="Tumakuru" {% if user.district == 'Tumakuru' %}selected{% endif %}>Tumakuru</option>
+                <option value="Udupi" {% if user.district == 'Udupi' %}selected{% endif %}>Udupi</option>
+                <option value="Uttara Kannada" {% if user.district == 'Uttara Kannada' %}selected{% endif %}>Uttara Kannada</option>
+                <option value="Vijayanagara" {% if user.district == 'Vijayanagara' %}selected{% endif %}>Vijayanagara</option>
+                <option value="Yadgir" {% if user.district == 'Yadgir' %}selected{% endif %}>Yadgir</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Taluk / Village</label>
+              <input type="text" name="taluk" placeholder="e.g. Badami / Cholachagudda" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section B: Land Area & Unit -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-[#15803d] fa-ruler-combined"></i> Section B: Land Size & Unit
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Land Area Value *</label>
+              <input type="number" id="input_size" name="input_size" step="0.1" min="0.1" value="2.5" required oninput="updateNormalizedAcresBadge()" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Unit of Measurement *</label>
+              <select id="input_unit" name="input_unit" required onchange="updateNormalizedAcresBadge()" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                <option value="Acre" selected>Acre</option>
+                <option value="Hectare">Hectare (1 Hectare = 2.47 Acres)</option>
+                <option value="Guntha">Guntha (40 Gunthas = 1 Acre)</option>
+              </select>
+            </div>
+
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center gap-3">
+              <i class="fas fa-calculator text-emerald-600 text-lg"></i>
+              <div>
+                <div class="text-[10px] uppercase font-bold text-emerald-800 tracking-wider">Normalized Area</div>
+                <div id="normalizedAcresBadge" class="text-sm font-extrabold text-emerald-900">~ 2.50 Acres</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section C: Land Characteristics & Soil -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-mountain-sun"></i> Section C: Land Type & Soil Quality
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Land Classification</label>
+              <select name="land_type" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Irrigated Agricultural Land" selected>Irrigated Agricultural Land</option>
+                <option value="Dryland / Rain-fed Farm">Dryland / Rain-fed Farm</option>
+                <option value="Horticulture / Plantation Land">Horticulture / Plantation Land</option>
+                <option value="Fallow / Idle Land">Fallow / Idle Land</option>
+                <option value="Polyhouse / High-Tech Farm">Polyhouse / High-Tech Farm</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Soil Type</label>
+              <select name="soil_type" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Black Cotton Soil" selected>Black Cotton Soil (Deep Fertile)</option>
+                <option value="Red Loamy Soil">Red Loamy Soil</option>
+                <option value="Alluvial / Clay Loam">Alluvial / Clay Loam</option>
+                <option value="Sandy / Gravelly Soil">Sandy / Gravelly Soil</option>
+                <option value="Laterite Soil">Laterite Soil</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Intended Crop / Use</label>
+              <select name="intended_use" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Commercial & Horticulture (Arecanut, Spices, Vegetables)" selected>Commercial / Horticulture (Arecanut, Spices, Vegetables)</option>
+                <option value="Field Crops (Paddy, Sugarcane, Maize, Pulses)">Field Crops (Paddy, Sugarcane, Maize)</option>
+                <option value="Plantation Crops (Coffee, Pepper, Rubber)">Plantation Crops</option>
+                <option value="Fallow / Grazing / Storage">Fallow / Grazing / Storage</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section D: Water & Irrigation -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-droplet"></i> Section D: Water Availability & Irrigation
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Water Availability *</label>
+              <select name="water_availability" required class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Regular Water (Perennial/Borewell)" selected>Regular Water (Perennial / Borewell)</option>
+                <option value="Year-round Canal Water">Year-round Canal Water</option>
+                <option value="Seasonal Water (Monsoon/Kharif)">Seasonal Water (Monsoon / Kharif)</option>
+                <option value="Rain-fed / No Water Source">Rain-fed / No Water Source</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Primary Water Source</label>
+              <select name="water_source" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Borewell" selected>Borewell</option>
+                <option value="Canal Network">Canal Network</option>
+                <option value="Open Well / Farm Pond">Open Well / Farm Pond</option>
+                <option value="River / Lake">River / Lake</option>
+                <option value="Rainwater Only">Rainwater Only</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Irrigation Setup</label>
+              <select name="irrigation_type" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Drip Irrigation Network" selected>Drip Irrigation Network</option>
+                <option value="Sprinkler System">Sprinkler System</option>
+                <option value="Surface / Flood Channel">Surface / Flood Channel</option>
+                <option value="None / Manual">None / Manual</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section E: Electricity & Grid -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-bolt"></i> Section E: Electricity Connection
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Electricity Availability *</label>
+              <select name="electricity_available" required class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="true" selected>Yes, Grid Electricity Available</option>
+                <option value="false">No Grid Electricity Connection</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Power Supply Quality</label>
+              <select name="electricity_reliability" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="3-Phase Dedicated Agricultural Line (7+ hrs)" selected>3-Phase Dedicated Line (7+ hrs/day)</option>
+                <option value="Single-Phase Regular Supply">Single-Phase Regular Supply</option>
+                <option value="Unreliable / Intermittent">Unreliable Grid / Low Voltage</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section F: Road Infrastructure & Logistics -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-road"></i> Section F: Road Access & Logistics
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Road Access Type *</label>
+              <select name="road_access" required class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Paved Road / Main Highway" selected>Paved Road / State Highway</option>
+                <option value="Gravel / All-Weather Tar Road">Gravel / All-Weather Tar Road</option>
+                <option value="Dirt Track / Mud Road">Dirt Track / Mud Road</option>
+                <option value="No Direct Vehicular Access">No Direct Vehicular Access</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Transport Accessibility</label>
+              <select name="transport_access" class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="Heavy Commercial Truck Accessible" selected>Heavy Commercial Truck Accessible</option>
+                <option value="Tractor Accessible">Tractor Accessible</option>
+                <option value="Two-Wheeler / Footpath Only">Two-Wheeler / Footpath Only</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Lease Duration (Years) *</label>
+              <input type="number" name="lease_duration_years" step="0.5" min="0.5" max="20" value="1.0" required class="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section G: On-Site Infrastructure Checkboxes -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-warehouse"></i> Section G: On-Site Infrastructure Features
+          </h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50 hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-gray-800 transition">
+              <input type="checkbox" name="infrastructure" value="Perimeter Fencing & Gate" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+              <span>Fencing & Gate</span>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50 hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-gray-800 transition">
+              <input type="checkbox" name="infrastructure" value="Motor Pump Set / Solar Pump" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+              <span>Motor / Solar Pump</span>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50 hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-gray-800 transition">
+              <input type="checkbox" name="infrastructure" value="Storage Shed / Farmhouse" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+              <span>Storage Shed / Godown</span>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50 hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-gray-800 transition">
+              <input type="checkbox" name="infrastructure" value="Polyhouse / Shade Net Structure" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+              <span>Polyhouse / Shade Net</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 border-t border-gray-100 flex items-center justify-end">
+          <button id="submitBtn" type="submit" class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+            <i class="fas fa-calculator"></i> Calculate Fair Lease Valuation
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="hidden bg-white rounded-3xl border border-emerald-200 p-12 text-center space-y-6 shadow-xl">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 text-2xl animate-spin">
+        <i class="fas fa-circle-notch"></i>
+      </div>
+      <div class="space-y-2">
+        <h3 class="text-xl font-extrabold text-gray-900">Calculating Land Lease Valuation...</h3>
+        <p id="loadingStepText" class="text-xs text-gray-500">Analyzing Karnataka district regional rates & water/road attributes...</p>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-2 max-w-md mx-auto overflow-hidden">
+        <div id="loadingProgressBar" class="bg-emerald-600 h-full w-1/4 transition-all duration-500"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS SECTION -->
+    <div id="resultsSection" class="hidden space-y-6">
+
+      <!-- Hero Valuation Display Banner -->
+      <div class="bg-gradient-to-br from-emerald-900 via-green-800 to-teal-900 rounded-3xl p-6 lg:p-8 text-white shadow-xl relative overflow-hidden border border-emerald-700/50">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+          
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span id="resConfidenceBadge" class="px-3.5 py-1 rounded-full text-xs font-extrabold bg-amber-400 text-amber-950 uppercase tracking-wide flex items-center gap-1.5 shadow-sm">
+                <i class="fas fa-shield-halved"></i> HIGH CONFIDENCE
+              </span>
+              <span id="resReportIdBadge" class="text-xs text-emerald-200 font-mono">REPORT ID: LL-2026-X89F</span>
+            </div>
+
+            <div>
+              <div class="text-xs uppercase font-bold tracking-wider text-emerald-200">Estimated Fair Annual Lease Value Range</div>
+              <div class="text-3xl lg:text-5xl font-black text-white mt-1 tracking-tight flex items-baseline gap-2">
+                <span id="resAnnualRange">₹35,000 – ₹45,000</span>
+                <span class="text-lg font-medium text-emerald-200">/ year</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-xs font-semibold text-emerald-100 pt-1">
+              <div class="bg-emerald-800/60 px-3 py-1.5 rounded-xl border border-emerald-600/40">
+                <i class="fas fa-calendar-alt text-emerald-400 mr-1"></i> Monthly: <span id="resMonthlyRange" class="font-bold text-white">₹2,900 – ₹3,750</span> / month
+              </div>
+              <div class="bg-emerald-800/60 px-3 py-1.5 rounded-xl border border-emerald-600/40">
+                <i class="fas fa-vector-square text-emerald-400 mr-1"></i> Per Acre Rate: <span id="resPerAcreRange" class="font-bold text-white">₹14,000 – ₹18,000</span> / acre / yr
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Download PDF Button -->
+          <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-3">
+            <button onclick="downloadPdfReport()" class="bg-amber-500 hover:bg-amber-400 text-amber-950 font-extrabold px-6 py-3.5 rounded-2xl transition shadow-lg flex items-center justify-center gap-2 text-sm">
+              <i class="fas fa-file-pdf text-lg"></i> Download PDF Report
+            </button>
+            <button onclick="modifyInputs()" class="bg-white/10 hover:bg-white/20 text-white font-bold px-5 py-3.5 rounded-2xl transition border border-white/20 flex items-center justify-center gap-2 text-sm">
+              <i class="fas fa-sliders"></i> Modify Details
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Grid of Valuation Factors & Land Summary -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1 & 2: Key Price Drivers -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- Positive Drivers -->
+          <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fas fa-circle-check text-emerald-600"></i> Primary Value Enhancers (+ Positive Drivers)
+            </h3>
+            <div id="resPositiveFactorsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Negative Drivers -->
+          <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold text-amber-800 uppercase tracking-wider flex items-center gap-2">
+              <i class="fas fa-triangle-exclamation text-amber-600"></i> Valuation Constraints & Risk Factors
+            </h3>
+            <div id="resNegativeFactorsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- AI Strategic Assessment -->
+          <div class="bg-white rounded-3xl border border-emerald-100 p-6 shadow-sm space-y-4 border-l-4 border-l-emerald-600">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-extrabold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-brain text-emerald-600"></i> Groq AI Strategic Land Lease Analysis
+              </h3>
+              <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full uppercase">Strategic Assessment</span>
+            </div>
+
+            <div class="space-y-4 text-xs text-gray-700 leading-relaxed">
+              <div class="p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+                <div class="font-bold text-gray-900 mb-1">Executive Summary:</div>
+                <p id="resAiSummary"></p>
+              </div>
+
+              <div>
+                <div class="font-bold text-gray-900 mb-1">Valuation Explanation:</div>
+                <p id="resAiExplanation"></p>
+              </div>
+
+              <div class="space-y-2">
+                <div class="font-bold text-gray-900">Recommended Negotiation Strategies:</div>
+                <ul id="resAiRecommendations" class="space-y-1.5 pl-4 list-disc text-gray-700"></ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Column 3: Confidence Breakdown & Verification Checklist -->
+        <div class="space-y-6">
+
+          <!-- Confidence Score Breakdown -->
+          <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+              <i class="fas fa-circle-info text-sky-600"></i> Confidence Justifications
+            </h3>
+            <ul id="resConfidenceReasonsList" class="space-y-2 text-xs text-gray-600">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Mandatory Legal Verification Checklist -->
+          <div class="bg-emerald-50/70 border border-emerald-200 rounded-3xl p-6 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold text-emerald-900 flex items-center gap-2">
+              <i class="fas fa-clipboard-check text-emerald-600"></i> Lessor/Lessee Verification Checklist
+            </h3>
+            <ul class="space-y-2 text-xs text-emerald-950 font-medium">
+              <li class="flex items-start gap-2">
+                <i class="fas fa-check-square text-emerald-600 mt-0.5"></i> Verify survey numbers and RTC (Pahani) records at Sub-Registrar office.
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fas fa-check-square text-emerald-600 mt-0.5"></i> Inspect physical land boundary markers and water pump condition.
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fas fa-check-square text-emerald-600 mt-0.5"></i> Execute a legally registered written lease agreement with annual escalation clause.
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- TAB 2: ESTIMATION HISTORY -->
+  <div id="historyContainer" class="hidden bg-white rounded-3xl border border-gray-200 shadow-md p-6 lg:p-8 space-y-6">
+    <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <i class="fas fa-history text-emerald-600"></i> Valuation History & Saved Reports
+        </h2>
+        <p class="text-xs text-gray-500 mt-0.5">Access and redownload your previous land lease estimation reports.</p>
+      </div>
+      <button onclick="loadHistory()" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+        <i class="fas fa-rotate"></i> Refresh
+      </button>
+    </div>
+
+    <div id="historyTableContainer" class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-gray-600">
+        <thead class="bg-gray-50 text-gray-700 font-bold uppercase tracking-wider border-b border-gray-200">
+          <tr>
+            <th class="p-3.5">Report ID & Date</th>
+            <th class="p-3.5">Location</th>
+            <th class="p-3.5">Land Size</th>
+            <th class="p-3.5">Estimated Annual Lease</th>
+            <th class="p-3.5">Confidence</th>
+            <th class="p-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody" class="divide-y divide-gray-100">
+          <tr>
+            <td colspan="6" class="p-8 text-center text-gray-400">Loading history records...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- JavaScript Logic -->
+<script>
+  let activeReportId = null;
+
+  function updateNormalizedAcresBadge() {
+    const size = parseFloat(document.getElementById('input_size').value) || 0;
+    const unit = document.getElementById('input_unit').value;
+    let acres = size;
+
+    if (unit === 'Hectare') {
+      acres = size * 2.47105;
+    } else if (unit === 'Guntha') {
+      acres = size * 0.025;
+    }
+
+    document.getElementById('normalizedAcresBadge').innerText = `~ ${acres.toFixed(2)} Acres`;
+  }
+
+  function switchTab(tab) {
+    const btnNew = document.getElementById('tabNewEstimate');
+    const btnHist = document.getElementById('tabHistory');
+    const containerNew = document.getElementById('newEstimateContainer');
+    const containerHist = document.getElementById('historyContainer');
+
+    if (tab === 'new') {
+      btnNew.className = 'px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm bg-white text-emerald-900';
+      btnHist.className = 'px-5 py-2.5 rounded-xl text-xs font-semibold text-emerald-100 hover:text-white transition-all';
+      containerNew.classList.remove('hidden');
+      containerHist.classList.add('hidden');
+    } else {
+      btnHist.className = 'px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm bg-white text-emerald-900';
+      btnNew.className = 'px-5 py-2.5 rounded-xl text-xs font-semibold text-emerald-100 hover:text-white transition-all';
+      containerHist.classList.remove('hidden');
+      containerNew.classList.add('hidden');
+      loadHistory();
+    }
+  }
+
+  async function handleFormSubmit(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('landLeaseForm');
+    const formData = new FormData(form);
+
+    // Extract multi-select checkboxes
+    const infrastructure = [];
+    form.querySelectorAll('input[name="infrastructure"]:checked').forEach(cb => {
+      infrastructure.push(cb.value);
+    });
+
+    const payload = {
+      state: formData.get('state') || 'Karnataka',
+      district: formData.get('district'),
+      taluk: formData.get('taluk') || null,
+      village: formData.get('village') || null,
+      input_size: parseFloat(formData.get('input_size')),
+      input_unit: formData.get('input_unit'),
+      land_type: formData.get('land_type'),
+      soil_type: formData.get('soil_type'),
+      intended_use: formData.get('intended_use'),
+      water_availability: formData.get('water_availability'),
+      water_source: formData.get('water_source'),
+      irrigation_type: formData.get('irrigation_type'),
+      electricity_available: formData.get('electricity_available') === 'true',
+      electricity_reliability: formData.get('electricity_reliability'),
+      road_access: formData.get('road_access'),
+      transport_access: formData.get('transport_access'),
+      lease_duration_years: parseFloat(formData.get('lease_duration_years')),
+      infrastructure: infrastructure
+    };
+
+    // UI Loading state
+    document.getElementById('formCard').classList.add('hidden');
+    document.getElementById('resultsSection').classList.add('hidden');
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.remove('hidden');
+
+    const progressBar = document.getElementById('loadingProgressBar');
+    const stepText = document.getElementById('loadingStepText');
+
+    progressBar.style.width = '30%';
+    stepText.innerText = 'Calculating Karnataka regional base rates...';
+
+    setTimeout(() => {
+      progressBar.style.width = '75%';
+      stepText.innerText = 'Generating Groq AI strategic valuation assessment...';
+    }, 600);
+
+    try {
+      const response = await fetch('/user/land-leasing/estimate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Estimation request failed');
+      }
+
+      const result = await response.json();
+      activeReportId = result.report_id;
+
+      // Render Result
+      renderResults(result);
+
+      overlay.classList.add('hidden');
+      document.getElementById('resultsSection').classList.remove('hidden');
+
+    } catch (err) {
+      alert('Error calculating lease estimation: ' + err.message);
+      overlay.classList.add('hidden');
+      document.getElementById('formCard').classList.remove('hidden');
+    }
+  }
+
+  function renderResults(res) {
+    document.getElementById('resReportIdBadge').innerText = `REPORT ID: ${res.report_id}`;
+    document.getElementById('resAnnualRange').innerText = `₹${res.calculated_min_price.toLocaleString('en-IN')} – ₹${res.calculated_max_price.toLocaleString('en-IN')}`;
+    document.getElementById('resMonthlyRange').innerText = `₹${res.monthly_min_price.toLocaleString('en-IN')} – ₹${res.monthly_max_price.toLocaleString('en-IN')}`;
+    document.getElementById('resPerAcreRange').innerText = `₹${res.per_acre_min.toLocaleString('en-IN')} – ₹${res.per_acre_max.toLocaleString('en-IN')}`;
+    document.getElementById('resConfidenceBadge').innerText = `${res.confidence_score} CONFIDENCE`;
+
+    // Render Positive Drivers
+    const posContainer = document.getElementById('resPositiveFactorsList');
+    posContainer.innerHTML = '';
+    (res.positive_factors || []).forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs font-semibold text-emerald-950 flex items-start gap-2';
+      div.innerHTML = `<span class="text-emerald-700 font-extrabold">${item.impact}</span> <span>${item.description}</span>`;
+      posContainer.appendChild(div);
+    });
+    if ((res.positive_factors || []).length === 0) {
+      posContainer.innerHTML = '<div class="text-xs text-gray-400 italic">Standard baseline conditions apply.</div>';
+    }
+
+    // Render Negative Drivers
+    const negContainer = document.getElementById('resNegativeFactorsList');
+    negContainer.innerHTML = '';
+    (res.negative_factors || []).forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'p-3 bg-amber-50 rounded-2xl border border-amber-200 text-xs font-semibold text-amber-950 flex items-start gap-2';
+      div.innerHTML = `<span class="text-amber-700 font-extrabold">${item.impact}</span> <span>${item.description}</span>`;
+      negContainer.appendChild(div);
+    });
+    if ((res.negative_factors || []).length === 0) {
+      negContainer.innerHTML = '<div class="text-xs text-gray-500 italic">No major physical or access constraints recorded.</div>';
+    }
+
+    // Render AI Assessment
+    const ai = res.ai_analysis || {};
+    document.getElementById('resAiSummary').innerText = ai.summary || 'Summary unavailable.';
+    document.getElementById('resAiExplanation').innerText = ai.estimated_range_explanation || 'Explanation unavailable.';
+
+    const recsList = document.getElementById('resAiRecommendations');
+    recsList.innerHTML = '';
+    (ai.recommendations || []).forEach(rec => {
+      const li = document.createElement('li');
+      li.innerText = rec;
+      recsList.appendChild(li);
+    });
+
+    // Render Confidence Reasons
+    const confList = document.getElementById('resConfidenceReasonsList');
+    confList.innerHTML = '';
+    (res.confidence_reasons || []).forEach(reason => {
+      const li = document.createElement('li');
+      li.className = 'flex items-start gap-2';
+      li.innerHTML = `<i class="fas fa-check text-sky-600 mt-0.5"></i> <span>${reason}</span>`;
+      confList.appendChild(li);
+    });
+  }
+
+  function modifyInputs() {
+    document.getElementById('resultsSection').classList.add('hidden');
+    document.getElementById('formCard').classList.remove('hidden');
+  }
+
+  function downloadPdfReport(reportId = null) {
+    const id = reportId || activeReportId;
+    if (!id) {
+      alert('Report ID not found.');
+      return;
+    }
+    window.open(`/user/land-leasing/report/${id}`, '_blank');
+  }
+
+  async function loadHistory() {
+    const body = document.getElementById('historyTableBody');
+    body.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">Fetching estimation history...</td></tr>';
+
+    try {
+      const response = await fetch('/user/land-leasing/history', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      const data = await response.json();
+
+      if (!data.history || data.history.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">No previous land lease estimation reports found.</td></tr>';
+        return;
+      }
+
+      body.innerHTML = '';
+      data.history.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50/80 transition';
+        tr.innerHTML = `
+          <td class="p-3.5 font-semibold text-gray-900">
+            <span class="font-mono text-emerald-700">${item.report_id}</span>
+            <div class="text-[10px] text-gray-400 font-normal">${item.created_at}</div>
+          </td>
+          <td class="p-3.5 font-medium text-gray-800">${item.district}, ${item.state}</td>
+          <td class="p-3.5 font-medium text-gray-800">${item.input_size} ${item.input_unit} (${item.acres} Acres)</td>
+          <td class="p-3.5 font-extrabold text-emerald-800">₹${item.calculated_min_price.toLocaleString('en-IN')} – ₹${item.calculated_max_price.toLocaleString('en-IN')}</td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 uppercase">${item.confidence_score}</span>
+          </td>
+          <td class="p-3.5 text-right">
+            <button onclick="downloadPdfReport('${item.report_id}')" class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs font-bold transition flex items-center gap-1.5 ml-auto">
+              <i class="fas fa-file-pdf"></i> Download PDF
+            </button>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+
+    } catch (err) {
+      body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Failed to load history: ${err.message}</td></tr>`;
+    }
+  }
+</script>
+{% endblock %}
