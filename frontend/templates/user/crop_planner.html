@@ -1,0 +1,1735 @@
+<!-- templates/user/crop_planner.html -->
+{% extends "base.html" %}
+{% block title %}Crop Planner - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Crop Schedule & Planner{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item active">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+
+{% endblock %} {% block content %}
+<div class="space-y-6 crop-planner-page">
+  <section class="bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-6 xl:grid-cols-[1.45fr,0.95fr]">
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-800"
+          >
+            <i class="fas fa-calendar-days text-emerald-600"></i>
+            Persisted Crop Plans
+          </span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 text-xs font-semibold text-sky-800"
+          >
+            <i class="fas fa-location-dot text-sky-600"></i>
+            {{ user.district or "District not set" }}, {{ user.state or "Karnataka" }}
+          </span>
+          <button
+            type="button"
+            onclick="openHistoryModal('crop_planner', 'Past Crop Plans')"
+            class="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition-all cursor-pointer shadow-2xs"
+          >
+            <i class="fas fa-history text-amber-600"></i>
+            View Past Plans
+          </button>
+        </div>
+
+        <div>
+          <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+            Keep one active crop plan visible while preparing the next one.
+          </h1>
+          <p class="mt-4 max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+            CropCare now stores your generated crop plan. If the plan is still active,
+            it stays visible when you revisit this page. You can also prepare a new crop
+            plan in a separate section without losing the current one.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="bg-gray-50 border border-gray-200 rounded-[24px] p-5 shadow-2xs">
+            <p class="text-xs uppercase font-bold tracking-wider text-gray-500">Active Plan</p>
+            <p class="mt-2 text-2xl font-extrabold text-gray-900">
+              {% if active_plan %}Available{% else %}Not set{% endif %}
+            </p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 rounded-[24px] p-5 shadow-2xs">
+            <p class="text-xs uppercase font-bold tracking-wider text-gray-500">Planner Scope</p>
+            <p class="mt-2 text-2xl font-extrabold text-gray-900">{{ planner_crops|length }} crops</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 rounded-[24px] p-5 shadow-2xs">
+            <p class="text-xs uppercase font-bold tracking-wider text-gray-500">Saved To</p>
+            <p class="mt-2 text-2xl font-extrabold text-gray-900">Your account</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="rounded-[28px] border border-emerald-200 bg-emerald-50/60 p-6 shadow-2xs">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-1">How It Works Now</p>
+              <p class="text-xl font-bold text-gray-900">Current plan plus new plan flow</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-emerald-200 text-emerald-700 shadow-2xs">
+              <i class="fas fa-layer-group text-lg"></i>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-3">
+            <div class="rounded-2xl bg-white border border-emerald-100 px-4 py-3 text-sm font-medium text-gray-800 shadow-2xs">
+              The current active plan remains visible until its end date passes.
+            </div>
+            <div class="rounded-2xl bg-white border border-emerald-100 px-4 py-3 text-sm font-medium text-gray-800 shadow-2xs">
+              A separate builder lets you create the next plan at any time.
+            </div>
+            <div class="rounded-2xl bg-white border border-emerald-100 px-4 py-3 text-sm font-medium text-gray-800 shadow-2xs">
+              Generated stages are stored and shown again on revisit.
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 border border-gray-200 rounded-[28px] p-6">
+          <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Operator Note</p>
+          <p class="text-sm leading-relaxed text-gray-600">
+            The active section always shows the latest plan that has not reached its harvest date yet.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-[1.02fr,0.98fr]">
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-8 fade-up stagger-1">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Section 1</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Current active plan</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 border border-sky-200 text-sky-600 shadow-2xs">
+          <i class="fas fa-timeline text-lg"></i>
+        </div>
+      </div>
+
+      <div id="activePlanShell" class="mt-6 active-plan-shell"></div>
+    </div>
+
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-8 fade-up stagger-2">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Section 2</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Create a new crop plan</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 shadow-2xs">
+          <i class="fas fa-wand-magic-sparkles text-lg"></i>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-5">
+        <div class="planner-panel rounded-[28px] p-6">
+          <label for="planningCrop" class="block text-sm font-bold text-gray-900">
+            Choose crop
+          </label>
+          <p class="mt-1.5 text-sm text-gray-600">
+            Select the crop you want to plan next. The plan length is automatically derived from the crop cycle.
+          </p>
+          <div id="planningCropContainer" class="mt-4"></div>
+          <input type="hidden" id="planningCrop" name="crop" required />
+        </div>
+
+        <div class="planner-panel rounded-[28px] p-6">
+          <label for="plantingDate" class="block text-sm font-bold text-gray-900">
+            Planting date
+          </label>
+          <p class="mt-1.5 text-sm text-gray-600">
+            The planner uses this date as the start point for all growth stages and harvest timing.
+          </p>
+          <input
+            type="text"
+            id="plantingDate"
+            placeholder="DD/MM/YYYY"
+            inputmode="numeric"
+            class="planner-input mt-4 w-full"
+          />
+          <div id="harvestPreview" class="preview-chip mt-4">
+            Harvest date will be calculated after crop selection.
+          </div>
+        </div>
+
+        <div class="planner-panel rounded-[28px] p-6">
+          <p class="text-sm font-bold text-gray-900">Purpose & Season</p>
+          <p class="mt-1.5 text-sm text-gray-600">Select the farming goal and growing season.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <div>
+              <label for="planningPurpose" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Purpose</label>
+              <select id="planningPurpose" class="planner-input w-full font-medium">
+                <option value="Commercial Sale">Commercial Sale</option>
+                <option value="Self Consumption">Self Consumption</option>
+                <option value="Seed Production">Seed Production</option>
+                <option value="Fodder Crop">Fodder Crop</option>
+              </select>
+            </div>
+            <div>
+              <label for="planningSeason" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Season</label>
+              <select id="planningSeason" class="planner-input w-full font-medium">
+                <option value="">Auto-detect from date</option>
+                <option value="Kharif">Kharif</option>
+                <option value="Rabi">Rabi</option>
+                <option value="Summer">Summer</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="planner-panel rounded-[28px] p-6">
+          <div class="flex items-center justify-between cursor-pointer select-none" onclick="togglePlannerSoil()">
+            <div>
+              <p class="text-sm font-bold text-gray-900">Soil Details <span class="text-xs text-gray-500 font-normal">(Optional)</span></p>
+              <p class="mt-1 text-sm text-gray-600">Provide soil test metrics for AI nutrient precision.</p>
+            </div>
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
+              <i id="soilChevron" class="fas fa-chevron-down transition-transform"></i>
+            </div>
+          </div>
+          <div id="plannerSoilContent" class="mt-5 space-y-4 pt-4 border-t border-gray-200" style="display: none;">
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label for="planSoilType" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Soil Type</label>
+                <select id="planSoilType" class="planner-input w-full">
+                  <option value="">Select soil type</option>
+                  <option value="Black Soil">Black Soil</option>
+                  <option value="Red Soil">Red Soil</option>
+                  <option value="Laterite Soil">Laterite Soil</option>
+                  <option value="Alluvial Soil">Alluvial Soil</option>
+                  <option value="Sandy Soil">Sandy Soil</option>
+                  <option value="Clay Soil">Clay Soil</option>
+                </select>
+              </div>
+              <div>
+                <label for="planSoilTexture" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Texture</label>
+                <select id="planSoilTexture" class="planner-input w-full">
+                  <option value="">Select texture</option>
+                  <option value="Sandy">Sandy</option>
+                  <option value="Loamy">Loamy</option>
+                  <option value="Clayey">Clayey</option>
+                  <option value="Silty">Silty</option>
+                  <option value="Mixed">Mixed</option>
+                </select>
+              </div>
+              <div>
+                <label for="planSoilDepth" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Depth (cm)</label>
+                <input type="number" id="planSoilDepth" placeholder="e.g. 30" class="planner-input w-full" />
+              </div>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label for="planSoilPH" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">pH</label>
+                <input type="number" step="0.1" id="planSoilPH" placeholder="e.g. 6.5" class="planner-input w-full" />
+              </div>
+              <div>
+                <label for="planSoilOC" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Organic Carbon (%)</label>
+                <input type="number" step="0.01" id="planSoilOC" placeholder="e.g. 0.8" class="planner-input w-full" />
+              </div>
+              <div>
+                <label for="planSoilEC" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">EC (dS/m)</label>
+                <input type="number" step="0.01" id="planSoilEC" placeholder="e.g. 0.5" class="planner-input w-full" />
+              </div>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label for="planSoilN" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Nitrogen (N) kg/ha</label>
+                <input type="number" id="planSoilN" placeholder="e.g. 250" class="planner-input w-full" />
+              </div>
+              <div>
+                <label for="planSoilP" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Phosphorus (P) kg/ha</label>
+                <input type="number" id="planSoilP" placeholder="e.g. 18" class="planner-input w-full" />
+              </div>
+              <div>
+                <label for="planSoilK" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Potassium (K) kg/ha</label>
+                <input type="number" id="planSoilK" placeholder="e.g. 280" class="planner-input w-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="planner-panel rounded-[28px] p-6">
+          <p class="text-sm font-bold text-gray-900">Climate & History</p>
+          <p class="mt-1.5 text-sm text-gray-600">Local climate data and previous cropping history.</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-3">
+            <div>
+              <label for="planRainfall" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Avg. Annual Rainfall</label>
+              <input type="number" id="planRainfall" placeholder="e.g. 800" class="planner-input w-full" />
+              <p class="mt-1.5 text-xs font-medium"><a href="#" onclick="openRainfallPopup(); return false;" class="text-emerald-700 hover:text-emerald-800 hover:underline inline-flex items-center gap-1"><i class="fas fa-chart-column"></i> View annual rainfall chart</a></p>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Monsoon Dependent?</label>
+              <select id="planMonsoon" class="planner-input w-full">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div>
+              <label for="planPrevCrop" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Last Crop Grown</label>
+              <input type="text" id="planPrevCrop" placeholder="e.g. Rice, Maize" class="planner-input w-full" />
+            </div>
+          </div>
+        </div>
+
+        <div class="planner-panel rounded-[28px] p-6">
+          <p class="text-sm font-bold text-gray-900">Reminder preferences</p>
+          <p class="mt-1.5 text-sm text-gray-600">
+            These are stored with the plan so you can see which kinds of reminders matter for this crop cycle.
+          </p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <label class="toggle-chip">
+              <input type="checkbox" id="wateringReminder" />
+              <span><i class="fas fa-droplet text-sky-600"></i> Watering</span>
+            </label>
+            <label class="toggle-chip">
+              <input type="checkbox" id="fertilizingReminder" />
+              <span><i class="fas fa-flask text-emerald-600"></i> Fertilizing</span>
+            </label>
+            <label class="toggle-chip">
+              <input type="checkbox" id="pestControlReminder" />
+              <span><i class="fas fa-bug text-amber-600"></i> Pest control</span>
+            </label>
+            <label class="toggle-chip">
+              <input type="checkbox" id="pruningReminder" />
+              <span><i class="fas fa-scissors text-red-600"></i> Pruning</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button
+            type="button"
+            onclick="generatePlan()"
+            class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 planner-cta font-bold shadow-md cursor-pointer"
+          >
+            <i class="fas fa-calendar-check"></i>
+            Generate And Save Plan
+          </button>
+          <button
+            type="button"
+            onclick="resetPlannerForm()"
+            class="btn-secondary inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 font-semibold cursor-pointer"
+          >
+            <i class="fas fa-rotate-left"></i>
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Rainfall Popup Modal -->
+<div id="rainfallPopupModal" class="rainfall-modal-overlay" style="display:none;">
+  <div class="rainfall-modal">
+    <div class="rainfall-modal-header">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-0.5">Annual Rainfall</p>
+        <h2 class="text-xl font-extrabold text-gray-900" id="rainfallPopupTitle">Loading...</h2>
+      </div>
+      <button type="button" class="farm-modal-close" onclick="closeRainfallPopup()" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="rainfall-modal-body">
+      <div id="rainfallPopupLoading" class="rainfall-loading">
+        <div class="loading-ring"><span></span></div>
+        <p class="mt-4 text-sm font-medium text-gray-600">Fetching rainfall data...</p>
+      </div>
+      <div id="rainfallPopupError" class="rainfall-error" style="display:none;">
+        <div class="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-red-50 text-red-600 text-xl border border-red-200">
+          <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <p class="mt-3 text-sm font-medium text-gray-600" id="rainfallPopupErrorMsg">Unable to load rainfall data.</p>
+      </div>
+      <div id="rainfallPopupContent" style="display:none;">
+        <canvas id="rainfallPopupChart" width="500" height="260"></canvas>
+        <div class="rainfall-summary">
+          <div class="rainfall-summary-item">
+            <span class="rainfall-summary-label">Total Annual Rainfall</span>
+            <span class="rainfall-summary-value" id="rainfallPopupTotal">--</span>
+          </div>
+          <div class="rainfall-summary-item">
+            <span class="rainfall-summary-label">District</span>
+            <span class="rainfall-summary-value" id="rainfallPopupDistrict">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .crop-planner-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(79, 195, 247, 0.12), transparent 38%),
+      radial-gradient(circle at top right, rgba(67, 160, 71, 0.12), transparent 30%);
+  }
+
+  .crop-planner-page .active-plan-shell {
+    min-height: 580px;
+    border-radius: 28px;
+    border: 1px solid #DDE5D5;
+    background: #F8FAF5;
+    padding: 1.5rem;
+  }
+
+  .crop-planner-page .planner-panel {
+    border: 1px solid #DDE5D5;
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+
+  .crop-planner-page .planner-input {
+    min-height: 3.5rem;
+    border-radius: 1.25rem;
+    border: 1px solid #DDE5D5;
+    background: #FFFFFF;
+    color: #1F2937;
+    padding: 0.95rem 1rem;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .crop-planner-page .planner-input:focus {
+    outline: none;
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .crop-planner-page .preview-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 999px;
+    background: #E8F5E9;
+    border: 1px solid #C8E6C9;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1B5E20;
+  }
+
+  .crop-planner-page .toggle-chip {
+    position: relative;
+    display: block;
+    cursor: pointer;
+  }
+
+  .crop-planner-page .toggle-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .crop-planner-page .toggle-chip span {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 20px;
+    border: 1px solid #DDE5D5;
+    background: #FFFFFF;
+    padding: 0.95rem 1rem;
+    color: #4B5563;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  }
+
+  .crop-planner-page .toggle-chip input:checked + span {
+    border-color: #2E7D32;
+    background: #E8F5E9;
+    color: #1B5E20;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .crop-planner-page .planner-cta {
+    min-width: 250px;
+  }
+
+  .crop-planner-page .empty-state,
+  .crop-planner-page .loading-state {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .crop-planner-page .empty-icon,
+  .crop-planner-page .loading-icon {
+    display: inline-flex;
+    height: 5rem;
+    width: 5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.6rem;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 1.8rem;
+  }
+
+  .crop-planner-page .current-plan {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .crop-planner-page .plan-banner {
+    border-radius: 24px;
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
+    color: #FFFFFF;
+    padding: 1.75rem;
+    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.15);
+  }
+
+  .crop-planner-page .plan-badge,
+  .crop-planner-page .mini-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    padding: 0.55rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+
+  .crop-planner-page .plan-meta {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .crop-planner-page .meta-card,
+  .crop-planner-page .stage-card {
+    border-radius: 22px;
+    border: 1px solid #DDE5D5;
+    background: #FFFFFF;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .crop-planner-page .stage-card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    border-color: #A5D6A7;
+  }
+
+  .crop-planner-page .reminder-row,
+  .crop-planner-page .task-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .crop-planner-page .task-item,
+  .crop-planner-page .reminder-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    background: #F3F6F0;
+    border: 1px solid #E5EBE0;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .crop-planner-page .stages-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .crop-planner-page .stage-copy {
+    margin-top: 0.85rem;
+    color: #4B5563;
+    line-height: 1.7;
+  }
+
+  .crop-planner-page .plan-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 767px) {
+    .crop-planner-page .planner-cta {
+      width: 100%;
+    }
+
+    .crop-planner-page .active-plan-shell {
+      min-height: 420px;
+      padding: 1rem;
+    }
+
+    .crop-planner-page .plan-meta {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Loading Ring & Close Button ── */
+  .crop-planner-page .loading-ring {
+    position: relative;
+    display: flex;
+    height: 4.8rem;
+    width: 4.8rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #F3F6F0;
+  }
+
+  .crop-planner-page .loading-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0.2rem;
+    border-radius: inherit;
+    border: 3px solid #C8E6C9;
+    border-top-color: #2E7D32;
+    animation: spin 1s linear infinite;
+  }
+
+  .crop-planner-page .loading-ring span {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    height: 2.2rem;
+    width: 2.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #E8F5E9;
+  }
+
+  .crop-planner-page .loading-ring span::before {
+    content: "\f06c";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #2E7D32;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .farm-modal-close {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    border: 1px solid #DDE5D5;
+    background: #F3F6F0;
+    color: #6B7280;
+    cursor: pointer;
+    transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+  }
+
+  .farm-modal-close:hover {
+    transform: scale(1.06);
+    background: #FEE2E2;
+    color: #DC2626;
+  }
+
+  /* ── Rainfall Popup Modal ── */
+  .rainfall-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .rainfall-modal {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 28px;
+    border: 1px solid #DDE5D5;
+    background: #FFFFFF;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .rainfall-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #DDE5D5;
+    background: #F8FAF5;
+    flex-shrink: 0;
+  }
+
+  .rainfall-modal-body {
+    padding: 1.5rem;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rainfall-loading,
+  .rainfall-error {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 280px;
+  }
+
+  .rainfall-summary {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .rainfall-summary-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.85rem 1rem;
+    border-radius: 16px;
+    background: #F8FAF5;
+    border: 1px solid #DDE5D5;
+  }
+
+  .rainfall-summary-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6B7280;
+  }
+
+  .rainfall-summary-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2E7D32;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @media (max-width: 767px) {
+    .rainfall-modal {
+      max-width: 100%;
+      border-radius: 20px;
+    }
+
+    .rainfall-summary {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const initialActivePlan = {{ active_plan|tojson }};
+
+  function parseDateValue(value) {
+    if (value instanceof Date) {
+      return value;
+    }
+
+    if (typeof value === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+      const [day, month, year] = value.split("/").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    return new Date(value);
+  }
+
+  function formatDateInputValue(value) {
+    const date = parseDateValue(value);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function getIsoDateFromInput(value) {
+    if (!value || !/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+      return null;
+    }
+
+    const parsed = parseDateValue(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+
+    const day = String(parsed.getDate()).padStart(2, "0");
+    const month = String(parsed.getMonth() + 1).padStart(2, "0");
+    const year = parsed.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+
+  function formatDate(dateString) {
+    const value = parseDateValue(dateString);
+    return value.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  function getReminderPayload() {
+    return {
+      watering: document.getElementById("wateringReminder").checked,
+      fertilizing: document.getElementById("fertilizingReminder").checked,
+      pest_control: document.getElementById("pestControlReminder").checked,
+      pruning: document.getElementById("pruningReminder").checked,
+    };
+  }
+
+  function renderEmptyPlanState() {
+    return `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-calendar-xmark"></i>
+        </div>
+        <h3 class="mt-5 text-2xl font-extrabold text-gray-900">No active crop plan</h3>
+        <p class="mt-2 max-w-md text-sm leading-relaxed text-gray-600">
+          Generate a new crop plan from Section 2. Once created, it will stay here until its harvest date passes.
+        </p>
+      </div>
+    `;
+  }
+
+  function renderLoadingState() {
+    return `
+      <div class="space-y-6 w-full py-4">
+        <div class="loading-state mb-4">
+          <div class="loading-icon">
+            <i class="fas fa-spinner fa-spin"></i>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Saving crop plan</h3>
+          <p class="mt-2 max-w-md text-sm leading-relaxed text-gray-600">
+            Building stage-by-stage guidance and storing it to your account.
+          </p>
+        </div>
+        <div class="grid gap-4">
+          <div class="bg-white border border-gray-200 shadow-2xs p-5 rounded-[24px] space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="skeleton-block w-24 h-5 rounded-full bg-gray-200"></div>
+              <div class="skeleton-block w-32 h-5 rounded-full bg-gray-200"></div>
+            </div>
+            <div class="skeleton-block w-1/2 h-6 rounded-lg bg-gray-200"></div>
+            <div class="skeleton-line w-full bg-gray-200"></div>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-2xs p-5 rounded-[24px] space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="skeleton-block w-24 h-5 rounded-full bg-gray-200"></div>
+              <div class="skeleton-block w-32 h-5 rounded-full bg-gray-200"></div>
+            </div>
+            <div class="skeleton-block w-1/2 h-6 rounded-lg bg-gray-200"></div>
+            <div class="skeleton-line w-full bg-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderReminderChips(reminders) {
+    const labels = [
+      { key: "watering", label: "Watering", icon: "fas fa-droplet text-sky-600" },
+      { key: "fertilizing", label: "Fertilizing", icon: "fas fa-flask text-emerald-600" },
+      { key: "pest_control", label: "Pest control", icon: "fas fa-bug text-amber-600" },
+      { key: "pruning", label: "Pruning", icon: "fas fa-scissors text-red-600" },
+    ].filter((item) => reminders && reminders[item.key]);
+
+    if (labels.length === 0) {
+      return `<span class="reminder-chip"><i class="fas fa-bell-slash text-gray-400"></i>No reminder flags selected</span>`;
+    }
+
+    return labels
+      .map(
+        (item) => `
+          <span class="reminder-chip">
+            <i class="${item.icon}"></i>
+            ${item.label}
+          </span>
+        `,
+      )
+      .join("");
+  }
+
+  function renderTaskItems(tasks) {
+    return tasks
+      .map(
+        (task) => `
+          <span class="task-item">
+            <i class="fas fa-circle-check text-emerald-600"></i>
+            ${task}
+          </span>
+        `,
+      )
+      .join("");
+  }
+
+  function renderActivePlan(plan) {
+    if (plan.ai_generated) {
+      const activeStageTitle = plan.current_stage?.title || "Active Growth";
+      const countdownText = plan.harvest_countdown >= 0 ? `${plan.harvest_countdown} days remaining` : "Ready for Harvest";
+      const todayTasksHtml = (plan.todays_tasks && plan.todays_tasks.length > 0)
+        ? plan.todays_tasks.map(t => `<div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl mb-3 shadow-2xs"><span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">${t.category} (${t.priority})</span><p class="text-gray-900 mt-1 font-bold text-base">${t.task}</p><p class="text-xs text-gray-600 mt-1 leading-relaxed">${t.notes}</p></div>`).join("")
+        : `<p class="text-sm font-medium text-gray-500">No specific tasks scheduled for today.</p>`;
+      
+      const nextTaskHtml = plan.next_task
+        ? `<div class="p-4 bg-sky-50 border border-sky-200 rounded-2xl shadow-2xs"><span class="text-xs font-bold text-sky-800 uppercase tracking-wider">Day ${plan.next_task.day_number} — ${plan.next_task.formatted_date}</span><p class="text-gray-900 mt-1 font-bold text-base">${plan.next_task.task}</p><p class="text-xs text-gray-600 mt-1 leading-relaxed">${plan.next_task.notes}</p></div>`
+        : `<p class="text-sm font-medium text-gray-500">No upcoming tasks scheduled.</p>`;
+
+      const scheduleHtml = (plan.ai_details?.schedule || []).map(t => `
+        <div class="flex items-start justify-between gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-200 mb-3 shadow-2xs">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-800 mb-2">Day ${t.day_number} (${t.formatted_date})</span>
+            <h5 class="text-base font-bold text-gray-900">${t.task}</h5>
+            <p class="text-sm text-gray-600 mt-1">${t.notes}</p>
+          </div>
+          <span class="text-xs px-3 py-1 rounded-full font-bold ${t.priority === 'High' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-sky-50 border border-sky-200 text-sky-700'}">${t.category}</span>
+        </div>
+      `).join("");
+
+      const stagesHtml = (plan.stages || []).map(st => `
+        <article class="stage-card">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="text-xs uppercase font-bold tracking-wider text-gray-400">Days ${st.day_range}</p>
+              <h4 class="mt-1 text-xl font-extrabold text-gray-900">${st.title}</h4>
+            </div>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 border border-sky-200 px-3 py-1 text-xs font-semibold text-sky-800">
+              <i class="fas fa-calendar-day text-sky-600"></i>
+              ${formatDate(st.start_date)} to ${formatDate(st.end_date)}
+            </span>
+          </div>
+          <p class="stage-copy mt-2">${st.description}</p>
+        </article>
+      `).join("");
+
+      const irrHtml = (plan.ai_details?.irrigation_schedule || []).map(i => `
+        <div class="p-3.5 bg-gray-50 rounded-xl border border-gray-200 mb-2 flex justify-between items-center">
+          <div>
+            <p class="text-sm font-bold text-gray-900">Day ${i.day} (${i.formatted_date})</p>
+            <p class="text-xs text-gray-600 mt-0.5">${i.reason}</p>
+          </div>
+          <span class="text-xs font-bold text-sky-700 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-lg"><i class="fas fa-droplet mr-1"></i>${i.water_amount}</span>
+        </div>
+      `).join("");
+
+      const fertHtml = (plan.ai_details?.fertilizer_schedule || []).map(f => `
+        <div class="p-3.5 bg-gray-50 rounded-xl border border-gray-200 mb-2 flex justify-between items-center">
+          <div>
+            <p class="text-sm font-bold text-gray-900">Day ${f.day} (${f.formatted_date}) — ${f.fertilizer}</p>
+            <p class="text-xs text-gray-600 mt-0.5">${f.reason}</p>
+          </div>
+          <span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg"><i class="fas fa-flask mr-1"></i>${f.quantity}</span>
+        </div>
+      `).join("");
+
+      const tipsHtml = (plan.ai_details?.tips || []).map(tip => `
+        <li class="flex items-start gap-2.5 text-sm font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-amber-500 mt-1"></i><span>${tip}</span></li>
+      `).join("");
+
+      const alertsHtml = (plan.ai_details?.important_alerts || []).map(a => `
+        <div class="p-4 bg-red-50 border border-red-200 rounded-2xl text-sm font-semibold text-red-800 mb-3 flex items-start gap-3 shadow-2xs"><i class="fas fa-triangle-exclamation mt-0.5 text-lg text-red-600"></i><span>${a}</span></div>
+      `).join("");
+
+      return `
+        <div class="current-plan">
+          <div class="plan-banner flex flex-wrap justify-between items-start gap-4">
+            <div>
+              <span class="plan-badge">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                AI Cultivation Schedule
+              </span>
+              <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-white">${plan.crop_label} <span class="text-base font-normal text-white/80 ml-2">(${plan.ai_details?.season || ''})</span></h3>
+              <p class="mt-2 text-sm leading-relaxed text-white/90">
+                Personalized plan generated for your farm conditions.
+              </p>
+            </div>
+            <button onclick="regeneratePlan(${plan.id})" class="inline-flex items-center gap-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2.5 text-sm border border-white/30 transition-colors cursor-pointer shadow-2xs">
+              <i class="fas fa-rotate"></i> Regenerate Plan
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-6">
+            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 shadow-2xs">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Crop Age</p>
+              <p class="text-2xl font-extrabold text-emerald-700 mt-1">${plan.crop_age_days} <span class="text-sm font-normal text-gray-500">days</span></p>
+            </div>
+            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 shadow-2xs">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Current Stage</p>
+              <p class="text-lg font-extrabold text-gray-900 mt-1 truncate">${activeStageTitle}</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 shadow-2xs">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Countdown</p>
+              <p class="text-2xl font-extrabold text-sky-600 mt-1">${countdownText}</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 shadow-2xs">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Est. Harvest</p>
+              <p class="text-lg font-extrabold text-gray-900 mt-1">${formatDate(plan.harvest_date)}</p>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <div class="p-6 rounded-[24px] bg-white border border-gray-200 shadow-2xs">
+              <h4 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2"><i class="fas fa-calendar-day text-emerald-600"></i> Today's Tasks</h4>
+              ${todayTasksHtml}
+            </div>
+            <div class="p-6 rounded-[24px] bg-white border border-gray-200 shadow-2xs">
+              <h4 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2"><i class="fas fa-forward-step text-sky-600"></i> Next Scheduled Task</h4>
+              ${nextTaskHtml}
+            </div>
+          </div>
+
+          ${alertsHtml ? `<div class="mb-6">${alertsHtml}</div>` : ''}
+
+          <div class="space-y-6">
+            <div>
+              <h4 class="text-lg font-extrabold text-gray-900 mb-3">Growth Stages</h4>
+              <div class="stages-grid">${stagesHtml}</div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="p-6 rounded-[24px] bg-white border border-gray-200 shadow-2xs">
+                <h4 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2"><i class="fas fa-droplet text-sky-600"></i> Irrigation Schedule</h4>
+                <div class="max-h-64 overflow-y-auto pr-1">${irrHtml || '<p class="text-sm text-gray-500">No irrigation entries.</p>'}</div>
+              </div>
+              <div class="p-6 rounded-[24px] bg-white border border-gray-200 shadow-2xs">
+                <h4 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2"><i class="fas fa-flask text-emerald-600"></i> Fertilizer Schedule</h4>
+                <div class="max-h-64 overflow-y-auto pr-1">${fertHtml || '<p class="text-sm text-gray-500">No fertilizer entries.</p>'}</div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-extrabold text-gray-900 mb-3">Full Cultivation Schedule</h4>
+              <div class="max-h-96 overflow-y-auto pr-2">${scheduleHtml}</div>
+            </div>
+
+            ${tipsHtml ? `<div class="p-6 rounded-[24px] bg-amber-50/60 border border-amber-200 shadow-2xs"><h4 class="text-base font-bold text-amber-900 mb-3 flex items-center gap-2"><i class="fas fa-lightbulb text-amber-600"></i> Pro AI Tips</h4><ul class="list-none pl-0">${tipsHtml}</ul></div>` : ''}
+          </div>
+
+          <div class="plan-actions pt-6">
+            <button onclick='downloadPlan()' class="btn-secondary inline-flex items-center gap-3 rounded-2xl px-6 py-3.5 font-semibold cursor-pointer shadow-2xs">
+              <i class="fas fa-download"></i>
+              Download / Print
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="current-plan">
+        <div class="plan-banner">
+          <span class="plan-badge">
+            <i class="fas fa-circle-check"></i>
+            Active plan stored
+          </span>
+          <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-white">${plan.crop_label}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-white/90">
+            This plan remains visible until ${formatDate(plan.harvest_date)}. You can still create a new one from Section 2.
+          </p>
+        </div>
+
+        <div class="plan-meta">
+          <div class="meta-card">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Planting</p>
+            <p class="mt-2 text-xl font-extrabold text-gray-900">${formatDate(plan.planting_date)}</p>
+          </div>
+          <div class="meta-card">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Harvest</p>
+            <p class="mt-2 text-xl font-extrabold text-gray-900">${formatDate(plan.harvest_date)}</p>
+          </div>
+          <div class="meta-card">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Cycle</p>
+            <p class="mt-2 text-xl font-extrabold text-gray-900">${plan.duration_days} days</p>
+          </div>
+        </div>
+
+        <div class="meta-card">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-bold text-gray-900">Saved reminder preferences</p>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-700">
+              <i class="fas fa-bell text-gray-500"></i>
+              Plan options
+            </span>
+          </div>
+          <div class="reminder-row mt-4">
+            ${renderReminderChips(plan.reminders)}
+          </div>
+        </div>
+
+        <div class="meta-card">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-bold text-gray-900">Live reminder</p>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-800">
+              <i class="fas fa-bolt text-amber-600"></i>
+              Real-time
+            </span>
+          </div>
+          <p class="mt-3 text-sm leading-relaxed font-medium text-gray-800">${plan.live_reminder?.message || "No live reminder available."}</p>
+          <div class="mt-4 reminder-row">
+            <span class="reminder-chip">
+              <i class="fas fa-clock text-sky-600"></i>
+              ${plan.live_reminder?.time || "No specific time"}
+            </span>
+            <span class="reminder-chip">
+              <i class="fas fa-location-arrow text-emerald-600"></i>
+              ${plan.current_stage?.title || "No active stage"}
+            </span>
+          </div>
+        </div>
+
+        <div class="stages-grid">
+          ${plan.stages
+            .map(
+              (stage) => `
+                <article class="stage-card">
+                  <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p class="text-xs font-bold uppercase tracking-wider text-gray-400">${stage.day_range}</p>
+                      <h4 class="mt-1 text-xl font-extrabold text-gray-900">${stage.title}</h4>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 border border-sky-200 px-3 py-1 text-xs font-semibold text-sky-800">
+                      <i class="fas fa-calendar-day text-sky-600"></i>
+                      ${formatDate(stage.start_date)} to ${formatDate(stage.end_date)}
+                    </span>
+                  </div>
+                  <p class="stage-copy">${stage.description}</p>
+                  <div class="task-list mt-4">
+                    ${renderTaskItems(stage.tasks)}
+                  </div>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+
+        <div class="plan-actions pt-4">
+          <button onclick='downloadPlan()' class="btn-secondary inline-flex items-center gap-3 rounded-2xl px-6 py-3.5 font-semibold cursor-pointer shadow-2xs">
+            <i class="fas fa-download"></i>
+            Download / Print
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateActivePlanShell(plan) {
+    const shell = document.getElementById("activePlanShell");
+    shell.innerHTML = plan ? renderActivePlan(plan) : renderEmptyPlanState();
+    window.currentPlanData = plan || null;
+  }
+
+  function getCropDuration(cropName) {
+    if (!cropName) return 120;
+    const lower = cropName.toLowerCase();
+    if (lower.includes("sugarcane") || lower.includes("banana") || lower.includes("coconut") || lower.includes("coffee") || lower.includes("arecanut") || lower.includes("rubber")) return 365;
+    if (lower.includes("cotton") || lower.includes("turmeric") || lower.includes("ginger") || lower.includes("chilli") || lower.includes("red gram")) return 180;
+    if (lower.includes("rice") || lower.includes("maize") || lower.includes("ragi") || lower.includes("jowar") || lower.includes("groundnut") || lower.includes("soybean") || lower.includes("sunflower") || lower.includes("potato") || lower.includes("onion")) return 120;
+    if (lower.includes("tomato") || lower.includes("brinjal") || lower.includes("cabbage") || lower.includes("cauliflower") || lower.includes("carrot") || lower.includes("green gram") || lower.includes("black gram")) return 90;
+    if (lower.includes("radish") || lower.includes("spinach") || lower.includes("coriander") || lower.includes("mint")) return 45;
+    return 120;
+  }
+
+  function updateHarvestPreview() {
+    const cropValue = document.getElementById("planningCrop").value.trim();
+    const plantingDate = document.getElementById("plantingDate").value.trim();
+    const preview = document.getElementById("harvestPreview");
+
+    if (!cropValue) {
+      preview.textContent = "Harvest date will be calculated after crop selection.";
+      return;
+    }
+
+    const duration = getCropDuration(cropValue);
+
+    if (!plantingDate) {
+      preview.textContent = `Estimated crop cycle: ${duration} days. Select a planting date to preview harvest.`;
+      return;
+    }
+
+    const isoDate = getIsoDateFromInput(plantingDate);
+    if (!isoDate) {
+      preview.textContent = "Select a planting date from the calendar to preview harvest.";
+      return;
+    }
+
+    const start = parseDateValue(isoDate);
+    start.setDate(start.getDate() + duration - 1);
+    preview.innerHTML = `<i class="fas fa-hourglass-half text-warning mr-2"></i>Estimated harvest: ${formatDate(start)}`;
+  }
+
+  function getPlannerPayload() {
+    const crop = document.getElementById("planningCrop").value;
+    const plantingDate = document.getElementById("plantingDate").value.trim();
+    const plantingDateIso = getIsoDateFromInput(plantingDate);
+
+    const getNum = id => {
+      const val = document.getElementById(id)?.value?.trim();
+      return val && !isNaN(val) ? parseFloat(val) : null;
+    };
+
+    return {
+      crop,
+      planting_date: plantingDateIso,
+      purpose: document.getElementById("planningPurpose")?.value || "Commercial Sale",
+      season: document.getElementById("planningSeason")?.value || null,
+      soil_type: document.getElementById("planSoilType")?.value || null,
+      soil_texture: document.getElementById("planSoilTexture")?.value || null,
+      soil_depth: getNum("planSoilDepth"),
+      soil_ph: getNum("planSoilPH"),
+      organic_carbon: getNum("planSoilOC"),
+      ec: getNum("planSoilEC"),
+      nitrogen: getNum("planSoilN"),
+      phosphorus: getNum("planSoilP"),
+      potassium: getNum("planSoilK"),
+      rainfall: getNum("planRainfall"),
+      monsoon_dependent: document.getElementById("planMonsoon")?.value === "true",
+      previous_crop: document.getElementById("planPrevCrop")?.value?.trim() || null,
+      reminders: getReminderPayload(),
+    };
+  }
+
+  function togglePlannerSoil() {
+    const content = document.getElementById("plannerSoilContent");
+    const chevron = document.getElementById("soilChevron");
+    if (content.style.display === "none") {
+      content.style.display = "block";
+      chevron.style.transform = "rotate(180deg)";
+    } else {
+      content.style.display = "none";
+      chevron.style.transform = "rotate(0deg)";
+    }
+  }
+
+  async function generatePlan() {
+    const payload = getPlannerPayload();
+    if (!payload.crop || !payload.planting_date) {
+      alert("Please select a crop and choose a planting date from the calendar.");
+      return;
+    }
+
+    updateActivePlanShell(null);
+    document.getElementById("activePlanShell").innerHTML = renderLoadingState();
+
+    try {
+      const response = await fetch("/user/crop-planner", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `HTTP ${response.status} error`);
+      }
+
+      const result = await response.json();
+      updateActivePlanShell(result);
+    } catch (error) {
+      document.getElementById("activePlanShell").innerHTML = `
+        <div class="empty-state">
+          <div class="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-red-50 text-red-600 text-2xl border border-red-200">
+            <i class="fas fa-triangle-exclamation"></i>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Unable to save crop plan</h3>
+          <p class="mt-2 max-w-md text-sm leading-relaxed text-gray-600">
+            ${error.message}
+          </p>
+        </div>
+      `;
+    }
+  }
+
+  async function regeneratePlan(planId) {
+    const payload = getPlannerPayload();
+    if (!payload.crop || !payload.planting_date) {
+      alert("Please ensure crop and planting date are selected in Section 2 before regenerating.");
+      return;
+    }
+
+    document.getElementById("activePlanShell").innerHTML = renderLoadingState();
+
+    try {
+      const response = await fetch(`/user/crop-planner/regenerate/${planId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `HTTP ${response.status} error`);
+      }
+
+      const result = await response.json();
+      updateActivePlanShell(result);
+    } catch (error) {
+      alert(`Unable to regenerate plan: ${error.message}`);
+      if (window.currentPlanData) {
+        updateActivePlanShell(window.currentPlanData);
+      }
+    }
+  }
+
+  function resetPlannerForm() {
+    const cropSelect = document.getElementById("planningCrop");
+    cropSelect.value = "";
+    if (window.plannerCropSelect) {
+      window.plannerCropSelect.btn.querySelector("span").textContent = "Select a crop...";
+    }
+    document.getElementById("plantingDate").value = "";
+    if (window.plannerCalendar) {
+      window.plannerCalendar.selectedDate = null;
+    }
+    document.getElementById("wateringReminder").checked = false;
+    document.getElementById("fertilizingReminder").checked = false;
+    document.getElementById("pestControlReminder").checked = false;
+    document.getElementById("pruningReminder").checked = false;
+    updateHarvestPreview();
+  }
+
+  function downloadPlan() {
+    if (!window.currentPlanData) {
+      return;
+    }
+
+    const plan = window.currentPlanData;
+    const generatedOn = new Date();
+    const reminderEntries = [
+      ["Watering", plan.reminders?.watering],
+      ["Fertilizing", plan.reminders?.fertilizing],
+      ["Pest control", plan.reminders?.pest_control],
+      ["Pruning", plan.reminders?.pruning],
+    ].filter(([, enabled]) => enabled);
+    const reminderSummary = reminderEntries.length
+      ? reminderEntries.map(([label]) => label).join(", ")
+      : "No reminder preferences selected";
+
+    const isAi = plan.ai_generated;
+    const seasonStr = isAi && plan.ai_details?.season ? ` (${plan.ai_details.season})` : "";
+    const activeStageTitle = plan.current_stage?.title || "Active Growth";
+
+    let aiSectionsHtml = "";
+    if (isAi) {
+      // Alerts
+      const alerts = plan.ai_details?.important_alerts || [];
+      if (alerts.length > 0) {
+        aiSectionsHtml += `
+          <div class="alert-box">
+            <div class="alert-title">⚠️ Important Agronomic Alerts</div>
+            <ul>${alerts.map((a) => `<li>${a}</li>`).join("")}</ul>
+          </div>
+        `;
+      }
+
+      // Today's & Next Task
+      const todayTasks = plan.todays_tasks || [];
+      const nextTask = plan.next_task;
+      aiSectionsHtml += `
+        <div class="split-grid">
+          <div class="meta-card" style="border-left-color: #3b82f6; background: #eff6ff;">
+            <div class="meta-label" style="color: #1e40af;">Today's Active Tasks</div>
+            ${todayTasks.length > 0
+              ? todayTasks.map((t) => `<div style="margin-top: 6px; font-weight: 600; color: #1e3a8a;">[${t.category}] ${t.task}</div><div style="font-size: 12px; color: #3b82f6;">${t.notes}</div>`).join("")
+              : `<div style="margin-top: 6px; font-size: 13.5px; color: #4b5563;">No specific field operations scheduled for today.</div>`}
+          </div>
+          <div class="meta-card" style="border-left-color: #f59e0b; background: #fffbeb;">
+            <div class="meta-label" style="color: #92400e;">Next Upcoming Task</div>
+            ${nextTask
+              ? `<div style="margin-top: 6px; font-weight: 600; color: #78350f;">Day ${nextTask.day_number} (${nextTask.formatted_date}) — ${nextTask.task}</div><div style="font-size: 12px; color: #d97706;">${nextTask.notes}</div>`
+              : `<div style="margin-top: 6px; font-size: 13.5px; color: #4b5563;">No upcoming tasks found.</div>`}
+          </div>
+        </div>
+      `;
+
+      // Irrigation & Fertilizer Schedules
+      const irr = plan.ai_details?.irrigation_schedule || [];
+      const fert = plan.ai_details?.fertilizer_schedule || [];
+      aiSectionsHtml += `
+        <h2 class="section-heading">Water & Nutrient Management Schedule</h2>
+        <div class="split-grid">
+          <div>
+            <h3 class="sub-heading" style="color: #0284c7;">💧 Irrigation Schedule</h3>
+            <table class="schedule-table">
+              <thead><tr><th>Day & Date</th><th>Amount</th><th>Rationale</th></tr></thead>
+              <tbody>
+                ${irr.map((i) => `<tr><td><strong>Day ${i.day}</strong><br><span style="font-size:11px;color:#6b7280;">${i.formatted_date}</span></td><td><span style="color:#0284c7;font-weight:600;">${i.water_amount}</span></td><td>${i.reason}</td></tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3 class="sub-heading" style="color: #16a34a;">🌱 Fertilizer Application</h3>
+            <table class="schedule-table">
+              <thead><tr><th>Day & Date</th><th>Input</th><th>Rationale</th></tr></thead>
+              <tbody>
+                ${fert.map((f) => `<tr><td><strong>Day ${f.day}</strong><br><span style="font-size:11px;color:#6b7280;">${f.formatted_date}</span></td><td><strong style="color:#16a34a;">${f.fertilizer}</strong> (${f.quantity})</td><td>${f.reason}</td></tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    const stagesHtml = (plan.stages || []).map((stage) => `
+      <div class="stage">
+        <div class="stage-top">
+          <div><h3>${stage.title}</h3></div>
+          <div class="stage-window">Day ${stage.day_range}<br />${formatDate(stage.start_date)} to ${formatDate(stage.end_date)}</div>
+        </div>
+        <p>${stage.description}</p>
+        <div class="tasks-title">Key Field Operations</div>
+        <ul>${(stage.tasks || []).map((task) => `<li>${task}</li>`).join("")}</ul>
+      </div>
+    `).join("");
+
+    let fullScheduleHtml = "";
+    if (isAi && plan.ai_details?.schedule) {
+      fullScheduleHtml = `
+        <h2 class="section-heading" style="page-break-before: always;">Complete Day-by-Day Cultivation Schedule</h2>
+        <table class="schedule-table full-table">
+          <thead><tr><th style="width:14%;">Timeline</th><th style="width:20%;">Category</th><th style="width:34%;">Task</th><th style="width:32%;">Agronomic Notes</th></tr></thead>
+          <tbody>
+            ${plan.ai_details.schedule.map((t) => `
+              <tr>
+                <td><strong>Day ${t.day_number}</strong><br><span style="font-size:11px;color:#6b7280;">${t.formatted_date}</span></td>
+                <td><span class="badge ${t.priority === 'High' ? 'badge-high' : 'badge-norm'}">${t.category} (${t.priority})</span></td>
+                <td style="font-weight:600;color:#111827;">${t.task}</td>
+                <td style="color:#4b5563;font-size:12px;">${t.notes}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    let tipsHtml = "";
+    if (isAi && plan.ai_details?.tips?.length > 0) {
+      tipsHtml = `
+        <div class="tips-box" style="break-inside: avoid; margin-top: 24px;">
+          <div class="alert-title" style="color: #b45309;">💡 Pro Agronomic AI Tips</div>
+          <ul>${plan.ai_details.tips.map((tip) => `<li>${tip}</li>`).join("")}</ul>
+        </div>
+      `;
+    }
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Crop Plan - ${plan.crop_label}</title>
+        <style>
+          @page { margin: 20mm 15mm; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; color: #1f2937; background: #ffffff; line-height: 1.5; }
+          .watermark { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 88px; font-weight: 800; letter-spacing: 0.15em; color: rgba(31, 143, 70, 0.06); pointer-events: none; z-index: 0; white-space: nowrap; }
+          .page { position: relative; z-index: 1; }
+          .header { margin-bottom: 24px; border-bottom: 3px solid #16a34a; padding-bottom: 14px; }
+          .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #16a34a; margin-bottom: 4px; }
+          .title { margin: 0; font-size: 28px; font-weight: 800; color: #14532d; }
+          .subtitle { margin: 6px 0 0 0; color: #4b5563; font-size: 14px; }
+          .meta-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
+          .split-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; break-inside: avoid; }
+          .meta-card { padding: 12px 14px; background: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 8px; break-inside: avoid; }
+          .meta-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #4b5563; margin-bottom: 4px; }
+          .meta-value { font-size: 15px; font-weight: 700; color: #14532d; }
+          .section-heading { font-size: 20px; font-weight: 700; color: #14532d; margin: 28px 0 14px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; break-after: avoid; }
+          .sub-heading { font-size: 16px; font-weight: 700; margin: 0 0 10px 0; break-after: avoid; }
+          .stage { margin-bottom: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff; break-inside: avoid; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+          .stage-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+          .stage h3 { margin: 0; color: #14532d; font-size: 18px; font-weight: 700; }
+          .stage-window { font-size: 12px; font-weight: 600; color: #4b5563; text-align: right; white-space: nowrap; background: #f3f4f6; padding: 4px 8px; border-radius: 6px; }
+          .stage p { margin: 8px 0 0 0; color: #374151; font-size: 13.5px; }
+          .tasks-title { margin-top: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #16a34a; }
+          ul { margin: 6px 0 0 18px; padding: 0; }
+          li { margin-bottom: 4px; font-size: 13px; color: #374151; }
+          .alert-box { padding: 14px 16px; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 8px; margin-bottom: 24px; break-inside: avoid; }
+          .tips-box { padding: 14px 16px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 8px; margin-bottom: 24px; break-inside: avoid; }
+          .alert-title { font-weight: 700; font-size: 14px; color: #b91c1c; margin-bottom: 6px; }
+          .schedule-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 16px; break-inside: auto; }
+          .schedule-table tr { break-inside: avoid; break-after: auto; }
+          .schedule-table th { background: #f8fafc; color: #334155; font-weight: 700; text-align: left; padding: 8px 10px; border-bottom: 2px solid #cbd5e1; font-size: 11.5px; uppercase; }
+          .schedule-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+          .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600; }
+          .badge-high { background: #fee2e2; color: #991b1b; }
+          .badge-norm { background: #e0f2fe; color: #075985; }
+        </style>
+      </head>
+      <body>
+        <div class="watermark">CropCare AI</div>
+        <div class="page">
+          <div class="header">
+            <div class="brand">CropCare AI Precision Planner</div>
+            <h1 class="title">${plan.crop_label}${seasonStr} Cultivation Plan</h1>
+            <p class="subtitle">Personalized agronomic schedule and resource manager generated for your farm account.</p>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-card">
+              <div class="meta-label">Planting Date</div>
+              <div class="meta-value">${formatDate(plan.planting_date)}</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">Est. Harvest Date</div>
+              <div class="meta-value">${formatDate(plan.estimated_harvest_date || plan.harvest_date)}</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">Total Crop Cycle</div>
+              <div class="meta-value">${plan.estimated_total_duration_days || plan.duration_days} days</div>
+            </div>
+            ${isAi ? `
+              <div class="meta-card">
+                <div class="meta-label">Current Crop Age</div>
+                <div class="meta-value">${plan.crop_age_days} days</div>
+              </div>
+              <div class="meta-card">
+                <div class="meta-label">Active Growth Stage</div>
+                <div class="meta-value" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${activeStageTitle}</div>
+              </div>
+              <div class="meta-card">
+                <div class="meta-label">Harvest Countdown</div>
+                <div class="meta-value">${plan.harvest_countdown >= 0 ? plan.harvest_countdown + ' days remaining' : 'Harvest Ready'}</div>
+              </div>
+            ` : ''}
+            <div class="meta-card">
+              <div class="meta-label">Farmer Name</div>
+              <div class="meta-value" style="font-size: 14px;">{{ user.name }}</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">Location</div>
+              <div class="meta-value" style="font-size: 14px;">{{ user.district or "Not set" }}, {{ user.state or "Karnataka" }}</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">Generated On</div>
+              <div class="meta-value" style="font-size: 13px;">${formatDate(generatedOn)}</div>
+            </div>
+          </div>
+
+          ${aiSectionsHtml}
+
+          <h2 class="section-heading">Growth Stages Breakdown</h2>
+          ${stagesHtml}
+
+          ${fullScheduleHtml}
+
+          ${tipsHtml}
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 400);
+  }
+
+  /* ── Rainfall Popup Modal JS ── */
+  let rainfallPopupChart = null;
+
+  function openRainfallPopup() {
+    const modal = document.getElementById("rainfallPopupModal");
+    if (!modal) return;
+    modal.style.display = "flex";
+
+    document.getElementById("rainfallPopupLoading").style.display = "flex";
+    document.getElementById("rainfallPopupError").style.display = "none";
+    document.getElementById("rainfallPopupContent").style.display = "none";
+    document.getElementById("rainfallPopupTitle").textContent = "Loading...";
+
+    const district = "{{ user.district or 'Bengaluru Urban' }}";
+
+    document.getElementById("rainfallPopupTitle").textContent = district + " — Annual Rainfall";
+
+    fetch(`/user/district-rainfall?district=${encodeURIComponent(district)}`, {
+      headers: getAuthHeaders(),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        document.getElementById("rainfallPopupLoading").style.display = "none";
+        document.getElementById("rainfallPopupContent").style.display = "block";
+        document.getElementById("rainfallPopupTotal").textContent = data.total_rainfall + " mm";
+        document.getElementById("rainfallPopupDistrict").textContent = data.district;
+        renderRainfallPopupChart(data.labels, data.rainfall);
+      })
+      .catch((err) => {
+        console.error("Rainfall popup error:", err);
+        document.getElementById("rainfallPopupLoading").style.display = "none";
+        document.getElementById("rainfallPopupError").style.display = "flex";
+        document.getElementById("rainfallPopupErrorMsg").textContent = "Unable to load rainfall data. " + err.message;
+      });
+  }
+
+  function closeRainfallPopup() {
+    const modal = document.getElementById("rainfallPopupModal");
+    if (modal) modal.style.display = "none";
+    if (rainfallPopupChart) {
+      rainfallPopupChart.destroy();
+      rainfallPopupChart = null;
+    }
+  }
+
+  function renderRainfallPopupChart(labels, rainfall) {
+    const ctx = document.getElementById("rainfallPopupChart")?.getContext("2d");
+    if (!ctx) return;
+
+    if (rainfallPopupChart) {
+      rainfallPopupChart.destroy();
+    }
+
+    if (typeof Chart === "undefined") {
+      return;
+    }
+
+    rainfallPopupChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels || [],
+        datasets: [
+          {
+            label: "Rainfall (mm)",
+            data: rainfall || [],
+            backgroundColor: "rgba(59, 130, 246, 0.55)",
+            borderColor: "rgba(59, 130, 246, 1)",
+            borderWidth: 1,
+            borderRadius: 6,
+            hoverBackgroundColor: "rgba(59, 130, 246, 0.8)",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            labels: { color: "#ffffff", font: { size: 12 } },
+          },
+          tooltip: {
+            backgroundColor: "rgba(10, 25, 18, 0.92)",
+            titleColor: "#fff",
+            bodyColor: "#d6e5da",
+            borderColor: "rgba(177, 224, 186, 0.2)",
+            borderWidth: 1,
+            cornerRadius: 10,
+            padding: 10,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "#b3b3b3", font: { size: 11 } },
+            grid: { color: "rgba(255, 255, 255, 0.06)" },
+          },
+          x: {
+            ticks: { color: "#b3b3b3", font: { size: 11 } },
+            grid: { color: "rgba(255, 255, 255, 0.04)" },
+          },
+        },
+      },
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const rainfallModal = document.getElementById("rainfallPopupModal");
+    if (rainfallModal) {
+      rainfallModal.addEventListener("click", function (e) {
+        if (e.target === this) closeRainfallPopup();
+      });
+    }
+
+    window.plannerCropSelect = new CascadingCropSelect("planningCropContainer", "planningCrop", "Select a crop...");
+    window.plannerCalendar = new PopoverCalendar("plantingDate");
+    updateActivePlanShell(initialActivePlan);
+    resetPlannerForm();
+    document.getElementById("planningCrop").addEventListener("change", updateHarvestPreview);
+    document.getElementById("plantingDate").addEventListener("change", updateHarvestPreview);
+  });
+</script>
+
+{% endblock %}

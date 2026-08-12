@@ -1,0 +1,759 @@
+<!-- templates/user/disease_diagnosis.html -->
+{% extends "base.html" %}
+{% block title %}Disease Diagnosis - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}AI Disease Diagnosis{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item active">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+
+{% endblock %} {% block content %}
+<div class="space-y-6 disease-page">
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-6 xl:grid-cols-[1.45fr,0.95fr]">
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800"
+          >
+            <i class="fas fa-microscope text-green-600"></i>
+            AI Plant Health Check
+          </span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-700"
+          >
+            <i class="fas fa-location-dot text-sky-600"></i>
+            {{ user.district or "District not set" }}, {{ user.state or "Karnataka" }}
+          </span>
+          <button
+            type="button"
+            onclick="openHistoryModal('disease_diagnosis', 'Past Disease Diagnoses')"
+            class="touch-target inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 shadow-2xs transition-all cursor-pointer min-h-[44px]"
+          >
+
+            <i class="fas fa-history"></i>
+            View Past Diagnoses
+          </button>
+        </div>
+
+        <div>
+          <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900">
+            Turn visible symptoms into a focused disease diagnosis.
+          </h1>
+          <p class="mt-4 max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+            Upload a clear plant image, describe what you see in the field, and
+            CropCare will return a likely diagnosis with symptoms, treatment, and
+            prevention guidance tailored to your district context.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Input Modes</p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">Image + text</p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Output</p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">4 care blocks</p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Location Lens</p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">
+              {{ user.district or "Unset" }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="rounded-[28px] border border-green-200 bg-gradient-to-br from-green-50/80 to-emerald-50/80 p-6 shadow-sm">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Best Results</p>
+              <p class="text-xl font-extrabold text-gray-900">Give both visual and written clues</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-green-200 text-green-700 shadow-sm">
+              <i class="fas fa-camera-retro"></i>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-3">
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Upload a sharp image of affected leaves, stems, or fruits.
+            </div>
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Mention crop stage, color change, spots, wilting, or pest traces.
+            </div>
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Uses {{ user.district or "your district" }} as local context.
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+          <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Operator Note</p>
+          <p class="text-sm leading-6 text-gray-600">
+            AI can narrow down the likely issue, but severe outbreaks or uncertain
+            cases should still be confirmed with an agronomist or local extension office.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-[0.98fr,1.02fr]">
+    <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 fade-up stagger-1">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Evidence Studio</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Prepare plant evidence</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 border border-green-100 text-green-700">
+          <i class="fas fa-file-medical"></i>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-5">
+        <div class="upload-shell">
+          <label for="plantImage" class="upload-dropzone">
+            <span class="upload-icon">
+              <i class="fas fa-camera"></i>
+            </span>
+            <span class="block text-lg font-extrabold text-gray-900">
+              Drop a plant image here
+            </span>
+            <span class="mt-1.5 block text-sm text-gray-600">
+              or click to upload JPG, JPEG, PNG, or WEBP
+            </span>
+            <span
+              id="imageMeta"
+              class="mt-4 inline-flex rounded-full bg-gray-100 border border-gray-200 px-3.5 py-1.5 text-xs font-semibold text-gray-700"
+            >
+              No image selected
+            </span>
+          </label>
+          <input
+            type="file"
+            id="plantImage"
+            accept=".jpg,.jpeg,.png,.webp"
+            class="sr-only"
+          />
+        </div>
+
+        <div class="entry-shell">
+          <label for="symptomsDescription" class="block text-sm font-bold text-gray-900">
+            Describe symptoms (optional if image is uploaded)
+          </label>
+          <p class="mt-1.5 text-sm text-gray-600">
+            Add crop name, affected part, color change, spots, curling,
+            powdery growth, wilting, rotting, pest presence, or spread pattern.
+            You can submit an image, symptom text, or both.
+          </p>
+          <textarea
+            id="symptomsDescription"
+            placeholder="Example: Tomato crop, flowering stage. Lower leaves have yellow halos with brown spots, some curling, and white powdery patches near the veins."
+            class="detail-field mt-4 w-full"
+          ></textarea>
+        </div>
+
+        <div class="entry-shell">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-bold text-gray-900">Diagnosis coverage</p>
+              <p class="mt-1 text-sm text-gray-600">
+                The result includes likely issue, matching symptoms, treatment, and prevention.
+              </p>
+            </div>
+            <div class="coverage-icon">
+              <i class="fas fa-shield-heart"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onclick="diagnoseDisease()"
+            class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 diagnose-cta"
+          >
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Diagnose Disease
+          </button>
+          <button
+            type="button"
+            onclick="backToForm()"
+            class="btn-secondary inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm"
+          >
+            <i class="fas fa-rotate-left"></i>
+            Reset Inputs
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 fade-up stagger-2">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Diagnosis Board</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Plant health result</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 border border-sky-100 text-sky-600">
+          <i class="fas fa-stethoscope"></i>
+        </div>
+      </div>
+
+      <div id="diagnosisResult" class="mt-6 result-shell">
+        <div class="result-empty">
+          <div class="result-empty-icon">
+            <i class="fas fa-leaf"></i>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Ready for diagnosis</h3>
+          <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+            Add symptoms and, if possible, a plant image to generate a likely diagnosis.
+          </p>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden mt-6 space-y-6">
+        <div class="loading-panel mb-6">
+          <div class="loading-ring">
+            <span></span>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Analyzing plant evidence</h3>
+          <div class="mt-5 grid gap-3 w-full max-w-lg">
+            <div class="loading-step">
+              <i class="fas fa-camera text-green-600"></i>
+              Reading visual clues from the uploaded plant image
+            </div>
+            <div class="loading-step">
+              <i class="fas fa-file-lines text-sky-600"></i>
+              Matching symptom description against likely disease patterns
+            </div>
+            <div class="loading-step">
+              <i class="fas fa-shield-virus text-amber-500"></i>
+              Generating treatment and prevention guidance
+            </div>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="skeleton-card p-5 rounded-[24px] border border-gray-200 bg-gray-50 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="skeleton-circle bg-gray-200"></div>
+              <div class="skeleton-block w-32 h-6 rounded-lg bg-gray-200"></div>
+            </div>
+            <div class="space-y-2 pt-2">
+              <div class="skeleton-line w-full bg-gray-200"></div>
+              <div class="skeleton-line w-5/6 bg-gray-200"></div>
+              <div class="skeleton-line w-4/6 bg-gray-200"></div>
+            </div>
+          </div>
+          <div class="skeleton-card p-5 rounded-[24px] border border-gray-200 bg-gray-50 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="skeleton-circle bg-gray-200"></div>
+              <div class="skeleton-block w-32 h-6 rounded-lg bg-gray-200"></div>
+            </div>
+            <div class="space-y-2 pt-2">
+              <div class="skeleton-line w-full bg-gray-200"></div>
+              <div class="skeleton-line w-5/6 bg-gray-200"></div>
+              <div class="skeleton-line w-4/6 bg-gray-200"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  .disease-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(67, 160, 71, 0.08), transparent 38%),
+      radial-gradient(circle at top right, rgba(79, 195, 247, 0.08), transparent 30%);
+  }
+
+  .disease-page .upload-shell,
+  .disease-page .entry-shell {
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+    padding: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .disease-page .upload-dropzone {
+    display: block;
+    cursor: pointer;
+    border-radius: 24px;
+    border: 2px dashed #CBD5E1;
+    background: #FFFFFF;
+    padding: 2.25rem 1.25rem;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  }
+
+  .disease-page .upload-dropzone:hover,
+  .disease-page .upload-shell input:focus + .upload-dropzone,
+  .disease-page .upload-shell input:focus-visible + .upload-dropzone {
+    transform: translateY(-2px);
+    border-color: #2E7D32;
+    background: #F0FDF4;
+    outline: 2px solid #2E7D32;
+    outline-offset: 2px;
+  }
+
+
+  .disease-page .upload-icon {
+    display: inline-flex;
+    height: 4.25rem;
+    width: 4.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.4rem;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 1.45rem;
+    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.12);
+  }
+
+  .disease-page .detail-field {
+    min-height: 230px;
+    resize: vertical;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    padding: 1rem 1.05rem;
+    color: #1F2937;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .disease-page .detail-field:focus {
+    outline: none;
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.12);
+    transform: translateY(-1px);
+  }
+
+  .disease-page .detail-field::placeholder {
+    color: #9CA3AF;
+  }
+
+  .disease-page .coverage-icon {
+    display: inline-flex;
+    height: 3.2rem;
+    width: 3.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    background: #E1F5FE;
+    color: #0288D1;
+  }
+
+  .disease-page .diagnose-cta {
+    min-width: 240px;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+  }
+
+  .disease-page .result-shell,
+  .disease-page .loading-panel {
+    min-height: 520px;
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+    padding: 1.5rem;
+  }
+
+  .disease-page .result-empty,
+  .disease-page .loading-panel {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .disease-page .result-empty-icon {
+    display: inline-flex;
+    height: 5rem;
+    width: 5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.6rem;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 1.8rem;
+    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.12);
+  }
+
+  .disease-page .loading-ring {
+    position: relative;
+    display: flex;
+    height: 4.8rem;
+    width: 4.8rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+  }
+
+  .disease-page .loading-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0.2rem;
+    border-radius: inherit;
+    border: 3px solid #E8F5E9;
+    border-top-color: #2E7D32;
+    animation: spin 1s linear infinite;
+  }
+
+  .disease-page .loading-ring span {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    height: 2.2rem;
+    width: 2.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #E8F5E9;
+  }
+
+  .disease-page .loading-ring span::before {
+    content: "\f06c";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #2E7D32;
+  }
+
+  .disease-page .loading-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    border-radius: 20px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 0.95rem 1rem;
+    color: #1F2937;
+    font-weight: 600;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .disease-page .result-stack {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .disease-page .result-banner {
+    border-radius: 24px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  .disease-page .result-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: #E8F5E9;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1B5E20;
+  }
+
+  .disease-page .result-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .disease-page .result-card {
+    border-radius: 26px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: all 0.25s ease;
+  }
+
+  .disease-page .result-card:hover {
+    border-color: #2E7D32;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .disease-page .result-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+  }
+
+  .disease-page .result-card-icon {
+    display: inline-flex;
+    height: 3.25rem;
+    width: 3.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.1rem;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  }
+
+  .disease-page .result-card-icon.diagnosis {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  .disease-page .result-card-icon.symptoms {
+    background: #E1F5FE;
+    color: #0288D1;
+  }
+
+  .disease-page .result-card-icon.treatment {
+    background: #FEF3C7;
+    color: #D97706;
+  }
+
+  .disease-page .result-card-icon.prevention {
+    background: #FEE2E2;
+    color: #DC2626;
+  }
+
+  .disease-page .result-copy {
+    margin-top: 1rem;
+    color: #374151;
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+
+  .disease-page .error-icon {
+    background: #FEE2E2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .disease-page .diagnose-cta {
+      width: 100%;
+    }
+
+    .disease-page .result-shell,
+    .disease-page .loading-panel {
+      min-height: 420px;
+      padding: 1rem;
+    }
+  }
+</style>
+
+<script>
+  function updateSelectedImageState() {
+    const plantImage = document.getElementById("plantImage").files[0];
+    const imageMeta = document.getElementById("imageMeta");
+
+    if (!plantImage) {
+      imageMeta.textContent = "No image selected";
+      return;
+    }
+
+    const sizeInKb = Math.max(1, Math.round(plantImage.size / 1024));
+    imageMeta.textContent = `${plantImage.name} • ${sizeInKb} KB`;
+  }
+
+  function renderEmptyState() {
+    return `
+      <div class="result-empty">
+        <div class="result-empty-icon">
+          <i class="fas fa-leaf"></i>
+        </div>
+        <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Ready for diagnosis</h3>
+        <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+          Add symptoms and, if possible, a plant image to generate a likely diagnosis.
+        </p>
+      </div>
+    `;
+  }
+
+  function renderResultCard(title, content, iconClass, toneClass) {
+    return `
+      <article class="result-card">
+        <div class="result-card-top">
+          <div class="result-card-icon ${toneClass}">
+            <i class="${iconClass}"></i>
+          </div>
+          <div>
+            <p class="text-xs uppercase font-bold tracking-[0.18em] text-gray-400">${title}</p>
+          </div>
+        </div>
+        <div class="result-copy">${content}</div>
+      </article>
+    `;
+  }
+
+  function renderDiagnosisResult(result) {
+    return `
+      <div class="result-stack">
+        <div class="result-banner">
+          <span class="result-badge">
+            <i class="fas fa-circle-check text-green-600"></i>
+            AI diagnosis generated
+          </span>
+          <h3 class="mt-4 text-3xl font-extrabold tracking-[-0.03em] text-gray-900">${result.diagnosis}</h3>
+          <p class="mt-3 text-sm leading-6 text-gray-600">
+            Review the symptom match, treatment direction, and prevention steps below before taking field action.
+          </p>
+        </div>
+        <div class="result-grid">
+          ${renderResultCard("Likely diagnosis", result.diagnosis, "fas fa-microscope", "diagnosis")}
+          ${renderResultCard("Matched symptoms", result.symptoms, "fas fa-file-lines", "symptoms")}
+          ${renderResultCard("Treatment guidance", result.treatment, "fas fa-syringe", "treatment")}
+          ${renderResultCard("Prevention steps", result.prevention, "fas fa-shield-heart", "prevention")}
+        </div>
+        <div class="pt-2">
+          <button onclick="backToForm()" class="btn-secondary inline-flex items-center gap-3 rounded-2xl px-6 py-3.5 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm">
+            <i class="fas fa-rotate-left"></i>
+            Start another check
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderErrorState(message) {
+    return `
+      <div class="result-empty">
+        <div class="result-empty-icon error-icon">
+          <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Diagnosis failed</h3>
+        <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+          ${message}
+        </p>
+        <div class="mt-6">
+          <button onclick="backToForm()" class="btn-secondary inline-flex items-center gap-3 rounded-2xl px-6 py-3.5 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm">
+            <i class="fas fa-rotate-left"></i>
+            Try again
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function diagnoseDisease() {
+    const plantImage = document.getElementById("plantImage").files[0];
+    const symptomsDescription = document.getElementById("symptomsDescription").value.trim();
+
+    if (!plantImage && !symptomsDescription) {
+      alert("Please upload a plant image or describe the symptoms");
+      return;
+    }
+
+    document.getElementById("diagnosisResult").style.display = "none";
+    document.getElementById("loading").classList.remove("hidden");
+
+    try {
+      const formData = new FormData();
+      if (plantImage) {
+        formData.append("plant_image", plantImage);
+      }
+      formData.append("symptoms_description", symptomsDescription);
+      formData.append("district", "{{ user.district }}");
+
+      const response = await fetch("/user/disease-diagnosis", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("diagnosisResult").innerHTML =
+          renderDiagnosisResult(result);
+        document.getElementById("diagnosisResult").style.display = "block";
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `HTTP ${response.status} error`);
+      }
+    } catch (error) {
+      console.error("Error diagnosing disease:", error);
+      document.getElementById("loading").classList.add("hidden");
+      document.getElementById("diagnosisResult").innerHTML = renderErrorState(
+        `Failed to diagnose disease: ${error.message}.`,
+      );
+      document.getElementById("diagnosisResult").style.display = "block";
+    }
+  }
+
+  function backToForm() {
+    document.getElementById("diagnosisResult").innerHTML = renderEmptyState();
+    document.getElementById("diagnosisResult").style.display = "block";
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("plantImage").value = "";
+    document.getElementById("symptomsDescription").value = "";
+    updateSelectedImageState();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("plantImage").addEventListener("change", updateSelectedImageState);
+    updateSelectedImageState();
+  });
+</script>
+
+{% endblock %}

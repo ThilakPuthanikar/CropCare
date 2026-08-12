@@ -1,11 +1,15 @@
-import os
-import sys
+from pathlib import Path
+
 from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
+from sqlalchemy.exc import OperationalError
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 
 from .config.settings import settings
 from .database.database import engine, Base, SessionLocal
@@ -223,11 +227,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount static files & uploads
+app.mount("/static/uploads", StaticFiles(directory=PROJECT_ROOT / "frontend" / "uploads"), name="uploads")
+app.mount("/static", StaticFiles(directory=PROJECT_ROOT / "frontend" / "static"), name="static")
 
 # Templates
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=PROJECT_ROOT / "frontend" / "templates")
+
 
 
 @app.middleware("http")
@@ -259,6 +265,21 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data: https: blob:; script-src 'self' 'unsafe-inline' https: cdn.tailwindcss.com cdnjs.cloudflare.com cdn.jsdelivr.net www.chatbase.co; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com cdnjs.cloudflare.com; font-src 'self' https: data: fonts.gstatic.com cdnjs.cloudflare.com; frame-src 'self' https: https://krama.karnataka.gov.in; connect-src 'self' https: www.chatbase.co;"
     return response
+
+
+@app.exception_handler(OperationalError)
+async def db_operational_error_handler(request: Request, exc: OperationalError):
+    try:
+        engine.dispose()
+    except Exception:
+        pass
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.url.path.startswith(("/user/", "/admin/", "/auth/")):
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Database connection reconnected. Please try again."}
+        )
+    return templates.TemplateResponse("index.html", {"request": request, "error": "Database connection reconnected. Please try again."})
 
 
 @app.get("/", response_class=HTMLResponse)

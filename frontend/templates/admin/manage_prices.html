@@ -1,0 +1,680 @@
+{% extends "base.html" %}
+{% block title %}Manage Prices - CropCare{% endblock %}
+{% block user_role %}Admin Dashboard{% endblock %}
+{% block page_heading %}Price Desk{% endblock %}
+
+{% block sidebar %}
+<a href="/admin/dashboard" class="sidebar-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+<a href="/admin/manage-users" class="sidebar-item"><i class="fas fa-users"></i><span>Manage Users</span></a>
+<a href="/admin/manage-admins" class="sidebar-item"><i class="fas fa-user-shield"></i><span>Manage Admins</span></a>
+<a href="/admin/manage-ads" class="sidebar-item"><i class="fas fa-ad"></i><span>Manage Ads</span></a>
+<a href="/admin/manage-schemes" class="sidebar-item"><i class="fas fa-hand-holding-heart"></i><span>Manage Schemes</span></a>
+<a href="/admin/manage-prices" class="sidebar-item active"><i class="fas fa-chart-line"></i><span>Manage Prices</span></a>
+<a href="/admin/analytics" class="sidebar-item"><i class="fas fa-chart-bar"></i><span>Analytics</span></a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 admin-page">
+  <!-- Hero Section -->
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm relative">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-8 xl:grid-cols-[1.35fr,0.95fr] items-start">
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800">
+          <i class="fas fa-tower-broadcast text-amber-600"></i> Admin-Controlled Mandi Feed Import
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900 leading-tight">
+          Scrape, verify, and synchronize official Karnataka mandi rates.
+        </h1>
+        <p class="max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+          Fetch live commodity prices directly from the Karnataka Agricultural Marketing Board database. Preview and audit scraped records before replacing the live production snapshot.
+        </p>
+      </div>
+      <div class="bg-gradient-to-br from-amber-50/80 to-yellow-50/80 border border-amber-200 shadow-sm rounded-[28px] p-6">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <span class="eyebrow text-amber-800 font-bold uppercase tracking-wider text-xs">Govt Source Feed</span>
+          <span class="w-10 h-10 rounded-2xl bg-white border border-amber-200 text-amber-700 flex items-center justify-center shadow-2xs"><i class="fas fa-globe"></i></span>
+        </div>
+        <a href="{{ source_url }}" target="_blank" rel="noreferrer" class="text-base font-bold text-gray-900 hover:text-green-700 underline break-all block">{{ source_url }}</a>
+        <p class="mt-2.5 text-sm leading-6 text-gray-700 font-medium">
+          Use the fetch controls below to pull the latest report into a temporary staging buffer. Live database records remain untouched until you confirm the import.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Stat Cards Grid -->
+  <section class="grid gap-4 sm:grid-cols-2 md:grid-cols-4 fade-up stagger-1">
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Snapshot Rows</p>
+      <p class="mt-2 text-3xl font-extrabold text-gray-900" id="recordsStat">{{ total_records }}</p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Stored in `mandi_prices`</p>
+    </div>
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Latest Import</p>
+      <p class="mt-2 text-2xl font-extrabold text-green-700 truncate" id="latestImportStat">
+        {% if latest_import %}
+          {{ latest_import.strftime("%d %b %Y") }}
+        {% else %}
+          No import yet
+        {% endif %}
+      </p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Most recent sync</p>
+    </div>
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Districts Covered</p>
+      <p class="mt-2 text-3xl font-extrabold text-sky-600" id="districtStat">{{ district_count }}</p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Represented in snapshot</p>
+    </div>
+    <div class="bg-white border border-gray-200 shadow-sm rounded-[24px] p-5">
+      <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Distinct Markets</p>
+      <p class="mt-2 text-3xl font-extrabold text-amber-600" id="marketStat">{{ market_count }}</p>
+      <p class="mt-2 text-xs font-medium text-gray-500">Active APMC mandis</p>
+    </div>
+  </section>
+
+  <!-- Fetch Controls & Staging Status -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-2 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Staging Buffer</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">Scrape & Audit Controls</h2>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <button id="fetchButton" type="button" class="btn-primary inline-flex items-center gap-2.5 rounded-2xl px-6 py-3.5 font-bold shadow-sm hover:shadow-md transition-all cursor-pointer">
+          <i class="fas fa-cloud-arrow-down"></i> Scrape Latest Karnataka Rates
+        </button>
+        <button id="importButton" type="button" class="btn-secondary inline-flex items-center gap-2.5 rounded-2xl px-6 py-3.5 font-bold bg-white border border-gray-300 text-gray-700 hover:bg-green-50 hover:text-green-800 hover:border-green-300 transition-all shadow-2xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none" disabled>
+          <i class="fas fa-database"></i> Commit to Database
+        </button>
+        <button id="syncDirectButton" type="button" class="btn-primary inline-flex items-center gap-2.5 rounded-2xl px-6 py-3.5 font-bold bg-green-700 hover:bg-green-800 text-white shadow-sm hover:shadow-md transition-all cursor-pointer">
+          <i class="fas fa-rotate"></i> Sync Direct from KRAMA
+        </button>
+      </div>
+    </div>
+
+    <div class="grid gap-4 xl:grid-cols-[1fr,1.1fr]">
+      <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5 flex flex-col justify-center">
+        <span class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Telemetry Status</span>
+        <div id="statusPanel" class="text-sm font-semibold text-gray-600">No fetch has been run in this session. Ready to scrape or sync directly.</div>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-4">
+        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5">
+          <span class="block text-xs font-bold uppercase tracking-wider text-gray-400">Staged Rows</span>
+          <p class="mt-2 text-2xl font-extrabold text-gray-900" id="previewRowCount">0</p>
+        </div>
+        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5">
+          <span class="block text-xs font-bold uppercase tracking-wider text-gray-400">Imported / Upd</span>
+          <p class="mt-2 text-xl font-extrabold text-green-700 truncate" id="syncStatsCount">-- / --</p>
+        </div>
+        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5">
+          <span class="block text-xs font-bold uppercase tracking-wider text-gray-400">Scrape Time</span>
+          <p class="mt-2 text-base font-bold text-gray-800 truncate" id="fetchTimestamp">--</p>
+        </div>
+        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-5">
+          <span class="block text-xs font-bold uppercase tracking-wider text-gray-400">Source Host</span>
+          <p class="mt-2 text-base font-bold text-gray-800 truncate" id="sourceWebsite">--</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Preview Table Section -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-3 space-y-6">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Staging Preview</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">Fetched Staging Records</h2>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input id="previewSearch" class="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs w-full sm:w-64" placeholder="Search staging...">
+        </div>
+        <select id="commodityFilter" class="px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+          <option value="">All Commodities</option>
+        </select>
+        <select id="marketFilter" class="px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+          <option value="">All Markets</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table Wrapper -->
+    <div class="overflow-x-auto rounded-[24px] border border-gray-200 bg-white shadow-2xs">
+      <table class="w-full min-w-[1200px] border-collapse text-left text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
+            <th class="py-4 px-4 font-bold">Commodity</th>
+            <th class="py-4 px-4 font-bold">Variety</th>
+            <th class="py-4 px-4 font-bold">Grade</th>
+            <th class="py-4 px-4 font-bold">District</th>
+            <th class="py-4 px-4 font-bold">Market (Mandi)</th>
+            <th class="py-4 px-4 font-bold text-right">Arrival</th>
+            <th class="py-4 px-4 font-bold">Unit</th>
+            <th class="py-4 px-4 font-bold text-right">Min Price</th>
+            <th class="py-4 px-4 font-bold text-right">Max Price</th>
+            <th class="py-4 px-4 font-bold text-right">Modal Price</th>
+          </tr>
+        </thead>
+        <tbody id="previewTableBody" class="divide-y divide-gray-100">
+          <tr><td colspan="10" class="py-12 text-center text-gray-400 font-medium">No staging records loaded. Click "Scrape Latest Karnataka Rates" above to fetch data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Active Production Database Section (Admin Only Management Table) -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-4 space-y-6">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Production Database</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">Active Mandi Price Records (Admin Management Table)</h2>
+        <p class="text-sm text-gray-600 mt-1">Full administrative access to live database records visible to farmers. Add manual override rates, edit existing entries, or delete outdated items.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <button id="addManualPriceBtn" type="button" class="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 font-bold bg-green-700 hover:bg-green-800 text-white shadow-sm transition-all cursor-pointer">
+          <i class="fas fa-plus"></i> Add Manual Price
+        </button>
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input id="adminSearch" class="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs w-full sm:w-64" placeholder="Search active database...">
+        </div>
+        <select id="adminCommodityFilter" class="px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+          <option value="">All Commodities</option>
+        </select>
+        <select id="adminSourceFilter" class="px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs">
+          <option value="">All Sources</option>
+          <option value="KRAMA">KRAMA Auto</option>
+          <option value="Manual">Manual Entry</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Admin Management Table Wrapper -->
+    <div class="overflow-x-auto rounded-[24px] border border-gray-200 bg-white shadow-2xs">
+      <table class="w-full min-w-[1300px] border-collapse text-left text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
+            <th class="py-4 px-4 font-bold">ID / Source</th>
+            <th class="py-4 px-4 font-bold">Commodity</th>
+            <th class="py-4 px-4 font-bold">Variety / Grade</th>
+            <th class="py-4 px-4 font-bold">District</th>
+            <th class="py-4 px-4 font-bold">Market (Mandi)</th>
+            <th class="py-4 px-4 font-bold text-right">Min Rate</th>
+            <th class="py-4 px-4 font-bold text-right">Max Rate</th>
+            <th class="py-4 px-4 font-bold text-right">Modal Rate</th>
+            <th class="py-4 px-4 font-bold">Last Updated</th>
+            <th class="py-4 px-4 font-bold text-right">Admin Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminPricesTableBody" class="divide-y divide-gray-100">
+          <tr><td colspan="10" class="py-12 text-center text-gray-400 font-medium">Loading active database records...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Add / Edit Manual Price Modal -->
+  <div id="priceModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-[28px] border border-gray-200 shadow-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+        <h3 id="priceModalTitle" class="text-xl font-extrabold text-gray-900">Add Manual Mandi Price</h3>
+        <button type="button" onclick="closePriceModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-xl transition-colors cursor-pointer">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      <form id="priceForm" class="space-y-4" onsubmit="savePriceRecord(event)">
+        <input type="hidden" id="editPriceId" value="">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Commodity Name <span class="text-red-500">*</span></label>
+            <input id="fieldCropName" type="text" required placeholder="e.g. Arecanut, Ragi, Rice" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Variety</label>
+            <input id="fieldVariety" type="text" placeholder="e.g. Rashi, Red, Sona" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Grade</label>
+            <input id="fieldGrade" type="text" placeholder="e.g. FAQ, Standard" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">District <span class="text-red-500">*</span></label>
+            <input id="fieldDistrict" type="text" required placeholder="e.g. Shimoga, Dharwad" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Market (Mandi Name) <span class="text-red-500">*</span></label>
+            <input id="fieldMandiName" type="text" required placeholder="e.g. Shimoga APMC, Hubli Market" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Min Price (₹ / Qtl)</label>
+            <input id="fieldMinPrice" type="number" step="0.01" placeholder="0.00" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Max Price (₹ / Qtl)</label>
+            <input id="fieldMaxPrice" type="number" step="0.01" placeholder="0.00" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">Modal Rate (₹ / Qtl) <span class="text-red-500">*</span></label>
+            <input id="fieldPricePerQuintal" type="number" step="0.01" required placeholder="4500.00" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10">
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button type="button" onclick="closePriceModal()" class="btn-secondary px-5 py-2.5 rounded-xl font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer">Cancel</button>
+          <button type="submit" id="savePriceBtn" class="btn-primary px-6 py-2.5 rounded-xl font-bold bg-green-700 hover:bg-green-800 text-white shadow-sm transition-colors cursor-pointer">Save Price</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(46, 125, 50, 0.08), transparent 45%),
+      radial-gradient(circle at top right, rgba(212, 160, 23, 0.08), transparent 35%);
+  }
+</style>
+
+<script>
+  let previewRecords = [];
+
+  function authHeaders(json = false) {
+    return getAuthHeaders(json ? { "Content-Type": "application/json" } : {});
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "-";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function formatCurrency(value) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A";
+    return `₹${Number(value).toLocaleString("en-IN")}`;
+  }
+
+  function formatNumber(value) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A";
+    return Number(value).toLocaleString("en-IN");
+  }
+
+  function setStatus(message, tone = "") {
+    const panel = document.getElementById("statusPanel");
+    if (tone === "success") {
+      panel.className = "text-sm font-bold text-green-700 bg-green-50 p-3.5 rounded-xl border border-green-200";
+    } else if (tone === "error") {
+      panel.className = "text-sm font-bold text-red-700 bg-red-50 p-3.5 rounded-xl border border-red-200";
+    } else {
+      panel.className = "text-sm font-semibold text-gray-700 bg-white p-3.5 rounded-xl border border-gray-200";
+    }
+    panel.innerHTML = message;
+  }
+
+  function populateSelectOptions(selectId, values, placeholder) {
+    const select = document.getElementById(selectId);
+    const options = [`<option value="">${placeholder}</option>`].concat(
+      values.map((value) => `<option value="${value}">${value}</option>`)
+    );
+    select.innerHTML = options.join("");
+  }
+
+  function renderPreviewTable(rows) {
+    const tbody = document.getElementById("previewTableBody");
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-gray-400 font-medium">No fetched staging records match your current search filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map((row) => `
+      <tr class="hover:bg-green-50/40 transition-colors">
+        <td class="py-3.5 px-4 font-bold text-gray-900">${row.crop_name}</td>
+        <td class="py-3.5 px-4 text-gray-600">${row.variety || "Standard"}</td>
+        <td class="py-3.5 px-4 text-gray-600">${row.grade || "FAQ"}</td>
+        <td class="py-3.5 px-4 font-medium text-gray-800">${row.district || "Unknown"}</td>
+        <td class="py-3.5 px-4 font-semibold text-gray-900">${row.mandi_name}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-700">${formatNumber(row.arrival)}</td>
+        <td class="py-3.5 px-4 text-gray-500">${row.unit || "Quintal"}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.min_price)}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.max_price)}</td>
+        <td class="py-3.5 px-4 text-right"><span class="inline-block bg-green-50 text-green-700 font-extrabold border border-green-200 px-3 py-1 rounded-xl shadow-2xs">${formatCurrency(row.price_per_quintal)}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  function applyPreviewFilters() {
+    const searchValue = document.getElementById("previewSearch").value.trim().toLowerCase();
+    const commodityValue = document.getElementById("commodityFilter").value;
+    const marketValue = document.getElementById("marketFilter").value;
+
+    const filtered = previewRecords.filter((row) => {
+      const matchesSearch =
+        !searchValue ||
+        (row.crop_name || "").toLowerCase().includes(searchValue) ||
+        (row.district || "").toLowerCase().includes(searchValue) ||
+        (row.mandi_name || "").toLowerCase().includes(searchValue);
+      const matchesCommodity = !commodityValue || row.crop_name === commodityValue;
+      const matchesMarket = !marketValue || row.mandi_name === marketValue;
+      return matchesSearch && matchesCommodity && matchesMarket;
+    });
+
+    renderPreviewTable(filtered);
+  }
+
+  function refreshPreviewMeta(payload) {
+    previewRecords = payload.records || [];
+    document.getElementById("previewRowCount").textContent = payload.row_count || previewRecords.length;
+    document.getElementById("fetchTimestamp").textContent = formatDateTime(payload.fetched_at);
+    document.getElementById("sourceWebsite").textContent = payload.source_url || "-";
+    document.getElementById("importButton").disabled = previewRecords.length === 0;
+
+    const commodityOptions = [...new Set(previewRecords.map((row) => row.crop_name).filter(Boolean))].sort();
+    const marketOptions = [...new Set(previewRecords.map((row) => row.mandi_name).filter(Boolean))].sort();
+    populateSelectOptions("commodityFilter", commodityOptions, "All Commodities");
+    populateSelectOptions("marketFilter", marketOptions, "All Markets");
+    applyPreviewFilters();
+  }
+
+  async function fetchLatestPrices() {
+    document.getElementById("fetchButton").disabled = true;
+    setStatus('<i class="fas fa-spinner fa-spin mr-2"></i> Scrape started. Fetching latest APMC bulletin from Karnataka Marketing Board...', "");
+
+    try {
+      const response = await fetch("/admin/mandi/fetch", {
+        method: "POST",
+        headers: authHeaders(),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.detail || "Fetch failed");
+      }
+
+      refreshPreviewMeta(payload);
+      setStatus(`<i class="fas fa-circle-check mr-2"></i> Scrape Success! <b>${payload.row_count}</b> records loaded into staging buffer. Please review below and click "Commit to Database".`, "success");
+    } catch (error) {
+      previewRecords = [];
+      document.getElementById("importButton").disabled = true;
+      renderPreviewTable([]);
+      setStatus(`<i class="fas fa-triangle-exclamation mr-2"></i> Error: ${error.message}`, "error");
+    } finally {
+      document.getElementById("fetchButton").disabled = false;
+    }
+  }
+
+  async function importPreviewRecords() {
+    if (!previewRecords.length) {
+      setStatus('<i class="fas fa-triangle-exclamation mr-2"></i> Error: Scrape records first before committing.', "error");
+      return;
+    }
+    if (!confirm("Are you sure you want to commit these previewed rows and replace the current production mandi database?")) {
+      return;
+    }
+
+    document.getElementById("importButton").disabled = true;
+    setStatus('<i class="fas fa-spinner fa-spin mr-2"></i> Commit started. Replacing production mandi records in a single database transaction...', "");
+
+    try {
+      const response = await fetch("/admin/mandi/import", {
+        method: "POST",
+        headers: {
+          ...authHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ records: previewRecords }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.detail || "Import failed");
+      }
+
+      document.getElementById("recordsStat").textContent = payload.inserted_rows;
+      document.getElementById("latestImportStat").textContent = formatDateTime(payload.imported_at);
+      document.getElementById("districtStat").textContent = new Set(previewRecords.map((row) => row.district || "Unknown")).size;
+      document.getElementById("marketStat").textContent = new Set(previewRecords.map((row) => row.mandi_name).filter(Boolean)).size;
+      setStatus(`<i class="fas fa-circle-check mr-2"></i> Commit Success! <b>${payload.inserted_rows}</b> live mandi records synchronized in database.`, "success");
+      await loadAdminPrices();
+    } catch (error) {
+      setStatus(`<i class="fas fa-triangle-exclamation mr-2"></i> Error: ${error.message}`, "error");
+    } finally {
+      document.getElementById("importButton").disabled = previewRecords.length === 0;
+    }
+  }
+
+  async function syncDirectFromKrama() {
+    if (!confirm("Start direct hybrid sync from official Karnataka KRAMA website? This will fetch live rates via Playwright and update existing production records without deleting historical data.")) {
+      return;
+    }
+
+    const btn = document.getElementById("syncDirectButton");
+    btn.disabled = true;
+    setStatus('<i class="fas fa-spinner fa-spin mr-2"></i> Direct sync started. Running headless Playwright scraper against official KRAMA portal...', "");
+
+    try {
+      const response = await fetch("/admin/mandi/sync", {
+        method: "POST",
+        headers: authHeaders(),
+        credentials: "same-origin",
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.detail || "Direct KRAMA sync failed");
+      }
+
+      document.getElementById("syncStatsCount").textContent = `${payload.rowsImported} / ${payload.rowsUpdated}`;
+      document.getElementById("fetchTimestamp").textContent = `${payload.duration}s`;
+      document.getElementById("sourceWebsite").textContent = "KRAMA Portal";
+
+      setStatus(`<i class="fas fa-circle-check mr-2"></i> ${payload.message} (Imported: <b>${payload.rowsImported}</b>, Updated: <b>${payload.rowsUpdated}</b> in ${payload.duration}s)`, "success");
+      await loadAdminPrices();
+    } catch (error) {
+      setStatus(`<i class="fas fa-triangle-exclamation mr-2"></i> Direct Sync Error: ${error.message}`, "error");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  let activeAdminRecords = [];
+
+  async function loadAdminPrices() {
+    try {
+      const response = await fetch("/admin/prices", {
+        headers: authHeaders(),
+        credentials: "same-origin",
+      });
+      if (!response.ok) throw new Error("Failed to load active production prices");
+      activeAdminRecords = await response.json();
+      applyAdminFilters();
+      
+      const commodityOptions = [...new Set(activeAdminRecords.map((row) => row.crop_name).filter(Boolean))].sort();
+      populateSelectOptions("adminCommodityFilter", commodityOptions, "All Commodities");
+    } catch (error) {
+      console.error("Error loading admin prices:", error);
+      document.getElementById("adminPricesTableBody").innerHTML = `<tr><td colspan="10" class="py-12 text-center text-red-600 font-semibold">Unable to load active production records right now.</td></tr>`;
+    }
+  }
+
+  function renderAdminPricesTable(rows) {
+    const tbody = document.getElementById("adminPricesTableBody");
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-gray-400 font-medium">No production records match your current filter.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map((row) => `
+      <tr class="hover:bg-green-50/40 transition-colors">
+        <td class="py-3.5 px-4 font-bold text-gray-900 whitespace-nowrap">
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${row.source === 'Manual' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-green-50 text-green-700 border border-green-200'}">
+            <i class="fas ${row.source === 'Manual' ? 'fa-user-pen' : 'fa-robot'} text-[10px]"></i> #${row.id} (${row.source || 'KRAMA'})
+          </span>
+        </td>
+        <td class="py-3.5 px-4 font-bold text-gray-900">${row.crop_name}</td>
+        <td class="py-3.5 px-4 text-gray-600">${row.variety || "Standard"} / ${row.grade || "FAQ"}</td>
+        <td class="py-3.5 px-4 font-medium text-gray-800">${row.district || "Unknown"}</td>
+        <td class="py-3.5 px-4 font-semibold text-gray-900">${row.mandi_name}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.min_price)}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.max_price)}</td>
+        <td class="py-3.5 px-4 text-right"><span class="inline-block bg-green-50 text-green-700 font-extrabold border border-green-200 px-3 py-1 rounded-xl shadow-2xs">${formatCurrency(row.price_per_quintal)}</span></td>
+        <td class="py-3.5 px-4 text-gray-500 text-xs whitespace-nowrap">${formatDateTime(row.last_updated || row.created_at)}</td>
+        <td class="py-3.5 px-4 text-right whitespace-nowrap">
+          <div class="inline-flex items-center gap-1.5">
+            <button type="button" onclick="openEditPriceModal(${row.id})" class="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-colors font-bold text-xs cursor-pointer" title="Edit Price">
+              <i class="fas fa-edit mr-1"></i>Edit
+            </button>
+            <button type="button" onclick="deletePriceRecord(${row.id})" class="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-bold text-xs cursor-pointer" title="Delete Record">
+              <i class="fas fa-trash mr-1"></i>Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function applyAdminFilters() {
+    const searchValue = document.getElementById("adminSearch").value.trim().toLowerCase();
+    const commodityValue = document.getElementById("adminCommodityFilter").value;
+    const sourceValue = document.getElementById("adminSourceFilter").value;
+
+    const filtered = activeAdminRecords.filter((row) => {
+      const matchesSearch =
+        !searchValue ||
+        String(row.id).includes(searchValue) ||
+        (row.crop_name || "").toLowerCase().includes(searchValue) ||
+        (row.district || "").toLowerCase().includes(searchValue) ||
+        (row.mandi_name || "").toLowerCase().includes(searchValue) ||
+        (row.variety || "").toLowerCase().includes(searchValue);
+      const matchesCommodity = !commodityValue || row.crop_name === commodityValue;
+      const matchesSource = !sourceValue || (row.source || "KRAMA") === sourceValue;
+      return matchesSearch && matchesCommodity && matchesSource;
+    });
+
+    renderAdminPricesTable(filtered);
+  }
+
+  function openAddPriceModal() {
+    document.getElementById("priceForm").reset();
+    document.getElementById("editPriceId").value = "";
+    document.getElementById("priceModalTitle").textContent = "Add Manual Mandi Price";
+    document.getElementById("priceModal").classList.remove("hidden");
+  }
+
+  function openEditPriceModal(priceId) {
+    const row = activeAdminRecords.find((r) => r.id === priceId);
+    if (!row) return;
+
+    document.getElementById("editPriceId").value = row.id;
+    document.getElementById("fieldCropName").value = row.crop_name || "";
+    document.getElementById("fieldVariety").value = row.variety || "";
+    document.getElementById("fieldGrade").value = row.grade || "";
+    document.getElementById("fieldDistrict").value = row.district || "";
+    document.getElementById("fieldMandiName").value = row.mandi_name || "";
+    document.getElementById("fieldMinPrice").value = row.min_price || "";
+    document.getElementById("fieldMaxPrice").value = row.max_price || "";
+    document.getElementById("fieldPricePerQuintal").value = row.price_per_quintal || "";
+    document.getElementById("priceModalTitle").textContent = `Edit Mandi Price (#${row.id})`;
+    document.getElementById("priceModal").classList.remove("hidden");
+  }
+
+  function closePriceModal() {
+    document.getElementById("priceModal").classList.add("hidden");
+  }
+
+  async function savePriceRecord(event) {
+    event.preventDefault();
+    const editId = document.getElementById("editPriceId").value;
+    const isEdit = Boolean(editId);
+
+    const payload = {
+      crop_name: document.getElementById("fieldCropName").value.trim(),
+      variety: document.getElementById("fieldVariety").value.trim() || "Standard",
+      grade: document.getElementById("fieldGrade").value.trim() || "FAQ",
+      district: document.getElementById("fieldDistrict").value.trim() || "Unknown",
+      mandi_name: document.getElementById("fieldMandiName").value.trim() || "Local Market",
+      price_per_quintal: parseFloat(document.getElementById("fieldPricePerQuintal").value) || 0,
+      min_price: parseFloat(document.getElementById("fieldMinPrice").value) || 0,
+      max_price: parseFloat(document.getElementById("fieldMaxPrice").value) || 0,
+      price_date: new Date().toISOString().split("T")[0],
+      source: "Manual"
+    };
+
+    const url = isEdit ? `/admin/prices/${editId}` : `/admin/prices`;
+    const method = isEdit ? "PUT" : "POST";
+
+    const btn = document.getElementById("savePriceBtn");
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          ...authHeaders(),
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Failed to save record" }));
+        throw new Error(err.detail || "Server error while saving price");
+      }
+
+      closePriceModal();
+      setStatus(`<i class="fas fa-circle-check mr-2"></i> Price record successfully ${isEdit ? 'updated' : 'added'}!`, "success");
+      await loadAdminPrices();
+    } catch (error) {
+      alert(`Error saving price record: ${error.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origText;
+    }
+  }
+
+  async function deletePriceRecord(priceId) {
+    if (!confirm(`Are you sure you want to permanently delete price record #${priceId}?`)) return;
+
+    try {
+      const response = await fetch(`/admin/prices/${priceId}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+        credentials: "same-origin",
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Deletion failed" }));
+        throw new Error(err.detail || "Could not delete price record");
+      }
+
+      setStatus(`<i class="fas fa-circle-check mr-2"></i> Price record #${priceId} permanently deleted.`, "success");
+      await loadAdminPrices();
+    } catch (error) {
+      alert(`Error deleting record: ${error.message}`);
+    }
+  }
+
+  document.getElementById("fetchButton").addEventListener("click", fetchLatestPrices);
+  document.getElementById("importButton").addEventListener("click", importPreviewRecords);
+  document.getElementById("syncDirectButton").addEventListener("click", syncDirectFromKrama);
+  document.getElementById("addManualPriceBtn").addEventListener("click", openAddPriceModal);
+  document.getElementById("previewSearch").addEventListener("input", applyPreviewFilters);
+  document.getElementById("commodityFilter").addEventListener("change", applyPreviewFilters);
+  document.getElementById("marketFilter").addEventListener("change", applyPreviewFilters);
+  document.getElementById("adminSearch").addEventListener("input", applyAdminFilters);
+  document.getElementById("adminCommodityFilter").addEventListener("change", applyAdminFilters);
+  document.getElementById("adminSourceFilter").addEventListener("change", applyAdminFilters);
+
+  document.addEventListener("DOMContentLoaded", function () {
+    loadAdminPrices();
+  });
+</script>
+{% endblock %}

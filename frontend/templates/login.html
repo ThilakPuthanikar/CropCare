@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - CropCare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root {
+        --primary: #059669;
+        --primary-dark: #047857;
+        --accent: #10B981;
+        --bg-main: #F4F7F4;
+        --surface: #FFFFFF;
+        --border-color: rgba(5, 150, 105, 0.15);
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --radius-lg: 24px;
+        --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        color: var(--text-primary);
+        background:
+          radial-gradient(circle at 15% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
+          radial-gradient(circle at 85% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
+          var(--bg-main);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px 16px;
+      }
+
+      h1, h2, h3, h4, h5, h6, .brand-font {
+        font-family: "Plus Jakarta Sans", "Manrope", sans-serif;
+      }
+
+      .auth-card {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 440px;
+        padding: 40px 36px;
+        box-shadow: 
+          0 30px 60px -15px rgba(0, 0, 0, 0.08),
+          0 10px 20px -5px rgba(5, 150, 105, 0.05),
+          inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .auth-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #059669, #10B981, #3B82F6);
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(241, 245, 249, 0.9);
+        border: 1px solid rgba(203, 213, 225, 0.6);
+        color: var(--text-secondary);
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-base);
+      }
+
+      .close-btn:hover {
+        background: #E2E8F0;
+        color: var(--text-primary);
+        transform: rotate(90deg);
+      }
+
+      .logo-container {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .logo-container img {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px auto;
+        border-radius: 16px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(5, 150, 105, 0.2);
+        object-fit: cover;
+      }
+
+      .logo-container h1 {
+        font-size: 30px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+        letter-spacing: -0.02em;
+        transition: var(--transition-base);
+      }
+
+      .logo-container h1:hover {
+        color: var(--primary);
+      }
+
+      .logo-container p {
+        color: var(--text-secondary);
+        font-size: 14.5px;
+        font-weight: 500;
+      }
+
+      .input-group {
+        margin-bottom: 22px;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+      }
+
+      .input-field {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        background: rgba(248, 250, 245, 0.9);
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 500;
+        transition: var(--transition-base);
+      }
+
+      .input-field::placeholder {
+        color: #94A3B8;
+        font-weight: 400;
+      }
+
+      .input-field:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: #FFFFFF;
+        box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
+      }
+
+      .password-input {
+        position: relative;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 16px;
+        padding: 6px;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .password-toggle:hover {
+        color: var(--primary);
+      }
+
+      .btn {
+        width: 100%;
+        padding: 15px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        transition: var(--transition-base);
+        border: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        box-shadow: 0 8px 20px -4px rgba(5, 150, 105, 0.35);
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px -4px rgba(5, 150, 105, 0.45);
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 26px;
+        font-size: 14px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .login-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+        transition: color 0.2s;
+      }
+
+      .login-link a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+      }
+
+      .input-error {
+        border-color: #EF4444 !important;
+        background: #FEF2F2 !important;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+      }
+
+      .error-message {
+        color: #EF4444;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 7px;
+        display: none;
+      }
+
+      .success-message {
+        background: #F0FDF4;
+        border: 1px solid #BBF7D0;
+        border-radius: 14px;
+        padding: 16px;
+        margin-top: 20px;
+        display: none;
+        color: #166534;
+        font-weight: 700;
+        font-size: 14px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
+      }
+
+      .app-name-button {
+        cursor: pointer;
+      }
+
+      @media (max-width: 480px) {
+        .auth-card {
+          padding: 30px 24px;
+          border-radius: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans antialiased">
+    <div class="auth-card">
+      <button class="close-btn" id="closeBtn" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <div class="logo-container">
+        <!-- Logo Image -->
+        <img
+          src="static/images/logo.png"
+          alt="CropCare Logo"
+          onerror="
+            this.style.display = 'none';
+            document.querySelector('.logo-placeholder').style.display = 'block';
+          "
+        />
+        <div class="logo-placeholder" style="display: none">
+          <div class="w-16 h-16 mx-auto bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 mb-4">
+            <svg
+              class="w-10 h-10 text-emerald-600"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+              />
+            </svg>
+          </div>
+        </div>
+        <h1 class="app-name-button brand-font" id="appNameButton">CropCare</h1>
+        <p>Login to your account</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="username">Email or Phone Number</label>
+          <input
+            type="text"
+            id="username"
+            class="input-field"
+            placeholder="Enter your email or phone number"
+            required
+          />
+          <div class="error-message" id="usernameError">
+            Please enter a valid email or phone number
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="password-input">
+            <input
+              type="password"
+              id="password"
+              class="input-field"
+              placeholder="Enter your password"
+              required
+            />
+            <button type="button" class="password-toggle" id="togglePassword">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="error-message" id="passwordError">
+            Please enter your password
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Login</button>
+
+        <div class="success-message" id="successMessage">
+          Login successful! Redirecting to dashboard...
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="login-link">
+          Don't have an account? <a href="/auth/register">Sign up</a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      // Close button functionality
+      document
+        .getElementById("closeBtn")
+        .addEventListener("click", function () {
+          window.location.href = "/";
+        });
+
+      // Password toggle functionality - FIXED
+      const togglePassword = document.getElementById("togglePassword");
+      const passwordInputField = document.getElementById("password");
+
+      togglePassword.addEventListener("click", function () {
+        // Get current type
+        const currentType = passwordInputField.getAttribute("type");
+
+        // Toggle between password and text
+        if (currentType === "password") {
+          passwordInputField.setAttribute("type", "text");
+          this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        } else {
+          passwordInputField.setAttribute("type", "password");
+          this.innerHTML = '<i class="fas fa-eye"></i>';
+        }
+      });
+
+      // Form validation
+      const loginForm = document.getElementById("loginForm");
+      const usernameInput = document.getElementById("username");
+      const successMessage = document.getElementById("successMessage");
+      const errorMessage = document.getElementById("errorMessage");
+
+      // Username validation (email or phone)
+      usernameInput.addEventListener("blur", function () {
+        const value = this.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[6-9]\d{9}$/;
+
+        if (!emailRegex.test(value) && !phoneRegex.test(value)) {
+          this.classList.add("input-error");
+          document.getElementById("usernameError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("usernameError").style.display = "none";
+        }
+      });
+
+      // Password validation
+      passwordInputField.addEventListener("blur", function () {
+        const value = this.value;
+        if (value === "") {
+          this.classList.add("input-error");
+          document.getElementById("passwordError").style.display = "block";
+        } else {
+          this.classList.remove("input-error");
+          document.getElementById("passwordError").style.display = "none";
+        }
+      });
+
+      // Form submission
+      loginForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        // Hide previous messages
+        successMessage.style.display = "none";
+        errorMessage.style.display = "none";
+
+        // Validate all fields
+        let isValid = true;
+
+        // Check username
+        const usernameValue = usernameInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (
+          !emailRegex.test(usernameValue) &&
+          !phoneRegex.test(usernameValue)
+        ) {
+          usernameInput.classList.add("input-error");
+          document.getElementById("usernameError").style.display = "block";
+          isValid = false;
+        }
+
+        // Check password
+        const passwordValue = passwordInputField.value;
+        if (passwordValue === "") {
+          passwordInputField.classList.add("input-error");
+          document.getElementById("passwordError").style.display = "block";
+          isValid = false;
+        }
+
+        if (isValid) {
+          try {
+            const formData = new FormData();
+            formData.append("email", usernameValue);
+            formData.append("password", passwordValue);
+
+            const response = await fetch("/auth/login", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              successMessage.style.display = "block";
+
+              // Redirect based on role
+              setTimeout(() => {
+                if (data.role === "admin") {
+                  window.location.href = "/admin/dashboard";
+                } else {
+                  window.location.href = "/user/dashboard";
+                }
+              }, 1500);
+            } else {
+              errorMessage.textContent = data.detail || "Login failed";
+              errorMessage.style.display = "block";
+            }
+          } catch (error) {
+            errorMessage.textContent = "Network error. Please try again.";
+            errorMessage.style.display = "block";
+          }
+        }
+      });
+
+      // App name button - redirects to admin login
+      document
+        .getElementById("appNameButton")
+        .addEventListener("click", function () {
+          window.location.href = "/auth/admin/login";
+        });
+    </script>
+  </body>
+</html>

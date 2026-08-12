@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+{% block title %}Price Tracker - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Live Mandi Price Tracker{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item active">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 price-page">
+  <!-- Hero Section -->
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm relative">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-8 xl:grid-cols-[1.35fr,1.05fr] items-start">
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800">
+            <i class="fas fa-scale-balanced text-green-600"></i>
+            Karnataka APMC Mandi Feed
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800">
+            <i class="fas fa-building-columns text-amber-600"></i>
+            Govt Verified Rates
+          </span>
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900 leading-tight">
+          Track live commodity arrivals and modal prices across Karnataka.
+        </h1>
+        <p class="max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+          Monitor real-time market snapshots imported daily from official APMC mandi reports. Compare minimum, maximum, and modal prices to decide the best time and market to sell your produce.
+        </p>
+      </div>
+
+      <!-- Stat Cards Grid -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5">
+          <span class="block text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Snapshot Rows</span>
+          <div id="totalRows" class="skeleton-block w-16 h-7 rounded-lg mt-2 bg-gray-200"></div>
+        </div>
+        <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5">
+          <span class="block text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Latest Update</span>
+          <div id="latestUpdate" class="skeleton-block w-24 h-7 rounded-lg mt-2 bg-gray-200"></div>
+        </div>
+        <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5">
+          <span class="block text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Top Commodity</span>
+          <div id="topCrop" class="skeleton-block w-20 h-7 rounded-lg mt-2 bg-gray-200"></div>
+        </div>
+        <div class="bg-gray-50 border border-gray-200/80 shadow-2xs rounded-[24px] p-5">
+          <span class="block text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Highest Modal Rate</span>
+          <div id="highestPrice" class="skeleton-block w-24 h-7 rounded-lg mt-2 bg-gray-200"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Official KRAMA Portal Hybrid Verification Section -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-1 space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-green-700 mb-1">
+          <i class="fas fa-shield-check"></i> Live Government Check
+        </div>
+        <h3 class="text-xl font-extrabold text-gray-900">Verify with Official KRAMA Portal</h3>
+        <p class="text-sm text-gray-600 mt-1">Cross-check daily rates directly on the Karnataka Agricultural Marketing Board portal without leaving CropCare.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="https://krama.karnataka.gov.in/Reports/Main_rep" target="_blank" rel="noopener noreferrer" class="btn-secondary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-2xs transition-all">
+          <span>Open Portal Tab</span>
+          <i class="fas fa-external-link-alt text-xs"></i>
+        </a>
+        <button id="toggleKramaBtn" type="button" class="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold bg-green-700 hover:bg-green-800 text-white shadow-sm transition-all cursor-pointer">
+          <i class="fas fa-eye"></i>
+          <span id="toggleKramaText">Show Live KRAMA Portal</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Lazy Loaded Inline Iframe Container -->
+    <div id="kramaIframeContainer" class="hidden pt-4 border-t border-gray-100 transition-all">
+      <div id="iframeTarget" class="w-full min-h-[750px] rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+        <div class="text-center p-8 text-gray-500">
+          <i class="fas fa-spinner fa-spin text-2xl text-green-600 mb-2"></i>
+          <p class="font-medium text-sm">Connecting to KRAMA official server...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Toolbar & Table Section -->
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[32px] p-6 lg:p-8 fade-up stagger-2 space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-extrabold text-gray-900">Mandi Price Directory</h2>
+        <p class="text-sm text-gray-600 mt-1">Search by commodity name, district, or specific mandi market name.</p>
+      </div>
+      <div class="w-full md:w-80">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input
+            id="searchInput"
+            type="text"
+            class="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 transition-all shadow-2xs"
+            placeholder="Search commodity, district, mandi..."
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Wrapper -->
+    <div class="table-responsive-wrapper overflow-x-auto rounded-[24px] border border-gray-200 bg-white shadow-2xs">
+
+      <table class="w-full min-w-[1100px] border-collapse text-left text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
+            <th class="py-4 px-4 font-bold">Date</th>
+            <th class="py-4 px-4 font-bold">Commodity</th>
+            <th class="py-4 px-4 font-bold">Variety</th>
+            <th class="py-4 px-4 font-bold">Grade</th>
+            <th class="py-4 px-4 font-bold">District</th>
+            <th class="py-4 px-4 font-bold">Market (Mandi)</th>
+            <th class="py-4 px-4 font-bold text-right">Arrival</th>
+            <th class="py-4 px-4 font-bold">Unit</th>
+            <th class="py-4 px-4 font-bold text-right">Min Rate</th>
+            <th class="py-4 px-4 font-bold text-right">Max Rate</th>
+            <th class="py-4 px-4 font-bold text-right">Modal Rate</th>
+          </tr>
+        </thead>
+        <tbody id="pricesTableBody" class="divide-y divide-gray-100">
+          <tr><td colspan="11" class="py-12 text-center text-gray-400 font-medium">Loading imported mandi prices...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<style>
+  .price-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(46, 125, 50, 0.08), transparent 45%),
+      radial-gradient(circle at top right, rgba(212, 160, 23, 0.08), transparent 35%);
+  }
+</style>
+
+<script>
+  let allPrices = [];
+
+  function renderPriceTableSkeleton() {
+    return renderTableSkeleton(11, 6);
+  }
+
+  function formatCurrency(value) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A";
+    return `₹${Number(value).toLocaleString("en-IN")}`;
+  }
+
+  function formatNumber(value) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A";
+    return Number(value).toLocaleString("en-IN");
+  }
+
+  function formatDate(value) {
+    if (!value) return "N/A";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "N/A";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  function updateOverview(prices) {
+    const totalEl = document.getElementById("totalRows");
+    totalEl.className = "block mt-2 text-gray-900 font-extrabold text-2xl";
+    totalEl.textContent = prices.length;
+
+    const updateEl = document.getElementById("latestUpdate");
+    updateEl.className = "block mt-2 text-gray-900 font-extrabold text-2xl";
+
+    const cropEl = document.getElementById("topCrop");
+    cropEl.className = "block mt-2 text-gray-900 font-extrabold text-2xl truncate";
+
+    const priceEl = document.getElementById("highestPrice");
+    priceEl.className = "block mt-2 text-green-700 font-extrabold text-2xl";
+
+    if (!prices.length) {
+      updateEl.textContent = "--";
+      cropEl.textContent = "--";
+      priceEl.textContent = "--";
+      return;
+    }
+
+    const latestUpdate = prices.reduce((best, row) => {
+      const candidate = row.created_at || row.last_updated || row.price_date;
+      if (!candidate) return best;
+      if (!best) return candidate;
+      return new Date(candidate) > new Date(best) ? candidate : best;
+    }, null);
+
+    const cropAggregates = {};
+    prices.forEach((row) => {
+      const crop = row.crop_name || "Unknown";
+      const amount = Number(row.price_per_quintal) || 0;
+      if (!cropAggregates[crop]) {
+        cropAggregates[crop] = { total: 0, count: 0 };
+      }
+      cropAggregates[crop].total += amount;
+      cropAggregates[crop].count += 1;
+    });
+    const topCrop = Object.entries(cropAggregates)
+      .map(([crop, value]) => ({ crop, average: value.total / value.count }))
+      .sort((a, b) => b.average - a.average)[0];
+
+    const highestPrice = prices.reduce((best, row) => {
+      return !best || Number(row.price_per_quintal) > Number(best.price_per_quintal) ? row : best;
+    }, null);
+
+    updateEl.textContent = formatDateTime(latestUpdate);
+    cropEl.textContent = topCrop ? topCrop.crop : "--";
+    priceEl.textContent = highestPrice ? formatCurrency(highestPrice.price_per_quintal) : "--";
+  }
+
+  function renderRows(rows) {
+    const tbody = document.getElementById("pricesTableBody");
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="11" class="py-12 text-center text-gray-500 font-medium">No imported mandi prices match your current search filter.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((row) => `
+      <tr class="hover:bg-green-50/40 transition-colors">
+        <td class="py-3.5 px-4 font-medium text-gray-600 whitespace-nowrap">${formatDate(row.price_date)}</td>
+        <td class="py-3.5 px-4 font-bold text-gray-900">${row.crop_name}</td>
+        <td class="py-3.5 px-4 text-gray-600">${row.variety || "Standard"}</td>
+        <td class="py-3.5 px-4 text-gray-600">${row.grade || "FAQ"}</td>
+        <td class="py-3.5 px-4 font-medium text-gray-800">${row.district}</td>
+        <td class="py-3.5 px-4 font-semibold text-gray-900">${row.mandi_name}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-700">${formatNumber(row.arrival)}</td>
+        <td class="py-3.5 px-4 text-gray-500">${row.unit || "Quintal"}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.min_price)}</td>
+        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${formatCurrency(row.max_price)}</td>
+        <td class="py-3.5 px-4 text-right"><span class="inline-block bg-green-50 text-green-700 font-extrabold border border-green-200 px-3 py-1 rounded-xl shadow-2xs">${formatCurrency(row.price_per_quintal)}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  function applyFilters() {
+    const searchValue = document.getElementById("searchInput").value.trim().toLowerCase();
+
+    const filtered = allPrices.filter((row) => {
+      return (
+        !searchValue ||
+        (row.crop_name || "").toLowerCase().includes(searchValue) ||
+        (row.district || "").toLowerCase().includes(searchValue) ||
+        (row.mandi_name || "").toLowerCase().includes(searchValue) ||
+        (row.variety || "").toLowerCase().includes(searchValue)
+      );
+    });
+
+    updateOverview(allPrices);
+    renderRows(filtered);
+  }
+
+  async function loadMarketPrices() {
+    try {
+      const response = await fetch("/user/market-prices", {
+        headers: getAuthHeaders(),
+      });
+      if (!response.ok) throw new Error("Failed to load market prices");
+      allPrices = await response.json();
+      applyFilters();
+    } catch (error) {
+      console.error(error);
+      document.getElementById("pricesTableBody").innerHTML = `<tr><td colspan="11" class="py-12 text-center text-red-600 font-semibold">Unable to load imported mandi prices right now. Please check your connection.</td></tr>`;
+      updateOverview([]);
+    }
+  }
+
+  let iframeLoaded = false;
+  function toggleKramaPortal() {
+    const container = document.getElementById("kramaIframeContainer");
+    const target = document.getElementById("iframeTarget");
+    const btnText = document.getElementById("toggleKramaText");
+
+    if (container.classList.contains("hidden")) {
+      container.classList.remove("hidden");
+      btnText.textContent = "Hide Live KRAMA Portal";
+
+      if (!iframeLoaded) {
+        iframeLoaded = true;
+        setTimeout(() => {
+          target.innerHTML = `<iframe src="/user/proxy-krama" class="w-full h-[780px] border-0 rounded-2xl bg-white shadow-inner" allow="geolocation"></iframe>`;
+        }, 300);
+      }
+    } else {
+      container.classList.add("hidden");
+      btnText.textContent = "Show Live KRAMA Portal";
+    }
+  }
+
+  document.getElementById("searchInput").addEventListener("input", applyFilters);
+  document.getElementById("toggleKramaBtn").addEventListener("click", toggleKramaPortal);
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("pricesTableBody").innerHTML = renderPriceTableSkeleton();
+    loadMarketPrices();
+  });
+</script>
+{% endblock %}
+
+

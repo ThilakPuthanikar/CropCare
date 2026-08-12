@@ -27,8 +27,13 @@ from ..utils.validation import (
     is_valid_name,
 )
 
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=PROJECT_ROOT / "frontend" / "templates")
+
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):

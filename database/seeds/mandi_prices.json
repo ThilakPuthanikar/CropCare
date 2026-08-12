@@ -1,0 +1,158 @@
+{
+  "weekly_market_series": [
+    {
+      "crop_name": "Tomato",
+      "district": "Bagalkot",
+      "mandi_name": "Bagalkot APMC",
+      "modal_prices": [
+        1300,
+        1450,
+        1200,
+        1550,
+        1800,
+        2250,
+        2050,
+        1880
+      ],
+      "spread": 260
+    },
+    {
+      "crop_name": "Onion",
+      "district": "Bagalkot",
+      "mandi_name": "Bagalkot APMC",
+      "modal_prices": [
+        1850,
+        1780,
+        1920,
+        2080,
+        2240,
+        2410,
+        2350,
+        2190
+      ],
+      "spread": 220
+    },
+    {
+      "crop_name": "Groundnut",
+      "district": "Bagalkot",
+      "mandi_name": "Bagalkot APMC",
+      "modal_prices": [
+        5650,
+        5710,
+        5780,
+        5820,
+        5890,
+        5980,
+        6070,
+        6010
+      ],
+      "spread": 320
+    },
+    {
+      "crop_name": "Paddy",
+      "district": "Mysuru",
+      "mandi_name": "Mysuru APMC",
+      "modal_prices": [
+        2240,
+        2280,
+        2260,
+        2310,
+        2350,
+        2390,
+        2370,
+        2420
+      ],
+      "spread": 140
+    },
+    {
+      "crop_name": "Tomato",
+      "district": "Mysuru",
+      "mandi_name": "Mysuru APMC",
+      "modal_prices": [
+        1450,
+        1620,
+        1380,
+        1710,
+        1980,
+        2440,
+        2210,
+        2050
+      ],
+      "spread": 280
+    },
+    {
+      "crop_name": "Onion",
+      "district": "Mysuru",
+      "mandi_name": "Mysuru APMC",
+      "modal_prices": [
+        1760,
+        1820,
+        1910,
+        2050,
+        2180,
+        2340,
+        2290,
+        2140
+      ],
+      "spread": 210
+    },
+    {
+      "crop_name": "Maize",
+      "district": "Belagavi",
+      "mandi_name": "Belagavi APMC",
+      "modal_prices": [
+        1930,
+        1950,
+        1940,
+        1970,
+        1990,
+        2010,
+        2030,
+        2050
+      ],
+      "spread": 95
+    },
+    {
+      "crop_name": "Groundnut",
+      "district": "Belagavi",
+      "mandi_name": "Belagavi APMC",
+      "modal_prices": [
+        5520,
+        5600,
+        5670,
+        5750,
+        5840,
+        5920,
+        6000,
+        5950
+      ],
+      "spread": 300
+    },
+    {
+      "crop_name": "Tomato",
+      "district": "Belagavi",
+      "mandi_name": "Belagavi APMC",
+      "modal_prices": [
+        1220,
+        1360,
+        1180,
+        1490,
+        1730,
+        2140,
+        1960,
+        1810
+      ],
+      "spread": 250
+    }
+  ],
+  "weekly_snapshot_dates": [
+    "2026-03-07",
+    "2026-03-14",
+    "2026-03-21",
+    "2026-03-28",
+    "2026-04-04",
+    "2026-04-11",
+    "2026-04-18",
+    "2026-04-25"
+  ]
+}

@@ -1,0 +1,2105 @@
+<!-- templates/user/crop_recommendation.html -->
+{% extends "base.html" %}
+{% block title %}Crop Suggestion - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}AI Crop Suggestion{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item active">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+
+{% endblock %} {% block content %}
+<div class="space-y-6 crop-suggestion-page">
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-6 xl:grid-cols-[1.45fr,0.9fr]">
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800"
+          >
+            <i class="fas fa-sparkles text-green-600"></i>
+            AI Crop Fit
+          </span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-700"
+          >
+            <i class="fas fa-location-dot text-sky-600"></i>
+            {{ user.district or "District not set" }}, {{ user.state or "Karnataka" }}
+          </span>
+          <button
+            type="button"
+            onclick="openHistoryModal('crop_suggestion', 'Past Crop Suggestions')"
+            class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white px-4 py-2 text-xs font-semibold text-green-700 hover:bg-green-50 shadow-2xs transition-all cursor-pointer"
+          >
+            <i class="fas fa-history"></i>
+            View Past Suggestions
+          </button>
+        </div>
+
+        <div>
+          <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900">
+            Turn soil signals into one focused crop decision.
+          </h1>
+          <p class="mt-4 max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+            Upload a soil report or describe field conditions manually. CropCare
+            combines your district context with AI analysis to recommend the
+            strongest crop fit for the current conditions.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">District Lens</p>
+            <p class="mt-3 text-xl font-extrabold text-gray-900">
+              {{ user.district or "Unset" }}
+            </p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Accepted Files</p>
+            <p class="mt-3 text-xl font-extrabold text-gray-900">PDF, JPG, PNG</p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Output</p>
+            <p class="mt-3 text-xl font-extrabold text-gray-900">1 best-fit crop</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="rounded-[28px] border border-green-200 bg-gradient-to-br from-green-50/80 to-emerald-50/80 p-6 shadow-sm">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">What It Considers</p>
+              <p class="text-xl font-extrabold text-gray-900">Soil, district, report evidence</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-green-200 text-green-700 shadow-sm">
+              <i class="fas fa-seedling"></i>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-3">
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Upload soil reports directly, including image-based reports.
+            </div>
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Add manual soil details when you know pH, texture, nutrients, or drainage.
+            </div>
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Uses {{ user.district or "your district" }} as local farming context.
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+          <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Operator Note</p>
+          <p class="text-sm leading-6 text-gray-600">
+            For the best result, include pH, soil texture, organic matter,
+            drainage, and any nutrient information available in the report.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
+    <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 fade-up stagger-1">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Input Studio</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Prepare soil evidence</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 border border-green-100 text-green-700">
+          <i class="fas fa-file-waveform"></i>
+        </div>
+      </div>
+
+      <div class="mt-6 inline-flex rounded-full border border-gray-200 bg-gray-50 p-1.5">
+        <button type="button" class="mode-pill is-active" data-mode="upload">
+          <i class="fas fa-cloud-arrow-up"></i>
+          Upload report
+        </button>
+        <button type="button" class="mode-pill" data-mode="manual">
+          <i class="fas fa-pen-field"></i>
+          Manual entry
+        </button>
+      </div>
+
+      <div class="mt-6 space-y-5">
+        <div class="upload-shell" id="uploadShell">
+          <label for="soilReport" class="upload-dropzone">
+            <span class="upload-icon">
+              <i class="fas fa-file-arrow-up"></i>
+            </span>
+            <span class="block text-lg font-bold text-gray-900">
+              Drop your soil report here
+            </span>
+            <span class="mt-2 block text-sm text-gray-500">
+              or click to browse PDF, JPG, JPEG, or PNG files
+            </span>
+            <span id="fileMeta" class="mt-4 inline-flex rounded-full bg-gray-100 border border-gray-200 px-3.5 py-1.5 text-xs font-medium text-gray-600">
+              No file selected
+            </span>
+          </label>
+          <input
+            type="file"
+            id="soilReport"
+            accept=".pdf,.jpg,.jpeg,.png"
+            class="sr-only"
+          />
+        </div>
+
+        <div class="manual-shell">
+          <div class="manual-shell-inner">
+            <div class="manual-shell-icon">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+            <p class="text-lg font-bold text-gray-900 mt-3">Structured farm profile</p>
+            <p class="mt-2 text-sm text-gray-600 max-w-md" style="text-align:center;">
+              Fill in your soil, nutrient, climate, and farm details using a guided form for more accurate crop recommendations.
+            </p>
+            <a href="#" id="openManualFormLink" class="manual-form-link mt-4" onclick="openFarmProfileModal(); return false;">
+              <i class="fas fa-pen-to-square"></i>
+              Fill the form manually
+            </a>
+            <p id="manualFormStatus" class="mt-3 text-xs font-semibold text-green-700" style="display:none;">
+              <i class="fas fa-circle-check"></i> Farm profile filled — ready to generate
+            </p>
+          </div>
+          <input type="hidden" id="structuredFormData" value="" />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onclick="recommendCrop()"
+            class="btn-primary suggestion-cta inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4"
+          >
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Generate Suggestion
+          </button>
+          <button
+            type="button"
+            onclick="backToForm()"
+            class="btn-secondary inline-flex items-center justify-center gap-3 rounded-2xl px-5 py-4"
+          >
+            <i class="fas fa-rotate-left"></i>
+            Reset Inputs
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 fade-up stagger-2">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">AI Output</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Crop decision panel</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 border border-sky-100 text-sky-600">
+          <i class="fas fa-leaf"></i>
+        </div>
+      </div>
+
+      <div id="recommendationResult" class="mt-6 result-panel">
+        <div class="result-empty">
+          <div class="result-empty-icon">
+            <i class="fas fa-seedling"></i>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Ready for analysis</h3>
+          <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+            Upload a soil report or enter soil details to receive a single crop
+            suggestion tuned to {{ user.district or "your district" }}.
+          </p>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden mt-6 space-y-6">
+        <div class="loading-panel mb-6">
+          <div class="loading-ring">
+            <span></span>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Analyzing field context</h3>
+          <div class="mt-5 grid gap-3">
+            <div class="loading-step">
+              <i class="fas fa-file-lines text-green-600"></i>
+              Reading soil details and uploaded report
+            </div>
+            <div class="loading-step">
+              <i class="fas fa-location-dot text-sky-600"></i>
+              Applying {{ user.district or "district" }} location context
+            </div>
+            <div class="loading-step">
+              <i class="fas fa-seedling text-amber-500"></i>
+              Generating the strongest crop fit
+            </div>
+          </div>
+        </div>
+        <!-- Skeleton Card Placeholder -->
+        <div class="skeleton-card p-6 rounded-[24px] border border-gray-200 bg-gray-50 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="skeleton-block w-32 h-6 rounded-full bg-gray-200"></div>
+            <div class="skeleton-block w-24 h-6 rounded-full bg-gray-200"></div>
+          </div>
+          <div class="skeleton-block w-3/4 h-8 rounded-lg bg-gray-200"></div>
+          <div class="space-y-2 pt-2">
+            <div class="skeleton-line w-full bg-gray-200"></div>
+            <div class="skeleton-line w-5/6 bg-gray-200"></div>
+            <div class="skeleton-line w-4/6 bg-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Farm Profile Modal -->
+<div id="farmProfileModal" class="farm-modal-overlay" style="display:none;">
+  <div class="farm-modal bg-white border border-gray-200 shadow-2xl">
+    <div class="farm-modal-header bg-gray-50 border-b border-gray-200">
+      <div>
+        <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Manual Entry</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">Farm Profile Form</h2>
+      </div>
+      <button type="button" class="farm-modal-close" onclick="closeFarmProfileModal()" aria-label="Close form">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form id="farmProfileForm" class="farm-modal-body" onsubmit="return false;">
+      <div id="formValidationError" class="farm-form-error" style="display:none;"></div>
+
+      <!-- Section 1: Farmer & Land Details -->
+      <div class="accordion-section" data-section="farmer-land">
+        <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon"><i class="fas fa-user-tie"></i></div>
+            <div>
+              <p class="accordion-title">Farmer & Land Details</p>
+              <p class="accordion-subtitle">Name, district, land size, irrigation</p>
+            </div>
+          </div>
+          <i class="fas fa-chevron-down accordion-chevron"></i>
+        </button>
+        <div class="accordion-content is-open">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="formFarmerName" class="form-label">Farmer Name</label>
+              <input type="text" id="formFarmerName" class="form-input" placeholder="Enter farmer name"
+                value="{{ user.name or '' }}" pattern="[A-Za-z\s]+" title="Letters and spaces only"
+                oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')" />
+            </div>
+            <div class="form-group">
+              <label for="formDistrict" class="form-label">District</label>
+              <select id="formDistrict" class="form-input form-select">
+                <option value="">Select district</option>
+                <option value="Bagalkot">Bagalkot</option>
+                <option value="Ballari">Ballari</option>
+                <option value="Belagavi">Belagavi</option>
+                <option value="Bengaluru Rural">Bengaluru Rural</option>
+                <option value="Bengaluru Urban">Bengaluru Urban</option>
+                <option value="Bidar">Bidar</option>
+                <option value="Chamarajanagar">Chamarajanagar</option>
+                <option value="Chikkaballapur">Chikkaballapur</option>
+                <option value="Chikkamagaluru">Chikkamagaluru</option>
+                <option value="Chitradurga">Chitradurga</option>
+                <option value="Dakshina Kannada">Dakshina Kannada</option>
+                <option value="Davanagere">Davanagere</option>
+                <option value="Dharwad">Dharwad</option>
+                <option value="Gadag">Gadag</option>
+                <option value="Hassan">Hassan</option>
+                <option value="Haveri">Haveri</option>
+                <option value="Kalaburagi">Kalaburagi</option>
+                <option value="Kodagu">Kodagu</option>
+                <option value="Kolar">Kolar</option>
+                <option value="Koppal">Koppal</option>
+                <option value="Mandya">Mandya</option>
+                <option value="Mysuru">Mysuru</option>
+                <option value="Raichur">Raichur</option>
+                <option value="Ramanagara">Ramanagara</option>
+                <option value="Shivamogga">Shivamogga</option>
+                <option value="Tumakuru">Tumakuru</option>
+                <option value="Udupi">Udupi</option>
+                <option value="Uttara Kannada">Uttara Kannada</option>
+                <option value="Vijayapura">Vijayapura</option>
+                <option value="Yadgir">Yadgir</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formLandSize" class="form-label">Land Size (acres)</label>
+              <input type="number" id="formLandSize" class="form-input" placeholder="e.g. 5.0"
+                value="{{ user.land_size or '' }}" step="0.1" min="0.1"
+                onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formIrrigation" class="form-label">Irrigation Type</label>
+              <select id="formIrrigation" class="form-input form-select">
+                <option value="">Select irrigation</option>
+                <option value="Canal">Canal</option>
+                <option value="Borewell">Borewell</option>
+                <option value="Rain-fed">Rain-fed</option>
+                <option value="Drip">Drip</option>
+                <option value="Sprinkler">Sprinkler</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Soil Profile -->
+      <div class="accordion-section" data-section="soil">
+        <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon accordion-icon-soil"><i class="fas fa-mountain"></i></div>
+            <div>
+              <p class="accordion-title">Soil Profile</p>
+              <p class="accordion-subtitle">Type, depth, texture</p>
+            </div>
+          </div>
+          <i class="fas fa-chevron-down accordion-chevron"></i>
+        </button>
+        <div class="accordion-content">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="formSoilType" class="form-label">Soil Type</label>
+              <select id="formSoilType" class="form-input form-select">
+                <option value="">Select soil type</option>
+                <option value="Black Soil">Black Soil</option>
+                <option value="Red Soil">Red Soil</option>
+                <option value="Laterite Soil">Laterite Soil</option>
+                <option value="Alluvial Soil">Alluvial Soil</option>
+                <option value="Sandy Soil">Sandy Soil</option>
+                <option value="Clay Soil">Clay Soil</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formSoilDepth" class="form-label">Soil Depth (cm)</label>
+              <input type="number" id="formSoilDepth" class="form-input" placeholder="e.g. 30"
+                step="1" min="1" onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group form-group-full">
+              <label for="formSoilTexture" class="form-label">Soil Texture</label>
+              <select id="formSoilTexture" class="form-input form-select">
+                <option value="">Select texture</option>
+                <option value="Sandy">Sandy</option>
+                <option value="Loamy">Loamy</option>
+                <option value="Clayey">Clayey</option>
+                <option value="Silty">Silty</option>
+                <option value="Mixed">Mixed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Chemical & Nutrient Analysis -->
+      <div class="accordion-section" data-section="nutrients">
+        <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon accordion-icon-chem"><i class="fas fa-flask"></i></div>
+            <div>
+              <p class="accordion-title">Chemical & Nutrient Analysis</p>
+              <p class="accordion-subtitle">pH, NPK, micro nutrients</p>
+            </div>
+          </div>
+          <i class="fas fa-chevron-down accordion-chevron"></i>
+        </button>
+        <div class="accordion-content">
+          <p class="form-section-label">Chemical Properties</p>
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label for="formPH" class="form-label">Soil pH <span class="form-required">*</span></label>
+              <input type="number" id="formPH" class="form-input" placeholder="0 – 14"
+                step="0.1" min="0" max="14" required onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formEC" class="form-label">EC (dS/m)</label>
+              <input type="number" id="formEC" class="form-input" placeholder="e.g. 0.5"
+                step="0.01" min="0" onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formOC" class="form-label">Organic Carbon (%)</label>
+              <input type="number" id="formOC" class="form-input" placeholder="e.g. 0.8"
+                step="0.01" min="0" max="100" onkeypress="return isNumberKey(event)" />
+            </div>
+          </div>
+
+          <p class="form-section-label mt-4">Primary Nutrients</p>
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label for="formN" class="form-label">Nitrogen (N) kg/ha <span class="form-required">*</span></label>
+              <input type="number" id="formN" class="form-input" placeholder="e.g. 250"
+                step="0.1" min="0" required onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formP" class="form-label">Phosphorus (P) kg/ha <span class="form-required">*</span></label>
+              <input type="number" id="formP" class="form-input" placeholder="e.g. 18"
+                step="0.1" min="0" required onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formK" class="form-label">Potassium (K) kg/ha <span class="form-required">*</span></label>
+              <input type="number" id="formK" class="form-input" placeholder="e.g. 280"
+                step="0.1" min="0" required onkeypress="return isNumberKey(event)" />
+            </div>
+          </div>
+
+          <p class="form-section-label mt-4">Micro Nutrients <span class="text-xs text-muted font-normal">(optional)</span></p>
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label for="formS" class="form-label">Sulphur (ppm)</label>
+              <input type="number" id="formS" class="form-input" placeholder="ppm"
+                step="0.01" min="0" onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formZn" class="form-label">Zinc (ppm)</label>
+              <input type="number" id="formZn" class="form-input" placeholder="ppm"
+                step="0.01" min="0" onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formFe" class="form-label">Iron (ppm)</label>
+              <input type="number" id="formFe" class="form-input" placeholder="ppm"
+                step="0.01" min="0" onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formCu" class="form-label">Copper (ppm)</label>
+              <input type="number" id="formCu" class="form-input" placeholder="ppm"
+                step="0.01" min="0" onkeypress="return isNumberKey(event)" />
+            </div>
+            <div class="form-group">
+              <label for="formMn" class="form-label">Manganese (ppm)</label>
+              <input type="number" id="formMn" class="form-input" placeholder="ppm"
+                step="0.01" min="0" onkeypress="return isNumberKey(event)" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Climate, History & Goals -->
+      <div class="accordion-section" data-section="climate-goals">
+        <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon accordion-icon-climate"><i class="fas fa-cloud-sun-rain"></i></div>
+            <div>
+              <p class="accordion-title">Climate, History & Goals</p>
+              <p class="accordion-subtitle">Rainfall, season, purpose, risk</p>
+            </div>
+          </div>
+          <i class="fas fa-chevron-down accordion-chevron"></i>
+        </button>
+        <div class="accordion-content">
+          <p class="form-section-label">Climate</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="formRainfall" class="form-label">Avg. Annual Rainfall (mm)</label>
+              <input type="number" id="formRainfall" class="form-input" placeholder="e.g. 800"
+                step="1" min="0" onkeypress="return isNumberKey(event)" />
+              <p class="form-hint"><i class="fas fa-info-circle"></i> <a href="#" class="form-hint-link" onclick="openRainfallPopup(); return false;"><i class="fas fa-chart-column"></i> View annual rainfall chart</a> for local data</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monsoon Dependent?</label>
+              <label class="toggle-switch" for="monsoonToggle">
+                <input type="checkbox" id="monsoonToggle" checked />
+                <span class="toggle-slider"></span>
+                <span class="toggle-label-text" id="monsoonToggleLabel">Yes</span>
+              </label>
+            </div>
+          </div>
+
+          <p class="form-section-label mt-4">Crop History</p>
+          <div class="form-grid">
+            <div class="form-group form-group-full">
+              <label for="formLastCrop" class="form-label">Last Crop Grown</label>
+              <input type="text" id="formLastCrop" class="form-input" placeholder="e.g. Rice, Maize, Sugarcane"
+                oninput="this.value = this.value.replace(/[^A-Za-z\s,]/g, '')" />
+            </div>
+          </div>
+
+          <p class="form-section-label mt-4">Season & Goals</p>
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label for="formSeason" class="form-label">Season</label>
+              <select id="formSeason" class="form-input form-select">
+                <option value="">Select season</option>
+                <option value="Kharif">Kharif</option>
+                <option value="Rabi">Rabi</option>
+                <option value="Summer">Summer</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formPurpose" class="form-label">Purpose</label>
+              <select id="formPurpose" class="form-input form-select">
+                <option value="">Select purpose</option>
+                <option value="Food Crop">Food Crop</option>
+                <option value="Cash Crop">Cash Crop</option>
+                <option value="Fodder Crop">Fodder Crop</option>
+                <option value="Mixed">Mixed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formRisk" class="form-label">Risk Preference</label>
+              <select id="formRisk" class="form-input form-select">
+                <option value="">Select risk level</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="farm-modal-footer">
+        <button type="button" onclick="submitFarmProfile()" class="btn-primary suggestion-cta inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 w-full">
+          <i class="fas fa-seedling"></i>
+          Get Recommended Crops
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Rainfall Popup Modal -->
+<div id="rainfallPopupModal" class="rainfall-modal-overlay" style="display:none;">
+  <div class="rainfall-modal bg-white border border-gray-200 shadow-2xl">
+    <div class="rainfall-modal-header bg-gray-50 border-b border-gray-200">
+      <div>
+        <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Annual Rainfall</p>
+        <h2 class="text-xl font-extrabold text-gray-900" id="rainfallPopupTitle">Loading...</h2>
+      </div>
+      <button type="button" class="farm-modal-close" onclick="closeRainfallPopup()" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="rainfall-modal-body">
+      <div id="rainfallPopupLoading" class="rainfall-loading">
+        <div class="loading-ring"><span></span></div>
+        <p class="mt-4 text-sm text-gray-500 font-medium">Fetching rainfall data...</p>
+      </div>
+      <div id="rainfallPopupError" class="rainfall-error" style="display:none;">
+        <div class="result-empty-icon bg-red-50 text-red-600 w-14 h-14 rounded-2xl flex items-center justify-center text-xl border border-red-200">
+          <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <p class="mt-3 text-sm text-gray-600 font-medium" id="rainfallPopupErrorMsg">Unable to load rainfall data.</p>
+      </div>
+      <div id="rainfallPopupContent" style="display:none;">
+        <canvas id="rainfallPopupChart" width="500" height="260"></canvas>
+        <div class="rainfall-summary">
+          <div class="rainfall-summary-item">
+            <span class="rainfall-summary-label">Total Annual Rainfall</span>
+            <span class="rainfall-summary-value" id="rainfallPopupTotal">--</span>
+          </div>
+          <div class="rainfall-summary-item">
+            <span class="rainfall-summary-label">District</span>
+            <span class="rainfall-summary-value" id="rainfallPopupDistrict">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .crop-suggestion-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(67, 160, 71, 0.08), transparent 38%),
+      radial-gradient(circle at top right, rgba(79, 195, 247, 0.08), transparent 30%);
+  }
+
+  .crop-suggestion-page .mode-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 999px;
+    padding: 0.85rem 1.2rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--muted-text);
+    transition: all 0.25s ease;
+  }
+
+  .crop-suggestion-page .mode-pill.is-active {
+    background: #E8F5E9;
+    color: #1B5E20;
+    border: 1px solid #C8E6C9;
+    box-shadow: 0 2px 6px rgba(46, 125, 50, 0.06);
+  }
+
+  .crop-suggestion-page .mode-pill:hover {
+    transform: translateY(-1px);
+    color: var(--light-text);
+  }
+
+  .crop-suggestion-page .upload-shell,
+  .crop-suggestion-page .manual-shell {
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+    padding: 1.2rem;
+  }
+
+  .crop-suggestion-page .upload-dropzone {
+    display: block;
+    cursor: pointer;
+    border-radius: 24px;
+    border: 2px dashed #81C784;
+    background: #FFFFFF;
+    padding: 2.5rem 1.25rem;
+    text-align: center;
+    transition: all 0.25s ease;
+  }
+
+  .crop-suggestion-page .upload-dropzone:hover {
+    transform: translateY(-2px);
+    border-color: #2E7D32;
+    background: #F3F6F0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  .crop-suggestion-page .upload-icon {
+    display: inline-flex;
+    height: 4.25rem;
+    width: 4.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.4rem;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 1.45rem;
+    box-shadow: 0 10px 20px rgba(46, 125, 50, 0.1);
+  }
+
+  .crop-suggestion-page .detail-field {
+    min-height: 220px;
+    resize: vertical;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    padding: 1rem 1.05rem;
+    color: #1F2937;
+    transition: all 0.25s ease;
+  }
+
+  .crop-suggestion-page .detail-field:focus {
+    outline: none;
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .crop-suggestion-page .detail-field::placeholder {
+    color: #9CA3AF;
+  }
+
+  .crop-suggestion-page .suggestion-cta {
+    min-width: 230px;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+  }
+
+  .crop-suggestion-page .result-panel,
+  .crop-suggestion-page .loading-panel {
+    min-height: 420px;
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+    padding: 1.5rem;
+  }
+
+  .crop-suggestion-page .result-empty,
+  .crop-suggestion-page .loading-panel {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .crop-suggestion-page .result-empty-icon {
+    display: inline-flex;
+    height: 5rem;
+    width: 5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.6rem;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 1.8rem;
+    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.12);
+  }
+
+  .crop-suggestion-page .result-card {
+    display: grid;
+    gap: 1rem;
+    min-height: 100%;
+  }
+
+  .crop-suggestion-page .result-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    border-radius: 999px;
+    background: #E8F5E9;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1B5E20;
+  }
+
+  .crop-suggestion-page .result-crop {
+    font-size: clamp(2rem, 3vw, 3.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: #1F2937;
+  }
+
+  .crop-suggestion-page .result-reason {
+    border-radius: 24px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 1.25rem;
+    color: #4B5563;
+    line-height: 1.8;
+  }
+
+  .crop-suggestion-page .result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .crop-suggestion-page .result-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 0.7rem 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1F2937;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .crop-suggestion-page .loading-ring {
+    position: relative;
+    display: flex;
+    height: 4.8rem;
+    width: 4.8rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+  }
+
+  .crop-suggestion-page .loading-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0.2rem;
+    border-radius: inherit;
+    border: 3px solid #E8F5E9;
+    border-top-color: #2E7D32;
+    animation: spin 1s linear infinite;
+  }
+
+  .crop-suggestion-page .loading-ring span {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    height: 2.2rem;
+    width: 2.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #E8F5E9;
+  }
+
+  .crop-suggestion-page .loading-ring span::before {
+    content: "\f06c";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #2E7D32;
+  }
+
+  .crop-suggestion-page .loading-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    border-radius: 20px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 0.95rem 1rem;
+    color: #1F2937;
+    font-weight: 600;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .crop-suggestion-page .mode-pill {
+      padding: 0.8rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .crop-suggestion-page .suggestion-cta {
+      width: 100%;
+    }
+
+    .crop-suggestion-page .result-panel,
+    .crop-suggestion-page .loading-panel {
+      min-height: 360px;
+    }
+  }
+
+  /* ── Manual shell inner (card with link) ── */
+  .crop-suggestion-page .manual-shell-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+    text-align: center;
+  }
+
+  .crop-suggestion-page .manual-shell-icon {
+    display: inline-flex;
+    height: 4.25rem;
+    width: 4.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.4rem;
+    background: #E1F5FE;
+    color: #0288D1;
+    font-size: 1.45rem;
+    box-shadow: 0 10px 25px rgba(2, 136, 209, 0.1);
+  }
+
+  .manual-form-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.8rem 1.4rem;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #2E7D32;
+    background: #E8F5E9;
+    border: 1px solid #C8E6C9;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    cursor: pointer;
+  }
+
+  .manual-form-link:hover {
+    transform: translateY(-2px);
+    background: #C8E6C9;
+    border-color: #2E7D32;
+    box-shadow: 0 8px 20px rgba(46, 125, 50, 0.12);
+  }
+
+  /* ── Modal overlay ── */
+  .farm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(31, 41, 55, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .farm-modal {
+    position: relative;
+    width: 100%;
+    max-width: 780px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 32px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .farm-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.75rem;
+    border-bottom: 1px solid var(--border-color);
+    background: #F8FAF5;
+    flex-shrink: 0;
+  }
+
+  .farm-modal-close {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    color: var(--muted-text);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .farm-modal-close:hover {
+    transform: scale(1.06);
+    background: #FEE2E2;
+    color: #DC2626;
+    border-color: #FECACA;
+  }
+
+  .farm-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: #DDE5D5 transparent;
+  }
+
+  .farm-modal-body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .farm-modal-body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .farm-modal-body::-webkit-scrollbar-thumb {
+    background: #DDE5D5;
+    border-radius: 999px;
+  }
+
+  .farm-modal-footer {
+    padding: 1.25rem 1.75rem;
+    border-top: 1px solid var(--border-color);
+    background: #F8FAF5;
+    flex-shrink: 0;
+  }
+
+  /* ── Validation error ── */
+  .farm-form-error {
+    border-radius: 16px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    background: #FEE2E2;
+    border: 1px solid #FECACA;
+    color: #DC2626;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  /* ── Accordion sections ── */
+  .accordion-section {
+    border-radius: 22px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .accordion-section:hover {
+    border-color: #2E7D32;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  .accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: #1F2937;
+    transition: background 0.25s ease;
+  }
+
+  .accordion-header:hover {
+    background: #F8FAF5;
+  }
+
+  .accordion-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .accordion-icon {
+    width: 2.6rem;
+    height: 2.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .accordion-icon-soil {
+    background: #FEF3C7;
+    color: #D97706;
+  }
+
+  .accordion-icon-chem {
+    background: #E1F5FE;
+    color: #0288D1;
+  }
+
+  .accordion-icon-climate {
+    background: #F3E8FF;
+    color: #7E22CE;
+  }
+
+  .accordion-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1F2937;
+    text-align: left;
+  }
+
+  .accordion-subtitle {
+    font-size: 0.78rem;
+    color: var(--muted-text);
+    margin-top: 0.15rem;
+    text-align: left;
+  }
+
+  .accordion-chevron {
+    font-size: 0.85rem;
+    color: var(--muted-text);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    flex-shrink: 0;
+  }
+
+  .accordion-section.is-expanded .accordion-chevron {
+    transform: rotate(180deg);
+  }
+
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 1.25rem;
+    transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1), padding 0.3s ease;
+  }
+
+  .accordion-content.is-open {
+    max-height: 1200px;
+    padding: 0.5rem 1.25rem 1.25rem;
+  }
+
+  /* ── Form elements ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group-full {
+    grid-column: 1 / -1;
+  }
+
+  .form-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.01em;
+  }
+
+  .form-required {
+    color: #DC2626;
+    font-weight: 700;
+  }
+
+  .form-input {
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    color: #1F2937;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .form-input::placeholder {
+    color: #9CA3AF;
+  }
+
+  .form-input.is-error {
+    border-color: #DC2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%232E7D32' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  .form-select option {
+    background: #FFFFFF;
+    color: #1F2937;
+  }
+
+  .form-section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #2E7D32;
+    margin-bottom: 0.75rem;
+  }
+
+  .form-hint {
+    font-size: 0.75rem;
+    color: var(--muted-text);
+    margin-top: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .form-hint-link {
+    color: #0288D1;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .form-hint-link:hover {
+    color: #2E7D32;
+  }
+
+  /* ── Toggle switch ── */
+  .toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle-switch input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .toggle-slider {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    border-radius: 999px;
+    background: #E5E7EB;
+    border: 1px solid #D1D5DB;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .toggle-slider::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: #E8F5E9;
+    border-color: #81C784;
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(24px);
+    background: #2E7D32;
+  }
+
+  .toggle-switch:hover .toggle-slider {
+    border-color: #9CA3AF;
+  }
+
+  .toggle-label-text {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--muted-text);
+    transition: color 0.25s ease;
+    min-width: 24px;
+  }
+
+  .toggle-switch input:checked ~ .toggle-label-text {
+    color: #2E7D32;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 767px) {
+    .farm-modal {
+      max-height: 96vh;
+      border-radius: 24px;
+    }
+
+    .farm-modal-header,
+    .farm-modal-body,
+    .farm-modal-footer {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .form-grid,
+    .form-grid-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .accordion-header {
+      padding: 0.9rem 1rem;
+    }
+
+    .accordion-content.is-open {
+      padding: 0.5rem 1rem 1rem;
+    }
+  }
+
+  /* ── Rainfall Popup Modal ── */
+  .rainfall-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    background: rgba(31, 41, 55, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .rainfall-modal {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .rainfall-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: #F8FAF5;
+    flex-shrink: 0;
+  }
+
+  .rainfall-modal-body {
+    padding: 1.5rem;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rainfall-loading,
+  .rainfall-error {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 280px;
+  }
+
+  .rainfall-summary {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .rainfall-summary-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.85rem 1rem;
+    border-radius: 16px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .rainfall-summary-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-text);
+  }
+
+  .rainfall-summary-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #2E7D32;
+  }
+
+  @media (max-width: 767px) {
+    .rainfall-modal {
+      max-width: 100%;
+      border-radius: 20px;
+    }
+
+    .rainfall-summary {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  /* ── Input type enforcement ── */
+  function isNumberKey(evt) {
+    const char = String.fromCharCode(evt.which || evt.keyCode);
+    // Allow digits, dot, minus, and control keys
+    if (/[\d.\-]/.test(char)) return true;
+    if (evt.which < 32) return true; // control keys
+    evt.preventDefault();
+    return false;
+  }
+
+  /* ── Mode switching ── */
+  function setInputMode(mode) {
+    const pills = document.querySelectorAll("[data-mode]");
+    pills.forEach((pill) => {
+      pill.classList.toggle("is-active", pill.dataset.mode === mode);
+    });
+  }
+
+  /* ── File upload state ── */
+  function updateSelectedFileState() {
+    const soilReport = document.getElementById("soilReport").files[0];
+    const fileMeta = document.getElementById("fileMeta");
+
+    if (!soilReport) {
+      fileMeta.textContent = "No file selected";
+      return;
+    }
+
+    const sizeInKb = Math.max(1, Math.round(soilReport.size / 1024));
+    fileMeta.textContent = `${soilReport.name} • ${sizeInKb} KB`;
+  }
+
+  /* ── Accordion ── */
+  function toggleAccordion(headerBtn) {
+    const section = headerBtn.closest(".accordion-section");
+    const content = section.querySelector(".accordion-content");
+    const isExpanded = section.classList.contains("is-expanded");
+
+    if (isExpanded) {
+      section.classList.remove("is-expanded");
+      content.classList.remove("is-open");
+    } else {
+      section.classList.add("is-expanded");
+      content.classList.add("is-open");
+    }
+  }
+
+  /* ── Toggle buttons (Yes/No) ── */
+  function setToggle(btn) {
+    const group = btn.dataset.toggle;
+    document.querySelectorAll(`[data-toggle="${group}"]`).forEach((b) => {
+      b.classList.remove("is-active");
+    });
+    btn.classList.add("is-active");
+  }
+
+  /* ── Monsoon toggle label updater ── */
+  (function() {
+    const cb = document.getElementById('monsoonToggle');
+    const lbl = document.getElementById('monsoonToggleLabel');
+    if (cb && lbl) {
+      cb.addEventListener('change', function() {
+        lbl.textContent = this.checked ? 'Yes' : 'No';
+      });
+    }
+  })();
+
+  /* ── Modal open/close ── */
+  function openFarmProfileModal() {
+    const modal = document.getElementById("farmProfileModal");
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+
+    // Auto-fill from user profile
+    const district = "{{ user.district or '' }}";
+    if (district) {
+      document.getElementById("formDistrict").value = district;
+    }
+
+    const irrigationType = "{{ user.irrigation_type or '' }}";
+    if (irrigationType) {
+      // Map old combined value to new individual option
+      const irrigationMap = { "Canal/Borewell": "Canal" };
+      document.getElementById("formIrrigation").value = irrigationMap[irrigationType] || irrigationType;
+    }
+
+    // Expand the first section by default
+    const firstSection = modal.querySelector(".accordion-section");
+    if (firstSection && !firstSection.classList.contains("is-expanded")) {
+      firstSection.classList.add("is-expanded");
+      firstSection.querySelector(".accordion-content").classList.add("is-open");
+    }
+
+    setInputMode("manual");
+  }
+
+  function closeFarmProfileModal() {
+    document.getElementById("farmProfileModal").style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  /* ── Rainfall Popup ── */
+  let rainfallPopupChart = null;
+
+  function openRainfallPopup() {
+    const modal = document.getElementById("rainfallPopupModal");
+    modal.style.display = "flex";
+
+    // Reset state
+    document.getElementById("rainfallPopupLoading").style.display = "flex";
+    document.getElementById("rainfallPopupError").style.display = "none";
+    document.getElementById("rainfallPopupContent").style.display = "none";
+    document.getElementById("rainfallPopupTitle").textContent = "Loading...";
+
+    // Determine district from form or user profile
+    const formDistrict = document.getElementById("formDistrict");
+    const district = (formDistrict && formDistrict.value) || "{{ user.district or '' }}";
+
+    if (!district) {
+      document.getElementById("rainfallPopupLoading").style.display = "none";
+      document.getElementById("rainfallPopupError").style.display = "flex";
+      document.getElementById("rainfallPopupErrorMsg").textContent = "No district selected. Please choose a district first.";
+      document.getElementById("rainfallPopupTitle").textContent = "No District";
+      return;
+    }
+
+    document.getElementById("rainfallPopupTitle").textContent = district + " — Annual Rainfall";
+
+    fetch(`/user/district-rainfall?district=${encodeURIComponent(district)}`, {
+      headers: getAuthHeaders(),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        document.getElementById("rainfallPopupLoading").style.display = "none";
+        document.getElementById("rainfallPopupContent").style.display = "block";
+        document.getElementById("rainfallPopupTotal").textContent = data.total_rainfall + " mm";
+        document.getElementById("rainfallPopupDistrict").textContent = data.district;
+        renderRainfallPopupChart(data.labels, data.rainfall);
+      })
+      .catch((err) => {
+        console.error("Rainfall popup error:", err);
+        document.getElementById("rainfallPopupLoading").style.display = "none";
+        document.getElementById("rainfallPopupError").style.display = "flex";
+        document.getElementById("rainfallPopupErrorMsg").textContent = "Unable to load rainfall data. " + err.message;
+      });
+  }
+
+  function closeRainfallPopup() {
+    document.getElementById("rainfallPopupModal").style.display = "none";
+    if (rainfallPopupChart) {
+      rainfallPopupChart.destroy();
+      rainfallPopupChart = null;
+    }
+  }
+
+  function renderRainfallPopupChart(labels, rainfall) {
+    const ctx = document.getElementById("rainfallPopupChart").getContext("2d");
+
+    if (rainfallPopupChart) {
+      rainfallPopupChart.destroy();
+    }
+
+    rainfallPopupChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels || [],
+        datasets: [
+          {
+            label: "Rainfall (mm)",
+            data: rainfall || [],
+            backgroundColor: "rgba(59, 130, 246, 0.55)",
+            borderColor: "rgba(59, 130, 246, 1)",
+            borderWidth: 1,
+            borderRadius: 6,
+            hoverBackgroundColor: "rgba(59, 130, 246, 0.8)",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            labels: { color: "#ffffff", font: { size: 12 } },
+          },
+          tooltip: {
+            backgroundColor: "rgba(10, 25, 18, 0.92)",
+            titleColor: "#fff",
+            bodyColor: "#d6e5da",
+            borderColor: "rgba(177, 224, 186, 0.2)",
+            borderWidth: 1,
+            cornerRadius: 10,
+            padding: 10,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "#b3b3b3", font: { size: 11 } },
+            grid: { color: "rgba(255, 255, 255, 0.06)" },
+          },
+          x: {
+            ticks: { color: "#b3b3b3", font: { size: 11 } },
+            grid: { color: "rgba(255, 255, 255, 0.04)" },
+          },
+        },
+      },
+    });
+  }
+
+  // Close rainfall popup on backdrop click
+  document.addEventListener("DOMContentLoaded", function () {
+    const rainfallModal = document.getElementById("rainfallPopupModal");
+    if (rainfallModal) {
+      rainfallModal.addEventListener("click", function (e) {
+        if (e.target === this) closeRainfallPopup();
+      });
+    }
+  });
+
+  /* ── Form validation helper ── */
+  function getNumericVal(id) {
+    const el = document.getElementById(id);
+    const val = el ? el.value.trim() : "";
+    return val === "" ? null : parseFloat(val);
+  }
+
+  function getTextVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }
+
+  function getSelectVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value : "";
+  }
+
+  function clearFieldErrors() {
+    document.querySelectorAll(".form-input.is-error").forEach((el) => {
+      el.classList.remove("is-error");
+    });
+    const errorBox = document.getElementById("formValidationError");
+    errorBox.style.display = "none";
+    errorBox.innerHTML = "";
+  }
+
+  function markFieldError(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("is-error");
+  }
+
+  function showFormErrors(errors) {
+    const errorBox = document.getElementById("formValidationError");
+    errorBox.innerHTML = errors.map((e) => `<div>• ${e}</div>`).join("");
+    errorBox.style.display = "block";
+    // Scroll to top of modal body
+    document.querySelector(".farm-modal-body").scrollTop = 0;
+  }
+
+  /* ── Submit structured form ── */
+  function submitFarmProfile() {
+    clearFieldErrors();
+    const errors = [];
+
+    // Required fields: pH, N, P, K
+    const ph = getNumericVal("formPH");
+    const nitrogen = getNumericVal("formN");
+    const phosphorus = getNumericVal("formP");
+    const potassium = getNumericVal("formK");
+
+    if (ph === null || isNaN(ph)) {
+      errors.push("Soil pH is required.");
+      markFieldError("formPH");
+    } else if (ph < 0 || ph > 14) {
+      errors.push("Soil pH must be between 0 and 14.");
+      markFieldError("formPH");
+    }
+
+    if (nitrogen === null || isNaN(nitrogen)) {
+      errors.push("Nitrogen (N) is required.");
+      markFieldError("formN");
+    } else if (nitrogen < 0) {
+      errors.push("Nitrogen must be a non-negative number.");
+      markFieldError("formN");
+    }
+
+    if (phosphorus === null || isNaN(phosphorus)) {
+      errors.push("Phosphorus (P) is required.");
+      markFieldError("formP");
+    } else if (phosphorus < 0) {
+      errors.push("Phosphorus must be a non-negative number.");
+      markFieldError("formP");
+    }
+
+    if (potassium === null || isNaN(potassium)) {
+      errors.push("Potassium (K) is required.");
+      markFieldError("formK");
+    } else if (potassium < 0) {
+      errors.push("Potassium must be a non-negative number.");
+      markFieldError("formK");
+    }
+
+    // Validate optional numeric fields
+    const landSize = getNumericVal("formLandSize");
+    if (landSize !== null && (isNaN(landSize) || landSize <= 0)) {
+      errors.push("Land size must be a positive number.");
+      markFieldError("formLandSize");
+    }
+
+    const rainfall = getNumericVal("formRainfall");
+    if (rainfall !== null && (isNaN(rainfall) || rainfall < 0)) {
+      errors.push("Rainfall must be a non-negative number.");
+      markFieldError("formRainfall");
+    }
+
+    const soilDepth = getNumericVal("formSoilDepth");
+    if (soilDepth !== null && (isNaN(soilDepth) || soilDepth <= 0)) {
+      errors.push("Soil depth must be a positive number.");
+      markFieldError("formSoilDepth");
+    }
+
+    if (errors.length > 0) {
+      showFormErrors(errors);
+      // Open the nutrients section if it has errors
+      const nutrientSection = document.querySelector('[data-section="nutrients"]');
+      if (nutrientSection && !nutrientSection.classList.contains("is-expanded")) {
+        nutrientSection.classList.add("is-expanded");
+        nutrientSection.querySelector(".accordion-content").classList.add("is-open");
+      }
+      return;
+    }
+
+    // Get monsoon toggle value
+    const monsoonCheckbox = document.getElementById('monsoonToggle');
+    const monsoonDependent = monsoonCheckbox ? monsoonCheckbox.checked : null;
+
+    // Build structured JSON payload
+    const payload = {
+      farmer: {
+        name: getTextVal("formFarmerName") || null,
+        district: getSelectVal("formDistrict") || null,
+      },
+      land: {
+        land_size: landSize,
+        irrigation_type: getSelectVal("formIrrigation") || null,
+      },
+      soil: {
+        soil_type: getSelectVal("formSoilType") || null,
+        soil_depth: soilDepth,
+        soil_texture: getSelectVal("formSoilTexture") || null,
+      },
+      nutrients: {
+        ph: ph,
+        ec: getNumericVal("formEC"),
+        organic_carbon: getNumericVal("formOC"),
+        nitrogen: nitrogen,
+        phosphorus: phosphorus,
+        potassium: potassium,
+        sulphur: getNumericVal("formS"),
+        zinc: getNumericVal("formZn"),
+        iron: getNumericVal("formFe"),
+        copper: getNumericVal("formCu"),
+        manganese: getNumericVal("formMn"),
+      },
+      climate: {
+        avg_rainfall: rainfall,
+        monsoon_dependent: monsoonDependent,
+      },
+      history: {
+        last_crop: getTextVal("formLastCrop") || null,
+      },
+      goals: {
+        season: getSelectVal("formSeason") || null,
+        purpose: getSelectVal("formPurpose") || null,
+        risk_preference: getSelectVal("formRisk") || null,
+      },
+      target_crop: document.getElementById("formTargetCrop") ? document.getElementById("formTargetCrop").value.trim() || null : null,
+    };
+
+    // Store structured data and close modal
+    document.getElementById("structuredFormData").value = JSON.stringify(payload);
+    document.getElementById("manualFormStatus").style.display = "block";
+    closeFarmProfileModal();
+
+    // Auto-trigger recommendation
+    recommendCropStructured(payload);
+  }
+
+  /* ── Recommend crop from structured data ── */
+  async function recommendCropStructured(payload) {
+    document.getElementById("recommendationResult").style.display = "none";
+    document.getElementById("loading").classList.remove("hidden");
+
+    try {
+      const response = await fetch("/user/crop-recommendation-structured", {
+        method: "POST",
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("recommendationResult").innerHTML =
+          renderSuggestionResult(result);
+        document.getElementById("recommendationResult").style.display = "block";
+      } else {
+        let errorMsg = `HTTP ${response.status} error`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.detail || errorMsg;
+        } catch (_) {
+          const text = await response.text().catch(() => '');
+          if (text) errorMsg = text;
+        }
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      console.error("Error getting crop suggestion:", error);
+      document.getElementById("loading").classList.add("hidden");
+      document.getElementById("recommendationResult").innerHTML =
+        renderErrorState(`Failed to get crop suggestion: ${error.message}.`);
+      document.getElementById("recommendationResult").style.display = "block";
+    }
+  }
+
+  /* ── Render states ── */
+  function renderEmptyState() {
+    return `
+      <div class="result-empty">
+        <div class="result-empty-icon">
+          <i class="fas fa-seedling"></i>
+        </div>
+        <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Ready for analysis</h3>
+        <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+          Upload a soil report or fill the farm profile form to receive a single crop
+          suggestion tuned to {{ user.district or "your district" }}.
+        </p>
+      </div>
+    `;
+  }
+
+  function renderSuggestionResult(result) {
+    return `
+      <div class="result-card">
+        <span class="result-kicker">
+          <i class="fas fa-circle-check text-green-600"></i>
+          Best-fit crop suggestion
+        </span>
+        <div>
+          <p class="text-sm uppercase font-bold tracking-[0.18em] text-gray-400">Recommended crop</p>
+          <h3 class="result-crop mt-3">${result.recommended_crop}</h3>
+        </div>
+        <div class="result-meta">
+          <span class="result-chip">
+            <i class="fas fa-location-dot text-sky-600"></i>
+            {{ user.district or "District not set" }}
+          </span>
+          <span class="result-chip">
+            <i class="fas fa-brain text-green-600"></i>
+            AI analyzed
+          </span>
+          <span class="result-chip">
+            <i class="fas fa-file-waveform text-amber-500"></i>
+            Soil-informed
+          </span>
+        </div>
+        <div class="result-reason">
+          ${result.reason}
+        </div>
+        <div class="pt-2">
+          <button onclick="backToForm()" class="btn-secondary inline-flex items-center gap-3 rounded-2xl px-6 py-3.5 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm">
+            <i class="fas fa-rotate-left"></i>
+            Start another check
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderErrorState(message) {
+    return `
+      <div class="result-empty">
+        <div class="result-empty-icon bg-red-50 text-red-600 border border-red-200">
+          <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Suggestion failed</h3>
+        <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+          ${message}
+        </p>
+        <div class="mt-6">
+          <button onclick="backToForm()" class="btn-secondary inline-flex items-center gap-3 rounded-2xl px-6 py-3.5 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm">
+            <i class="fas fa-rotate-left"></i>
+            Try again
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ── Upload-based recommendation (unchanged for PDF) ── */
+  async function recommendCrop() {
+    const soilReport = document.getElementById("soilReport").files[0];
+    const structuredData = document.getElementById("structuredFormData").value;
+
+    // If structured data is filled, use the structured endpoint
+    if (!soilReport && structuredData) {
+      try {
+        const payload = JSON.parse(structuredData);
+        recommendCropStructured(payload);
+        return;
+      } catch (e) {
+        // Fall through to validation error
+      }
+    }
+
+    if (!soilReport && !structuredData) {
+      alert("Please upload a soil report or fill the farm profile form.");
+      return;
+    }
+
+    const formData = new FormData();
+    if (soilReport) {
+      formData.append("soil_report", soilReport);
+      setInputMode("upload");
+    }
+    formData.append("district", "{{ user.district }}");
+
+    document.getElementById("recommendationResult").style.display = "none";
+    document.getElementById("loading").classList.remove("hidden");
+
+    try {
+      const response = await fetch("/user/crop-recommendation", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("recommendationResult").innerHTML =
+          renderSuggestionResult(result);
+        document.getElementById("recommendationResult").style.display = "block";
+      } else {
+        let errorMsg = `HTTP ${response.status} error`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.detail || errorMsg;
+        } catch (_) {
+          const text = await response.text().catch(() => '');
+          if (text) errorMsg = text;
+        }
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      console.error("Error getting crop suggestion:", error);
+      document.getElementById("loading").classList.add("hidden");
+      document.getElementById("recommendationResult").innerHTML =
+        renderErrorState(`Failed to get crop suggestion: ${error.message}.`);
+      document.getElementById("recommendationResult").style.display = "block";
+    }
+  }
+
+  /* ── Reset ── */
+  function backToForm() {
+    document.getElementById("recommendationResult").innerHTML = renderEmptyState();
+    document.getElementById("recommendationResult").style.display = "block";
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("soilReport").value = "";
+    document.getElementById("structuredFormData").value = "";
+    document.getElementById("manualFormStatus").style.display = "none";
+    updateSelectedFileState();
+    setInputMode("upload");
+  }
+
+  /* ── Init ── */
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("soilReport").addEventListener("change", function () {
+      updateSelectedFileState();
+      if (this.files[0]) {
+        setInputMode("upload");
+      }
+    });
+
+    document.querySelectorAll("[data-mode]").forEach((pill) => {
+      pill.addEventListener("click", function () {
+        setInputMode(this.dataset.mode);
+        if (this.dataset.mode === "upload") {
+          document.getElementById("soilReport").click();
+        } else {
+          openFarmProfileModal();
+        }
+      });
+    });
+
+    // Close modal on Escape key
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        const rainfallModal = document.getElementById("rainfallPopupModal");
+        if (rainfallModal && rainfallModal.style.display !== "none") {
+          closeRainfallPopup();
+          return;
+        }
+        const modal = document.getElementById("farmProfileModal");
+        if (modal.style.display !== "none") {
+          closeFarmProfileModal();
+        }
+      }
+    });
+
+    // Close modal on backdrop click
+    document.getElementById("farmProfileModal").addEventListener("click", function (event) {
+      if (event.target === this) {
+        closeFarmProfileModal();
+      }
+    });
+
+    updateSelectedFileState();
+  });
+</script>
+
+{% endblock %}

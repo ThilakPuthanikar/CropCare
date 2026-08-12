@@ -1,0 +1,1958 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}CropCare{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root {
+        /* ── Primary Palette ── */
+        --primary: #2E7D32;
+        --primary-strong: #1B5E20;
+        --accent: #43A047;
+        --info: #0EA5E9;
+        --warning: #F59E0B;
+        --danger: #DC2626;
+
+        /* ── Domain Colors ── */
+        --color-weather: #0EA5E9;
+        --color-soil: #8D6E63;
+        --color-harvest: #D97706;
+
+        /* ── Surfaces ── */
+        --bg: #F7F9F4;
+        --bg-elevated: #FFFFFF;
+        --panel: #FFFFFF;
+        --panel-strong: #FFFFFF;
+        --panel-soft: #F0F3EC;
+        --light-text: #111827;
+        --muted-text: #4B5563;
+        --border-color: #DDE5D5;
+
+
+        /* ── Shadows ── */
+        --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+        --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.1);
+
+        /* ── Radius (consistent scale) ── */
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --radius-2xl: 24px;
+        --radius-full: 9999px;
+
+        /* ── Transitions ── */
+        --transition-fast: 150ms ease;
+        --transition-base: 200ms ease;
+        --transition-slow: 300ms ease;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        color: var(--light-text);
+        min-height: 100vh;
+        margin: 0;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(67, 160, 71, 0.05),
+            transparent 35%
+          ),
+          radial-gradient(
+            circle at top right,
+            rgba(14, 165, 233, 0.04),
+            transparent 30%
+          ),
+          var(--bg);
+      }
+
+      h1, h2, h3, h4, h5, h6, .brand-mark, .eyebrow, .modal-title {
+        font-family: "Manrope", sans-serif;
+      }
+
+      body.drawer-open {
+        overflow: hidden;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        position: relative;
+      }
+
+      .app-shell::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(120deg, rgba(255, 255, 255, 0.4), transparent 30%),
+          radial-gradient(
+            circle at 20% 20%,
+            rgba(67, 160, 71, 0.03),
+            transparent 30%
+          );
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.92);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: var(--shadow-xs);
+      }
+
+      .topbar-inner {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
+      }
+
+      .brand-mark {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 18px;
+        background: linear-gradient(
+          135deg,
+          #43A047,
+          #2E7D32
+        );
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.35),
+          0 8px 20px rgba(46, 125, 50, 0.2);
+        color: #FFFFFF;
+      }
+
+      .menu-toggle,
+      .drawer-close {
+        border: 1px solid var(--border-color);
+        background: #FFFFFF;
+        color: var(--light-text);
+        transition:
+          transform var(--transition-base),
+          background var(--transition-base),
+          border-color var(--transition-base);
+        box-shadow: var(--shadow-xs);
+      }
+
+      .menu-toggle:hover,
+      .drawer-close:hover {
+        transform: translateY(-1px);
+        background: var(--panel-soft);
+        border-color: var(--primary);
+      }
+
+      .menu-toggle:focus-visible,
+      .drawer-close:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .nav-drawer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(320px, 88vw);
+        padding: 1.5rem;
+        z-index: 60;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        transform: translateX(-100%);
+        transition: transform var(--transition-slow) cubic-bezier(0.22, 1, 0.36, 1);
+        background: #FFFFFF;
+        border-right: 1px solid var(--border-color);
+        box-shadow: var(--shadow-xl);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        scrollbar-width: none;
+      }
+
+      .nav-drawer.open {
+        transform: translateX(0);
+      }
+
+      .nav-drawer nav {
+        min-height: 0;
+      }
+
+      .nav-drawer::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+
+      .drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.28s ease;
+        background: rgba(31, 41, 55, 0.45);
+        backdrop-filter: blur(4px);
+      }
+
+      .drawer-backdrop.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .sidebar-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        color: var(--muted-text);
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid transparent;
+        background: transparent;
+        text-decoration: none;
+        transition:
+          transform var(--transition-base),
+          background var(--transition-base),
+          color var(--transition-base),
+          border-color var(--transition-base);
+      }
+
+      .sidebar-item i,
+      .sidebar-item svg,
+      .sidebar-item [data-lucide] {
+        width: 2rem;
+        height: 2rem;
+        min-width: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        color: var(--accent);
+        background: var(--panel-soft);
+        font-size: 0.85rem;
+        transition:
+          background var(--transition-base),
+          transform var(--transition-base),
+          color var(--transition-base);
+      }
+
+      .sidebar-item:hover,
+      .sidebar-item.active {
+        color: var(--light-text);
+        background: var(--panel-soft);
+        border-color: var(--border-color);
+        transform: translateX(3px);
+        font-weight: 600;
+      }
+
+      .sidebar-item.active {
+        border-color: rgba(46, 125, 50, 0.2);
+      }
+
+      .sidebar-item[aria-current="page"] {
+        color: var(--light-text);
+        background: var(--panel-soft);
+        border-color: rgba(46, 125, 50, 0.2);
+        font-weight: 600;
+      }
+
+      .sidebar-item:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .sidebar-item:hover i,
+      .sidebar-item:hover svg,
+      .sidebar-item:hover [data-lucide],
+      .sidebar-item.active i,
+      .sidebar-item.active svg,
+      .sidebar-item.active [data-lucide] {
+        background: linear-gradient(
+          135deg,
+          var(--accent),
+          var(--primary)
+        );
+        color: #FFFFFF;
+        transform: scale(1.05);
+      }
+
+      .content-shell {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.5rem 1.5rem 2.5rem;
+      }
+
+      .dashboard-card {
+        position: relative;
+        overflow: hidden;
+        background: var(--panel);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        border-radius: var(--radius-2xl);
+      }
+
+      .dashboard-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          135deg,
+          rgba(67, 160, 71, 0.03),
+          transparent 30%
+        );
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        color: #FFFFFF;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform var(--transition-base),
+          box-shadow var(--transition-base),
+          filter var(--transition-base),
+          opacity var(--transition-base);
+        box-shadow: 0 4px 14px rgba(46, 125, 50, 0.2);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+        box-shadow: 0 8px 22px rgba(46, 125, 50, 0.28);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+      }
+
+      .btn-primary:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .btn-secondary {
+        background: #FFFFFF;
+        color: var(--light-text);
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition:
+          transform var(--transition-base),
+          background var(--transition-base),
+          border-color var(--transition-base);
+        box-shadow: var(--shadow-xs);
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-1px);
+        background: var(--panel-soft);
+        border-color: var(--primary);
+      }
+
+      .btn-secondary:active {
+        transform: translateY(0);
+      }
+
+      .btn-secondary:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .btn-secondary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .eyebrow {
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        color: #2E7D32;
+        font-weight: 700;
+      }
+
+      .surface-soft {
+        background: var(--bg);
+        border: 1px solid var(--border-color);
+      }
+
+      .text-muted {
+        color: var(--muted-text);
+      }
+
+      .text-accent {
+        color: var(--primary);
+      }
+
+      .text-info {
+        color: var(--info);
+      }
+
+      .text-warning {
+        color: var(--warning);
+      }
+
+      .text-danger {
+        color: var(--danger);
+      }
+
+      .bg-soft {
+        background: var(--bg);
+      }
+
+      .bg-soft-strong {
+        background: var(--panel-soft);
+      }
+
+      .border-soft {
+        border: 1px solid var(--border-color);
+      }
+
+      .icon-shell {
+        background: var(--panel-soft);
+        color: var(--primary);
+      }
+
+      .icon-shell-accent {
+        background: rgba(67, 160, 71, 0.1);
+        color: var(--primary);
+      }
+
+      .icon-shell-info {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--info);
+      }
+
+      .icon-shell-deep {
+        background: rgba(46, 125, 50, 0.12);
+        color: var(--primary);
+      }
+
+      .panel-highlight-green {
+        background: linear-gradient(
+          135deg,
+          rgba(67, 160, 71, 0.08),
+          #FFFFFF
+        );
+        border: 1px solid rgba(67, 160, 71, 0.15);
+      }
+
+      /* ── Reusable Component Classes ── */
+
+      .stat-label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #6B7280;
+      }
+
+      .theme-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        background: var(--bg);
+        color: var(--light-text);
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition:
+          border-color var(--transition-base),
+          background var(--transition-base),
+          box-shadow var(--transition-base);
+      }
+
+      .theme-input::placeholder {
+        color: #9CA3AF;
+      }
+
+      .theme-input:hover {
+        border-color: var(--accent);
+      }
+
+      .theme-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .theme-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--light-text);
+        margin-bottom: 0.375rem;
+      }
+
+      .theme-card {
+        background: var(--panel);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-sm);
+        transition:
+          box-shadow var(--transition-base),
+          border-color var(--transition-base);
+      }
+
+      .theme-card:hover {
+        box-shadow: var(--shadow-md);
+      }
+
+      .panel-highlight-blue {
+        background: linear-gradient(
+          135deg,
+          rgba(79, 195, 247, 0.12),
+          #FFFFFF
+        );
+        border: 1px solid rgba(79, 195, 247, 0.2);
+      }
+
+      .badge-accent {
+        color: #1B5E20;
+        background: rgba(67, 160, 71, 0.15);
+        font-weight: 600;
+      }
+
+      .badge-info {
+        color: #0288D1;
+        background: rgba(79, 195, 247, 0.15);
+        font-weight: 600;
+      }
+
+      .badge-warning {
+        color: #F57F17;
+        background: rgba(249, 168, 37, 0.15);
+        font-weight: 600;
+      }
+
+      .badge-danger {
+        color: #C62828;
+        background: rgba(211, 47, 47, 0.12);
+        font-weight: 600;
+      }
+
+      .metric-value {
+        font-size: clamp(2rem, 3vw, 3rem);
+        line-height: 1;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        color: var(--light-text);
+      }
+
+      .fade-up {
+        animation: fadeUp 0.35s ease both;
+      }
+
+      .skeleton-block,
+      .skeleton-line,
+      .skeleton-pill,
+      .skeleton-circle {
+        position: relative;
+        overflow: hidden;
+        background: #E8ECE3;
+      }
+
+      .skeleton-block::after,
+      .skeleton-line::after,
+      .skeleton-pill::after,
+      .skeleton-circle::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.7),
+          transparent
+        );
+        animation: skeletonShimmer 1s infinite;
+      }
+
+      .skeleton-line {
+        height: 0.9rem;
+        border-radius: var(--radius-full);
+      }
+
+      .skeleton-pill {
+        height: 2rem;
+        border-radius: var(--radius-full);
+      }
+
+      .skeleton-circle {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: var(--radius-full);
+      }
+
+      .skeleton-card {
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border-color);
+        background: var(--panel);
+        padding: 1rem;
+        box-shadow: var(--shadow-xs);
+      }
+
+      .skeleton-table-row td {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+      }
+
+      /* Content fade-in after skeleton replacement */
+      .content-loaded {
+        animation: contentFadeIn 0.2s ease both;
+      }
+
+      @keyframes contentFadeIn {
+        from { opacity: 0.4; }
+        to { opacity: 1; }
+      }
+
+      .stagger-1 {
+        animation-delay: 0.1s;
+      }
+
+      .stagger-2 {
+        animation-delay: 0.2s;
+      }
+
+      /* ── Responsive & Touch Device Utilities ── */
+      @media (max-width: 640px) {
+        .content-shell {
+          padding: 1rem 0.875rem 2rem;
+        }
+        .dashboard-card {
+          border-radius: var(--radius-xl);
+        }
+        .touch-target,
+        button,
+        .btn,
+        select.theme-input,
+        input.theme-input {
+          min-height: 44px;
+        }
+        .mobile-stack-table {
+          display: block;
+          width: 100%;
+        }
+        .mobile-stack-table thead {
+          display: none;
+        }
+        .mobile-stack-table tbody,
+        .mobile-stack-table tr,
+        .mobile-stack-table td {
+          display: block;
+          width: 100%;
+        }
+        .mobile-stack-table tr {
+          margin-bottom: 0.875rem;
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-lg);
+          background: var(--panel);
+          padding: 0.75rem;
+        }
+        .mobile-stack-table td {
+          padding: 0.375rem 0;
+          border: none;
+          text-align: left !important;
+        }
+      }
+
+      .table-responsive-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        border-radius: var(--radius-lg);
+      }
+
+
+      .stagger-3 {
+        animation-delay: 0.3s;
+      }
+
+      .stagger-4 {
+        animation-delay: 0.4s;
+      }
+
+      .modal {
+        background: rgba(17, 24, 39, 0.45);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+
+      .modal-content {
+        background: var(--panel);
+        border: 1px solid var(--border-color);
+        color: var(--light-text);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .theme-select,
+      select.theme-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        min-height: 3.5rem;
+        padding: 0.95rem 3.25rem 0.95rem 1rem;
+        border-radius: 1.35rem;
+        border: 1px solid var(--border-color);
+        color: #1F2937;
+        background:
+          linear-gradient(180deg, #FFFFFF, #F8FAF5),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%232E7D32' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+            no-repeat right 1rem center / 1.1rem,
+          #FFFFFF;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.8),
+          0 4px 12px rgba(0, 0, 0, 0.04);
+        transition:
+          border-color 0.25s ease,
+          box-shadow 0.25s ease,
+          transform 0.25s ease,
+          background 0.25s ease;
+      }
+
+      .theme-select:hover,
+      select.theme-select:hover {
+        border-color: #43A047;
+        background:
+          linear-gradient(180deg, #FFFFFF, #F3F6F0),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%232E7D32' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+            no-repeat right 1rem center / 1.1rem,
+          #FFFFFF;
+      }
+
+      .theme-select:focus,
+      select.theme-select:focus {
+        outline: none;
+        border-color: #2E7D32;
+        box-shadow:
+          0 0 0 4px rgba(46, 125, 50, 0.1),
+          0 8px 20px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+      }
+
+      .theme-select option,
+      select.theme-select option,
+      select option {
+        color: #1F2937;
+        background-color: #FFFFFF;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes skeletonShimmer {
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      /* Cascading Context Menu & Fly-out Styles */
+      .cascading-dropdown-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+      }
+      .cascading-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.875rem 1.25rem;
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        color: #1F2937;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      }
+      .cascading-btn:hover, .cascading-btn:focus {
+        background: #F8FAF5;
+        border-color: #2E7D32;
+        outline: none;
+      }
+      .cascading-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        width: 300px;
+        max-height: 360px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+        z-index: 9999;
+        padding: 0.4rem;
+        animation: winMenuFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        display: none;
+      }
+      .cascading-menu::-webkit-scrollbar,
+      .cascading-floating-submenu::-webkit-scrollbar {
+        display: none;
+      }
+      .cascading-menu.open {
+        display: block;
+      }
+      @keyframes winMenuFade {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .cascading-search-wrap {
+        padding: 0.4rem;
+        position: sticky;
+        top: 0;
+        background: #FFFFFF;
+        z-index: 2;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 0.25rem;
+      }
+      .cascading-search-input {
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+        background: #F8FAF5;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: #1F2937;
+        font-size: 0.85rem;
+      }
+      .cascading-search-input:focus {
+        outline: none;
+        border-color: #2E7D32;
+        background: #FFFFFF;
+      }
+      .cascading-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0.8rem;
+        border-radius: 10px;
+        color: #1F2937;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+        user-select: none;
+      }
+      .cascading-item:hover, .cascading-item.active-focus {
+        background: #F3F6F0;
+        color: #2E7D32;
+        font-weight: 600;
+      }
+      .cascading-floating-submenu {
+        position: fixed;
+        width: 260px;
+        max-height: 340px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(46, 125, 50, 0.2);
+        padding: 0.4rem;
+        display: none;
+        z-index: 100000;
+        animation: winSubmenuFade 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .cascading-floating-submenu.open {
+        display: block;
+      }
+      @keyframes winSubmenuFade {
+        from { opacity: 0; transform: translateX(-4px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      .cascading-subitem {
+        padding: 0.55rem 0.75rem;
+        border-radius: 8px;
+        color: #1F2937;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+        user-select: none;
+      }
+      .cascading-subitem:hover, .cascading-subitem.active-focus {
+        background: rgba(67, 160, 71, 0.12);
+        color: #2E7D32;
+        font-weight: 600;
+      }
+      @media (max-width: 768px) {
+        .cascading-menu { width: 100%; max-height: 340px; }
+      }
+
+      /* Custom Interactive Popover Calendar Picker */
+      .popover-calendar {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        width: 300px;
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+        padding: 1rem;
+        z-index: 9999;
+        display: none;
+        animation: menuSlideFade 0.2s ease;
+      }
+      .popover-calendar.open { display: block; }
+      .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+      .cal-nav-btn { background: #F3F6F0; border: none; color: #1F2937; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+      .cal-nav-btn:hover { background: rgba(67, 160, 71, 0.15); color: #2E7D32; }
+      .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+      .cal-day-label { font-size: 0.75rem; color: #6B7280; font-weight: 600; padding-bottom: 4px; }
+      .cal-date-btn { background: transparent; border: none; color: #1F2937; padding: 0.5rem 0; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: 0.15s; }
+      .cal-date-btn:hover { background: #F3F6F0; color: #2E7D32; }
+      .cal-date-btn.selected { background: #2E7D32; color: #FFFFFF; font-weight: 700; }
+      .cal-date-btn.today { border: 1px solid #2E7D32; color: #2E7D32; font-weight: 600; }
+
+      @media (max-width: 767px) {
+        .topbar-inner,
+        .content-shell {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+      }
+
+      /* ── Accessibility: Skip Link ── */
+      .skip-link {
+        position: absolute;
+        top: -100%;
+        left: 1rem;
+        z-index: 9999;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary);
+        color: #FFFFFF;
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        box-shadow: var(--shadow-lg);
+        transition: top var(--transition-fast);
+      }
+
+      .skip-link:focus {
+        top: 1rem;
+      }
+
+      /* ── Custom Scrollbar ── */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(46, 125, 50, 0.15);
+        border-radius: var(--radius-full);
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(46, 125, 50, 0.3);
+      }
+
+      /* Firefox scrollbar */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(46, 125, 50, 0.15) transparent;
+      }
+
+      /* ── Focus visible for general interactive elements ── */
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="app-shell">
+      <div
+        id="drawerBackdrop"
+        class="drawer-backdrop"
+        onclick="closeDrawer()"
+      ></div>
+
+      <aside id="navDrawer" class="nav-drawer flex flex-col">
+        <div class="flex items-center justify-between gap-3 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="brand-mark flex items-center justify-center">
+              <i data-lucide="sprout" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900">CropCare</h1>
+              <p class="text-xs text-muted">
+                {% block user_role %}{% endblock %}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="drawer-close w-10 h-10 rounded-full flex items-center justify-center md:hidden"
+            onclick="closeDrawer()"
+            aria-label="Close navigation menu"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <nav class="space-y-2 flex-1">{% block sidebar %}{% endblock %}</nav>
+      </aside>
+
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <button
+                type="button"
+                class="menu-toggle w-11 h-11 rounded-2xl flex items-center justify-center"
+                onclick="toggleDrawer()"
+                aria-label="Open navigation menu"
+              >
+                <i data-lucide="menu" class="w-5 h-5"></i>
+              </button>
+              <div>
+                <p class="eyebrow mb-1">Dashboard</p>
+                <h2 class="text-lg md:text-2xl font-bold text-gray-900">
+                  {% block page_heading %}CropCare Workspace{% endblock %}
+                </h2>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 shrink-0">
+              <div
+                class="flex items-center gap-3 surface-soft rounded-full px-3 py-1.5 sm:px-4 sm:py-2"
+              >
+                <div
+                  class="w-8 h-8 sm:w-9 sm:h-9 rounded-full icon-shell-accent flex items-center justify-center text-accent"
+                >
+                  <i data-lucide="star" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="logout()"
+                class="btn-secondary inline-flex items-center gap-2 rounded-2xl px-3 py-2 sm:px-4 sm:py-3 text-sm font-medium shrink-0"
+              >
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main id="main-content" class="content-shell">{% block content %}{% endblock %}</main>
+    </div>
+
+    <!-- Chatbase Integration -->
+    <script>
+      function generateOpaqueChatbaseToken() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return "guest_" + window.crypto.randomUUID().replace(/-/g, "");
+        }
+
+        const randomSuffix = Math.random().toString(36).slice(2);
+        return "guest_" + Date.now().toString(36) + randomSuffix;
+      }
+
+      // Chatbase configuration
+      window.chatbaseConfig = {
+        chatbotId: "{{ chatbot_id }}",
+        userId: "{{ chatbase_user_id or '' }}",
+      };
+
+      if (!window.chatbaseConfig.userId) {
+        window.chatbaseConfig.userId = generateOpaqueChatbaseToken();
+      }
+
+      // Load Chatbase script dynamically
+      (function () {
+        var script = document.createElement("script");
+        script.src = "https://www.chatbase.co/embed.min.js";
+        script.defer = true;
+        script.dataset.chatbotId = "{{ chatbot_id }}";
+        script.dataset.domain = "www.chatbase.co";
+        document.head.appendChild(script);
+      })();
+
+      async function logout() {
+        try {
+          await fetch("/auth/logout", {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+          });
+        } catch (e) {}
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        document.cookie =
+          "access_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        window.location.href = "/";
+      }
+
+      function getCookieValue(name) {
+        const match = document.cookie.match(
+          new RegExp("(^|;\\s*)" + name + "=([^;]*)"),
+        );
+        return match ? decodeURIComponent(match[2]) : "";
+      }
+
+      function getAccessToken() {
+        return (
+          getCookieValue("access_token") ||
+          sessionStorage.getItem("token") ||
+          localStorage.getItem("token") ||
+          ""
+        );
+      }
+
+      function getAuthHeaders(extraHeaders = {}) {
+        const token = getAccessToken();
+        const base = { ...extraHeaders, "X-Requested-With": "XMLHttpRequest" };
+        return token ? { ...base, Authorization: `Bearer ${token}` } : base;
+      }
+
+      function renderCardSkeletons(count = 3) {
+        return Array.from({ length: count })
+          .map(
+            () => `
+              <div class="skeleton-card">
+                <div class="flex items-start gap-4">
+                  <div class="skeleton-circle"></div>
+                  <div class="flex-1 space-y-3">
+                    <div class="skeleton-pill w-32"></div>
+                    <div class="skeleton-line w-3/4"></div>
+                    <div class="skeleton-line w-full"></div>
+                    <div class="skeleton-line w-5/6"></div>
+                  </div>
+                </div>
+              </div>
+            `,
+          )
+          .join("");
+      }
+
+      function renderTableSkeleton(columnCount = 6, rowCount = 5) {
+        return Array.from({ length: rowCount })
+          .map(
+            () => `
+              <tr class="skeleton-table-row">
+                ${Array.from({ length: columnCount })
+                  .map(
+                    () =>
+                      '<td><div class="skeleton-line w-full"></div></td>',
+                  )
+                  .join("")}
+              </tr>
+            `,
+          )
+          .join("");
+      }
+
+      function resetChat() {
+        // Regenerate session ID for chat isolation
+        window.chatbaseConfig.userId = generateOpaqueChatbaseToken();
+      }
+
+      function toggleDrawer() {
+        const drawer = document.getElementById("navDrawer");
+        const backdrop = document.getElementById("drawerBackdrop");
+        const isOpen = drawer.classList.toggle("open");
+        backdrop.classList.toggle("visible", isOpen);
+        document.body.classList.toggle("drawer-open", isOpen);
+      }
+
+      function closeDrawer() {
+        const drawer = document.getElementById("navDrawer");
+        const backdrop = document.getElementById("drawerBackdrop");
+        drawer.classList.remove("open");
+        backdrop.classList.remove("visible");
+        document.body.classList.remove("drawer-open");
+      }
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closeDrawer();
+        }
+      });
+    </script>
+
+    <!-- Global AI History Modal -->
+    <div id="aiHistoryModalOverlay" class="fixed inset-0 z-[100] bg-gray-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white border border-[var(--border-color)] rounded-[28px] w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between p-6 border-b border-[var(--border-color)]">
+          <div>
+            <p class="eyebrow mb-1">User Isolation Active</p>
+            <h2 id="aiHistoryModalTitle" class="text-xl font-bold text-gray-900">Past AI History</h2>
+          </div>
+          <button type="button" onclick="closeHistoryModal()" class="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-all cursor-pointer">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div id="aiHistoryModalBody" class="p-6 overflow-y-auto space-y-4 flex-1 scrollbar-none">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openHistoryModal(feature, title) {
+        const overlay = document.getElementById("aiHistoryModalOverlay");
+        const titleEl = document.getElementById("aiHistoryModalTitle");
+        const bodyEl = document.getElementById("aiHistoryModalBody");
+        if (!overlay) return;
+
+        titleEl.textContent = title || "Past AI History";
+        overlay.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+
+        // Show skeleton loading
+        bodyEl.innerHTML = renderCardSkeletons(3);
+        if (window.lucide) lucide.createIcons();
+
+        fetch(`/user/ai-history?feature=${encodeURIComponent(feature)}`, {
+          headers: getAuthHeaders()
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (!data || !data.history || data.history.length === 0) {
+            bodyEl.innerHTML = `
+              <div class="text-center py-12 text-muted">
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center mx-auto mb-4 text-xl text-accent">
+                  <i data-lucide="history" class="w-8 h-8 text-green-700"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">No past records found</h3>
+                <p class="text-sm">Generate new AI recommendations to build your personal history.</p>
+              </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+            return;
+          }
+
+          bodyEl.innerHTML = data.history.map(item => {
+            let outHtml = "";
+            const out = item.output_payload || {};
+            const inp = item.input_payload || {};
+
+            if (item.feature_type === "crop_suggestion") {
+              outHtml = `
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-green-800 bg-green-100 px-3 py-1 rounded-full border border-green-200">Recommended Crop</span>
+                  <span class="text-xs text-muted">${item.created_at}</span>
+                </div>
+                <h4 class="text-2xl font-bold text-gray-900 mb-2">${out.recommended_crop || 'Unknown'}</h4>
+                <p class="text-sm text-muted leading-relaxed">${out.reason || ''}</p>
+              `;
+            } else if (item.feature_type === "input_suggestions") {
+              outHtml = `
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-blue-800 bg-blue-100 px-3 py-1 rounded-full border border-blue-200">Input Suggestions</span>
+                  <span class="text-xs text-muted">${item.created_at}</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                  <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                    <p class="text-xs text-muted mb-1">Seeds</p>
+                    <p class="font-semibold text-gray-900">${out.seeds?.quantity || '--'}</p>
+                    <p class="text-xs text-accent mt-1">${(out.seeds?.brands || []).join(', ')}</p>
+                  </div>
+                  <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                    <p class="text-xs text-muted mb-1">Fertilizers</p>
+                    <p class="font-semibold text-gray-900">${out.fertilizers?.quantity || '--'}</p>
+                    <p class="text-xs text-accent mt-1">${(out.fertilizers?.brands || []).join(', ')}</p>
+                  </div>
+                  <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                    <p class="text-xs text-muted mb-1">Pesticides</p>
+                    <p class="font-semibold text-gray-900">${out.pesticides?.quantity || '--'}</p>
+                    <p class="text-xs text-accent mt-1">${(out.pesticides?.brands || []).join(', ')}</p>
+                  </div>
+                </div>
+              `;
+            } else if (item.feature_type === "disease_diagnosis") {
+              outHtml = `
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-red-800 bg-red-100 px-3 py-1 rounded-full border border-red-200">Diagnosis</span>
+                  <span class="text-xs text-muted">${item.created_at}</span>
+                </div>
+                <h4 class="text-xl font-bold text-gray-900 mb-2">${out.diagnosis || 'Unknown Issue'}</h4>
+                <div class="space-y-2 text-sm text-muted">
+                  <p><strong class="text-gray-900">Treatment:</strong> ${out.treatment || '--'}</p>
+                  <p><strong class="text-gray-900">Prevention:</strong> ${out.prevention || '--'}</p>
+                </div>
+              `;
+            } else if (item.feature_type === "crop_planner") {
+              outHtml = `
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-amber-800 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">Crop Plan</span>
+                  <span class="text-xs text-muted">${item.created_at}</span>
+                </div>
+                <h4 class="text-xl font-bold text-gray-900 mb-1">${(out.crop || '').toUpperCase()} Plan</h4>
+                <p class="text-xs text-muted mb-3">${out.planting_date || ''} to ${out.harvest_date || ''} (${out.duration_days || '--'} days)</p>
+                <div class="flex flex-wrap gap-2">
+                  ${(out.stages || []).slice(0, 4).map(s => `<span class="text-xs px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-800 font-medium">${s.stage_name}</span>`).join('')}
+                </div>
+              `;
+            } else {
+              outHtml = `<pre class="text-xs text-muted overflow-x-auto">${JSON.stringify(out, null, 2)}</pre>`;
+            }
+
+            return `
+              <div class="p-5 rounded-[22px] bg-white border border-gray-200 hover:border-green-600 shadow-sm transition-all">
+                ${outHtml}
+              </div>
+            `;
+          }).join("");
+          if (window.lucide) lucide.createIcons();
+        })
+        .catch(err => {
+          bodyEl.innerHTML = `
+            <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-center text-sm">
+              Failed to load past history: ${err.message || 'Network error'}
+            </div>
+          `;
+          if (window.lucide) lucide.createIcons();
+        });
+      }
+
+      function closeHistoryModal() {
+        const overlay = document.getElementById("aiHistoryModalOverlay");
+        if (overlay) {
+          overlay.classList.add("hidden");
+          document.body.style.overflow = "";
+        }
+      }
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeHistoryModal();
+      });
+    </script>
+
+    <!-- Global Cascading Crop Selection & Calendar Components -->
+    <script>
+      window.CROP_DATA = {
+        "🌾 Cereals & Millets": [
+          "Rice (Paddy)", "Maize", "Ragi (Finger Millet)", "Jowar (Sorghum)", "Bajra (Pearl Millet)",
+          "Wheat", "Barley", "Foxtail Millet (Navane)", "Little Millet (Saame)", "Kodo Millet (Harka)",
+          "Barnyard Millet (Oodalu)", "Proso Millet (Baragu)", "Browntop Millet"
+        ],
+        "🌱 Pulses": [
+          "Red Gram (Tur/Arhar)", "Green Gram (Moong)", "Black Gram (Urad)", "Horse Gram (Hurali)",
+          "Cowpea", "Bengal Gram (Chickpea)", "Field Bean (Avare)", "Rajma", "Lablab Bean", "Moth Bean"
+        ],
+        "🫒 Oilseeds": [
+          "Groundnut", "Sunflower", "Soybean", "Sesame (Til)", "Castor", "Safflower", "Mustard",
+          "Niger Seed", "Linseed (Flax)"
+        ],
+        "💰 Commercial Crops": [
+          "Sugarcane", "Cotton", "Tobacco", "Mulberry"
+        ],
+        "☕ Plantation Crops": [
+          "Coffee", "Tea", "Arecanut", "Coconut", "Rubber", "Cocoa", "Cashew"
+        ],
+        "🌶️ Spices": [
+          "Black Pepper", "Cardamom", "Turmeric", "Ginger", "Chilli", "Coriander", "Cumin",
+          "Fenugreek", "Garlic", "Onion"
+        ],
+        "🍅 Vegetables": [
+          "Tomato", "Brinjal (Eggplant)", "Okra (Bhindi)", "Cabbage", "Cauliflower", "Carrot",
+          "Radish", "Beetroot", "Bottle Gourd", "Bitter Gourd", "Ridge Gourd", "Snake Gourd",
+          "Ash Gourd", "Pumpkin", "Cucumber", "French Beans", "Cluster Beans", "Capsicum",
+          "Green Chilli", "Drumstick", "Sweet Potato", "Potato"
+        ],
+        "🍎 Fruits": [
+          "Mango", "Banana", "Papaya", "Guava", "Pomegranate", "Sapota (Chikoo)", "Jackfruit",
+          "Watermelon", "Muskmelon", "Custard Apple", "Lemon", "Sweet Orange", "Mosambi",
+          "Acid Lime", "Grapes", "Pineapple", "Amla"
+        ],
+        "🌸 Flowers": [
+          "Rose", "Jasmine", "Marigold", "Chrysanthemum", "Crossandra", "Aster", "Tuberose",
+          "Gladiolus", "Gerbera", "Orchid"
+        ],
+        "🌿 Medicinal & Aromatic": [
+          "Ashwagandha", "Aloe Vera", "Tulsi", "Lemongrass", "Mint", "Stevia", "Coleus", "Kalmegh"
+        ],
+        "🌾 Fodder Crops": [
+          "Napier Grass", "Guinea Grass", "Fodder Maize", "Lucerne", "Cowpea (Fodder)",
+          "Sorghum Fodder", "Berseem"
+        ]
+      };
+
+      class CascadingCropSelect {
+        constructor(containerId, hiddenInputId, placeholder = "Select Crop...") {
+          this.container = document.getElementById(containerId);
+          this.hiddenInput = document.getElementById(hiddenInputId);
+          if (!this.container || !this.hiddenInput) return;
+          this.placeholder = placeholder;
+          this.isOpen = false;
+          this.activeCatIndex = -1;
+          this.activeSubIndex = -1;
+          this.searchQuery = "";
+          this.mobileCatView = null;
+          this.hoverTimer = null;
+          this.closeTimer = null;
+          this.activeCatName = null;
+          this.init();
+        }
+
+        init() {
+          this.container.classList.add("cascading-dropdown-container");
+          const currentVal = this.hiddenInput.value || "";
+          this.btn = document.createElement("button");
+          this.btn.type = "button";
+          this.btn.className = "cascading-btn";
+          this.btn.setAttribute("role", "combobox");
+          this.btn.setAttribute("aria-haspopup", "listbox");
+          this.btn.setAttribute("aria-expanded", "false");
+          this.btn.innerHTML = `<span class="truncate font-medium">${currentVal || this.placeholder}</span><i class="fas fa-chevron-down text-xs text-muted ml-2"></i>`;
+
+          this.menu = document.createElement("div");
+          this.menu.className = "cascading-menu";
+          this.menu.setAttribute("role", "listbox");
+
+          this.submenuPanel = document.createElement("div");
+          this.submenuPanel.className = "cascading-floating-submenu";
+          this.submenuPanel.setAttribute("role", "listbox");
+          document.body.appendChild(this.submenuPanel);
+
+          this.renderMenu();
+
+          this.container.appendChild(this.btn);
+          this.container.appendChild(this.menu);
+
+          this.btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.toggleMenu();
+          });
+
+          document.addEventListener("click", (e) => {
+            if (!this.container.contains(e.target) && !this.submenuPanel.contains(e.target)) {
+              this.closeAll();
+            }
+          });
+
+          window.addEventListener("resize", () => {
+            if (this.isOpen && this.activeCatName) {
+              this.positionSubmenu(this.activeItemEl);
+            }
+          });
+
+          window.addEventListener("scroll", () => {
+            if (this.isOpen && this.activeCatName) {
+              this.positionSubmenu(this.activeItemEl);
+            }
+          }, true);
+
+          this.submenuPanel.addEventListener("mouseenter", () => {
+            if (this.closeTimer) clearTimeout(this.closeTimer);
+          });
+
+          this.submenuPanel.addEventListener("mouseleave", () => {
+            this.scheduleCloseSubmenu();
+          });
+
+          this.container.addEventListener("keydown", (e) => this.handleKeyDown(e));
+          this.submenuPanel.addEventListener("keydown", (e) => this.handleKeyDown(e));
+        }
+
+        renderMenu() {
+          this.menu.innerHTML = "";
+          const searchWrap = document.createElement("div");
+          searchWrap.className = "cascading-search-wrap";
+          const searchInput = document.createElement("input");
+          searchInput.type = "text";
+          searchInput.className = "cascading-search-input";
+          searchInput.placeholder = "Search 70+ crops...";
+          searchInput.value = this.searchQuery;
+          searchInput.addEventListener("input", (e) => {
+            this.searchQuery = e.target.value.toLowerCase();
+            this.closeSubmenu();
+            this.filterAndRenderItems();
+          });
+          searchInput.addEventListener("click", (e) => e.stopPropagation());
+          searchWrap.appendChild(searchInput);
+          this.menu.appendChild(searchWrap);
+
+          this.itemsContainer = document.createElement("div");
+          this.menu.appendChild(this.itemsContainer);
+          this.filterAndRenderItems();
+        }
+
+        filterAndRenderItems() {
+          this.itemsContainer.innerHTML = "";
+          this.categoryItems = [];
+
+          if (this.mobileCatView) {
+            this.renderMobileSubmenu(this.mobileCatView);
+            return;
+          }
+
+          const isMobile = window.innerWidth <= 768;
+          let hasAny = false;
+
+          Object.entries(window.CROP_DATA).forEach(([cat, crops], catIdx) => {
+            const filteredCrops = crops.filter(c => c.toLowerCase().includes(this.searchQuery));
+            if (this.searchQuery && filteredCrops.length === 0 && !cat.toLowerCase().includes(this.searchQuery)) return;
+            hasAny = true;
+
+            const itemEl = document.createElement("div");
+            itemEl.className = "cascading-item";
+            itemEl.setAttribute("role", "option");
+            itemEl.innerHTML = `<span>${cat}</span><i class="fas fa-chevron-right text-xs opacity-60"></i>`;
+            itemEl.dataset.cat = cat;
+
+            const displayCrops = this.searchQuery ? filteredCrops : crops;
+
+            if (!isMobile) {
+              itemEl.addEventListener("mouseenter", () => {
+                if (this.closeTimer) clearTimeout(this.closeTimer);
+                if (this.hoverTimer) clearTimeout(this.hoverTimer);
+                this.hoverTimer = setTimeout(() => {
+                  this.openSubmenu(cat, displayCrops, itemEl, catIdx);
+                }, 100);
+              });
+
+              itemEl.addEventListener("mouseleave", () => {
+                if (this.hoverTimer) clearTimeout(this.hoverTimer);
+                this.scheduleCloseSubmenu();
+              });
+            }
+
+            itemEl.addEventListener("click", (e) => {
+              e.stopPropagation();
+              if (isMobile) {
+                this.mobileCatView = { cat, crops: displayCrops };
+                this.filterAndRenderItems();
+              } else {
+                this.openSubmenu(cat, displayCrops, itemEl, catIdx);
+              }
+            });
+
+            this.itemsContainer.appendChild(itemEl);
+            this.categoryItems.push({ el: itemEl, cat, crops: displayCrops });
+          });
+
+          if (!hasAny) {
+            this.itemsContainer.innerHTML = `<div class="p-3 text-xs text-muted text-center">No crops matching "${this.searchQuery}"</div>`;
+          }
+        }
+
+        scheduleCloseSubmenu() {
+          if (this.closeTimer) clearTimeout(this.closeTimer);
+          this.closeTimer = setTimeout(() => {
+            this.closeSubmenu();
+          }, 200);
+        }
+
+        openSubmenu(cat, crops, itemEl, catIdx) {
+          if (this.closeTimer) clearTimeout(this.closeTimer);
+          this.activeCatName = cat;
+          this.activeItemEl = itemEl;
+          if (catIdx !== undefined) this.activeCatIndex = catIdx;
+
+          if (this.categoryItems) {
+            this.categoryItems.forEach(item => item.el.classList.remove("active-focus"));
+          }
+          if (itemEl) itemEl.classList.add("active-focus");
+
+          this.submenuPanel.innerHTML = "";
+          this.subItems = [];
+          crops.forEach((cropName) => {
+            const subItem = document.createElement("div");
+            subItem.className = "cascading-subitem";
+            subItem.textContent = cropName;
+            subItem.addEventListener("click", (e) => {
+              e.stopPropagation();
+              this.selectCrop(cropName);
+            });
+            this.submenuPanel.appendChild(subItem);
+            this.subItems.push({ el: subItem, cropName });
+          });
+
+          this.submenuPanel.classList.add("open");
+          this.positionSubmenu(itemEl);
+        }
+
+        positionSubmenu(itemEl) {
+          if (!itemEl || !this.submenuPanel.classList.contains("open")) return;
+          const rect = itemEl.getBoundingClientRect();
+          const subWidth = 260;
+          const subHeight = Math.min(340, this.submenuPanel.scrollHeight || 340);
+
+          let left = rect.right + 6;
+          if (left + subWidth > window.innerWidth - 10) {
+            left = rect.left - subWidth - 6;
+            if (left < 10) left = Math.max(10, window.innerWidth - subWidth - 10);
+          }
+
+          let top = rect.top;
+          if (top + subHeight > window.innerHeight - 10) {
+            top = Math.max(10, window.innerHeight - subHeight - 10);
+          }
+
+          this.submenuPanel.style.left = `${left}px`;
+          this.submenuPanel.style.top = `${top}px`;
+        }
+
+        closeSubmenu() {
+          if (this.closeTimer) clearTimeout(this.closeTimer);
+          if (this.hoverTimer) clearTimeout(this.hoverTimer);
+          this.activeCatName = null;
+          this.activeItemEl = null;
+          this.activeSubIndex = -1;
+          this.submenuPanel.classList.remove("open");
+          if (this.categoryItems) {
+            this.categoryItems.forEach(item => item.el.classList.remove("active-focus"));
+          }
+        }
+
+        renderMobileSubmenu({ cat, crops }) {
+          const backBtn = document.createElement("div");
+          backBtn.className = "p-2 mb-2 bg-white/5 rounded-lg text-xs font-semibold text-primary cursor-pointer flex items-center gap-2";
+          backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> Back to Categories (${cat})`;
+          backBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.mobileCatView = null;
+            this.filterAndRenderItems();
+          });
+          this.itemsContainer.appendChild(backBtn);
+
+          crops.forEach((cropName) => {
+            const subItem = document.createElement("div");
+            subItem.className = "cascading-subitem py-2";
+            subItem.textContent = cropName;
+            subItem.addEventListener("click", (e) => {
+              e.stopPropagation();
+              this.selectCrop(cropName);
+            });
+            this.itemsContainer.appendChild(subItem);
+          });
+        }
+
+        selectCrop(cropName) {
+          this.hiddenInput.value = cropName;
+          this.btn.querySelector("span").textContent = cropName;
+          this.closeAll();
+          this.hiddenInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        toggleMenu() {
+          if (this.isOpen) this.closeAll();
+          else this.openMenu();
+        }
+
+        openMenu() {
+          this.isOpen = true;
+          this.menu.classList.add("open");
+          this.btn.setAttribute("aria-expanded", "true");
+          const searchInput = this.menu.querySelector(".cascading-search-input");
+          if (searchInput) setTimeout(() => searchInput.focus(), 50);
+          this.activeCatIndex = -1;
+          this.activeSubIndex = -1;
+        }
+
+        closeAll() {
+          this.isOpen = false;
+          this.menu.classList.remove("open");
+          this.btn.setAttribute("aria-expanded", "false");
+          this.mobileCatView = null;
+          this.searchQuery = "";
+          this.closeSubmenu();
+        }
+
+        handleKeyDown(e) {
+          if (!this.isOpen && (e.key === "ArrowDown" || e.key === "Enter")) {
+            e.preventDefault();
+            this.openMenu();
+            return;
+          }
+
+          if (e.key === "Escape") {
+            e.preventDefault();
+            if (this.submenuPanel.classList.contains("open")) {
+              this.closeSubmenu();
+            } else {
+              this.closeAll();
+              this.btn.focus();
+            }
+            return;
+          }
+
+          if (!this.categoryItems || this.categoryItems.length === 0) return;
+
+          const isSubmenuOpen = this.submenuPanel.classList.contains("open");
+
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (isSubmenuOpen && this.subItems && this.subItems.length > 0) {
+              this.activeSubIndex = (this.activeSubIndex + 1) % this.subItems.length;
+              this.subItems.forEach((it, idx) => {
+                it.el.classList.toggle("active-focus", idx === this.activeSubIndex);
+              });
+              if (this.subItems[this.activeSubIndex]) {
+                this.subItems[this.activeSubIndex].el.scrollIntoView({ block: "nearest" });
+              }
+            } else {
+              this.activeCatIndex = (this.activeCatIndex + 1) % this.categoryItems.length;
+              this.categoryItems.forEach((it, idx) => {
+                it.el.classList.toggle("active-focus", idx === this.activeCatIndex);
+              });
+              if (this.categoryItems[this.activeCatIndex]) {
+                this.categoryItems[this.activeCatIndex].el.scrollIntoView({ block: "nearest" });
+              }
+            }
+            return;
+          }
+
+          if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (isSubmenuOpen && this.subItems && this.subItems.length > 0) {
+              this.activeSubIndex = (this.activeSubIndex - 1 + this.subItems.length) % this.subItems.length;
+              this.subItems.forEach((it, idx) => {
+                it.el.classList.toggle("active-focus", idx === this.activeSubIndex);
+              });
+              if (this.subItems[this.activeSubIndex]) {
+                this.subItems[this.activeSubIndex].el.scrollIntoView({ block: "nearest" });
+              }
+            } else {
+              this.activeCatIndex = (this.activeCatIndex - 1 + this.categoryItems.length) % this.categoryItems.length;
+              this.categoryItems.forEach((it, idx) => {
+                it.el.classList.toggle("active-focus", idx === this.activeCatIndex);
+              });
+              if (this.categoryItems[this.activeCatIndex]) {
+                this.categoryItems[this.activeCatIndex].el.scrollIntoView({ block: "nearest" });
+              }
+            }
+            return;
+          }
+
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            if (!isSubmenuOpen && this.activeCatIndex >= 0 && this.categoryItems[this.activeCatIndex]) {
+              const target = this.categoryItems[this.activeCatIndex];
+              this.openSubmenu(target.cat, target.crops, target.el, this.activeCatIndex);
+              this.activeSubIndex = 0;
+              if (this.subItems && this.subItems[0]) {
+                this.subItems[0].el.classList.add("active-focus");
+              }
+            }
+            return;
+          }
+
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            if (isSubmenuOpen) {
+              this.closeSubmenu();
+              if (this.activeCatIndex >= 0 && this.categoryItems[this.activeCatIndex]) {
+                this.categoryItems[this.activeCatIndex].el.classList.add("active-focus");
+              }
+            }
+            return;
+          }
+
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (isSubmenuOpen && this.activeSubIndex >= 0 && this.subItems && this.subItems[this.activeSubIndex]) {
+              this.selectCrop(this.subItems[this.activeSubIndex].cropName);
+            } else if (!isSubmenuOpen && this.activeCatIndex >= 0 && this.categoryItems[this.activeCatIndex]) {
+              const target = this.categoryItems[this.activeCatIndex];
+              this.openSubmenu(target.cat, target.crops, target.el, this.activeCatIndex);
+              this.activeSubIndex = 0;
+              if (this.subItems && this.subItems[0]) {
+                this.subItems[0].el.classList.add("active-focus");
+              }
+            }
+            return;
+          }
+        }
+      }
+
+      class PopoverCalendar {
+        constructor(inputId) {
+          this.input = document.getElementById(inputId);
+          if (!this.input) return;
+          this.currentDate = new Date();
+          this.selectedDate = null;
+          this.isOpen = false;
+          this.init();
+        }
+
+        init() {
+          this.input.setAttribute("readonly", "true");
+          this.input.style.cursor = "pointer";
+          this.container = document.createElement("div");
+          this.container.className = "relative inline-block w-full";
+          this.input.parentNode.insertBefore(this.container, this.input);
+          this.container.appendChild(this.input);
+
+          this.popover = document.createElement("div");
+          this.popover.className = "popover-calendar";
+          this.container.appendChild(this.popover);
+
+          this.input.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.toggle();
+          });
+
+          document.addEventListener("click", (e) => {
+            if (!this.container.contains(e.target)) this.close();
+          });
+
+          this.render();
+        }
+
+        toggle() {
+          if (this.isOpen) this.close();
+          else this.open();
+        }
+
+        open() {
+          this.isOpen = true;
+          this.popover.classList.add("open");
+          this.render();
+        }
+
+        close() {
+          this.isOpen = false;
+          this.popover.classList.remove("open");
+        }
+
+        render() {
+          this.popover.innerHTML = "";
+          const year = this.currentDate.getFullYear();
+          const month = this.currentDate.getMonth();
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+          const header = document.createElement("div");
+          header.className = "cal-header";
+          header.innerHTML = `
+            <button type="button" class="cal-nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+            <span class="font-bold text-sm text-white">${monthNames[month]} ${year}</span>
+            <button type="button" class="cal-nav-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+          `;
+          header.querySelector(".prev-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.currentDate.setMonth(month - 1);
+            this.render();
+          });
+          header.querySelector(".next-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.currentDate.setMonth(month + 1);
+            this.render();
+          });
+          this.popover.appendChild(header);
+
+          const grid = document.createElement("div");
+          grid.className = "cal-grid";
+          ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach(d => {
+            grid.innerHTML += `<div class="cal-day-label">${d}</div>`;
+          });
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          for (let i = 0; i < firstDay; i++) {
+            grid.innerHTML += `<div></div>`;
+          }
+
+          const todayStr = new Date().toDateString();
+          for (let day = 1; day <= daysInMonth; day++) {
+            const thisDayDate = new Date(year, month, day);
+            const isToday = thisDayDate.toDateString() === todayStr;
+            const isSel = this.selectedDate && this.selectedDate.toDateString() === thisDayDate.toDateString();
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = `cal-date-btn ${isToday ? "today" : ""} ${isSel ? "selected" : ""}`;
+            btn.textContent = day;
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              this.selectDate(thisDayDate);
+            });
+            grid.appendChild(btn);
+          }
+
+          this.popover.appendChild(grid);
+        }
+
+        selectDate(dateObj) {
+          this.selectedDate = dateObj;
+          const day = String(dateObj.getDate()).padStart(2, "0");
+          const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+          const year = dateObj.getFullYear();
+          const formatted = `${day}/${month}/${year}`;
+          this.input.value = formatted;
+          this.close();
+          this.input.dispatchEvent(new Event("change", { bubbles: true }));
+          this.input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
+    </script>
+
+    {% block scripts %}{% endblock %}
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide) lucide.createIcons();
+      });
+    </script>
+  </body>
+</html>

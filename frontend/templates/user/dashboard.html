@@ -1,0 +1,508 @@
+{% extends "base.html" %} {% block title %}Dashboard - CropCare{% endblock %} {%
+block user_role %}Farmer Dashboard{% endblock %} {% block page_heading %}Farm
+Overview{% endblock %} {% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item active">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+
+{% endblock %} {% block content %}
+<div class="space-y-6">
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up bg-white border border-gray-200 shadow-sm">
+    <div class="relative z-10 grid gap-6 xl:grid-cols-[1.6fr,0.95fr]">
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800"
+          >
+            <i class="fas fa-star text-green-600"></i>
+            Live Farm Summary
+          </span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-700"
+          >
+            <i class="fas fa-location-dot text-sky-600"></i>
+            {{ user.district or "District not set" }}, {{ user.state or
+            "Karnataka" }}
+          </span>
+        </div>
+
+        <div>
+          <h1
+            class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900"
+          >
+            Premium control for every day on your farm.
+          </h1>
+          <p class="mt-4 max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+            Welcome back, {{ user.name }}. Track conditions, act on crop
+            opportunities, and keep field operations aligned from one dashboard.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <a
+            href="/user/crop-recommendation"
+            class="btn-primary inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 font-semibold shadow-md"
+          >
+            <i class="fas fa-leaf"></i>
+            Explore Crop AI
+          </a>
+          <a
+            href="/user/crop-planner"
+            class="btn-secondary inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            <i class="fas fa-calendar-check text-green-600"></i>
+            Open Planner
+          </a>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Land Size
+            </p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">
+              {{ user.land_size or "--" }}
+              <span class="text-sm font-medium text-gray-500">acres</span>
+            </p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Irrigation
+            </p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">
+              {{ user.irrigation_type or "Not set" }}
+            </p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Profile Freshness
+            </p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">
+              {{ user.updated_at.strftime('%d %b %Y') if user.updated_at else
+              "Never" }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="eyebrow mb-2 text-sky-600 font-bold uppercase tracking-wider text-xs">Weather Pulse</p>
+              <div id="currentTemp" class="skeleton-block w-20 h-8 rounded-lg my-1"></div>
+              <div id="currentCondition" class="skeleton-block w-36 h-4 rounded-full mt-2"></div>
+            </div>
+            <div
+              class="flex h-14 w-14 items-center justify-center rounded-[18px] bg-sky-50 border border-sky-100 text-2xl text-sky-600 shadow-sm"
+            >
+              <i class="fas fa-cloud-sun"></i>
+            </div>
+          </div>
+          <div class="mt-5 grid grid-cols-2 gap-3">
+            <div class="rounded-2xl bg-gray-50 border border-gray-100 p-3.5">
+              <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+                Humidity
+              </p>
+              <p
+                id="currentHumidity"
+                class="mt-2 text-lg font-extrabold text-gray-900"
+              >
+                --%
+              </p>
+            </div>
+            <div class="rounded-2xl bg-gray-50 border border-gray-100 p-3.5">
+              <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+                District
+              </p>
+              <p class="mt-2 text-lg font-extrabold text-gray-900">
+                {{ user.district or "Unset" }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="rounded-[28px] border border-green-200 bg-gradient-to-br from-green-50/80 to-emerald-50/80 p-6 shadow-sm"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Today</p>
+              <p class="text-xl font-extrabold text-gray-900">Operational focus</p>
+            </div>
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-green-200 text-green-700 shadow-sm"
+            >
+              <i class="fas fa-bolt"></i>
+            </div>
+          </div>
+          <p id="reminderText" class="mt-4 text-sm leading-6 text-gray-700 font-medium">
+            Loading reminder...
+          </p>
+          <div
+            id="reminderTime"
+            class="mt-4 inline-flex items-center gap-2 rounded-full bg-white border border-green-200 px-3.5 py-1.5 text-xs font-semibold text-green-800 shadow-2xs"
+          >
+            <i class="fas fa-clock text-green-600"></i>
+            <span>Loading time...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
+    <div class="grid gap-6 md:grid-cols-2 fade-up stagger-1">
+      <a
+        href="/user/crop-recommendation"
+        class="dashboard-action-card bg-white border border-gray-200 shadow-sm rounded-[28px] p-6 group"
+      >
+        <div
+          class="action-icon bg-green-100 text-green-700 border border-green-200"
+        >
+          <i class="fas fa-leaf"></i>
+        </div>
+        <p class="mt-5 text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors">Crop Recommendation</p>
+        <p class="mt-2 text-sm leading-6 text-gray-600">
+          Use local farm conditions to shortlist the most promising crop
+          options.
+        </p>
+        <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-green-700">
+          Open tool
+          <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </span>
+      </a>
+
+      <a
+        href="/user/input-suggestions"
+        class="dashboard-action-card bg-white border border-gray-200 shadow-sm rounded-[28px] p-6 group"
+      >
+        <div
+          class="action-icon bg-sky-100 text-sky-700 border border-sky-200"
+        >
+          <i class="fas fa-flask"></i>
+        </div>
+        <p class="mt-5 text-xl font-bold text-gray-900 group-hover:text-sky-700 transition-colors">Input Suggestions</p>
+        <p class="mt-2 text-sm leading-6 text-gray-600">
+          Get curated recommendations for seeds, nutrients, pesticides, and
+          timing.
+        </p>
+        <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-sky-700">
+          Review suggestions
+          <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </span>
+      </a>
+
+      <a
+        href="/user/mandi-tracking"
+        class="dashboard-action-card bg-white border border-gray-200 shadow-sm rounded-[28px] p-6 group"
+      >
+        <div
+          class="action-icon bg-amber-100 text-amber-700 border border-amber-200"
+        >
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <p class="mt-5 text-xl font-bold text-gray-900 group-hover:text-amber-700 transition-colors">Price Tracker</p>
+        <p class="mt-2 text-sm leading-6 text-gray-600">
+          Monitor prices and spot better selling windows before your next market
+          move.
+        </p>
+        <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-amber-700">
+          View markets
+          <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </span>
+      </a>
+
+      <a
+        href="/user/disease-diagnosis"
+        class="dashboard-action-card bg-white border border-gray-200 shadow-sm rounded-[28px] p-6 group"
+      >
+        <div
+          class="action-icon bg-rose-100 text-rose-700 border border-rose-200"
+        >
+          <i class="fas fa-shield-heart"></i>
+        </div>
+        <p class="mt-5 text-xl font-bold text-gray-900 group-hover:text-rose-700 transition-colors">Disease Diagnosis</p>
+        <p class="mt-2 text-sm leading-6 text-gray-600">
+          Identify issues quickly and move from symptom detection to treatment
+          advice.
+        </p>
+        <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-rose-700">
+          Diagnose now
+          <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </span>
+      </a>
+    </div>
+
+    <div class="grid gap-6 fade-up stagger-2">
+      <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Live Feed</p>
+            <h3 class="text-xl font-extrabold text-gray-900">Notices & offers</h3>
+          </div>
+          <div
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-green-50 border border-green-100 text-green-700"
+          >
+            <i class="fas fa-bullhorn"></i>
+          </div>
+        </div>
+        <div id="adsBanner" class="mt-5 grid gap-3">
+          <div class="grid gap-3" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Farm Snapshot</p>
+            <h3 class="text-xl font-extrabold text-gray-900">Account status</h3>
+          </div>
+          <div
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-50 border border-sky-100 text-sky-600"
+          >
+            <i class="fas fa-user-check"></i>
+          </div>
+        </div>
+
+        <div class="mt-5 space-y-3">
+          <div
+            class="flex items-center justify-between rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3.5"
+          >
+            <span class="text-sm font-medium text-gray-500">Location</span>
+            <span id="userLocation" class="text-sm font-bold text-gray-900"
+              >{{ user.district or "Unset" }}, {{ user.state or "Karnataka"
+              }}</span
+            >
+          </div>
+          <div
+            class="flex items-center justify-between rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3.5"
+          >
+            <span class="text-sm font-medium text-gray-500">Land Size</span>
+            <span id="landSize" class="text-sm font-bold text-gray-900"
+              >{{ user.land_size or "--" }} acres</span
+            >
+          </div>
+          <div
+            class="flex items-center justify-between rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3.5"
+          >
+            <span class="text-sm font-medium text-gray-500">Irrigation Type</span>
+            <span id="irrigationType" class="text-sm font-bold text-gray-900"
+              >{{ user.irrigation_type or "Not set" }}</span
+            >
+          </div>
+          <div
+            class="flex items-center justify-between rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3.5"
+          >
+            <span class="text-sm font-medium text-gray-500">Last Updated</span>
+            <span id="lastUpdated" class="text-sm font-bold text-gray-900"
+              >{{ user.updated_at.strftime('%Y-%m-%d') if user.updated_at else
+              "Never" }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  .dashboard-action-card {
+    display: block;
+    transition:
+      transform 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .dashboard-action-card:hover {
+    transform: translateY(-5px);
+    border-color: #2E7D32;
+    box-shadow: 0 16px 32px rgba(46, 125, 50, 0.08);
+  }
+
+  .action-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.25rem;
+    font-size: 1.25rem;
+  }
+
+  .feed-card {
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    animation: fadeUp 0.45s ease both;
+  }
+
+  .feed-card:hover {
+    border-color: #43A047;
+    background: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  @media (max-width: 1024px) {
+    .dashboard-action-card:hover {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  function renderFeedSkeleton() {
+    return renderCardSkeletons(3);
+  }
+
+  function renderFeedItem(ad) {
+    const toneClass =
+      ad.type === "offer"
+        ? "bg-green-100 text-green-800 border border-green-200"
+        : ad.type === "announcement"
+          ? "bg-sky-100 text-sky-800 border border-sky-200"
+          : ad.type === "tip"
+            ? "bg-amber-100 text-amber-800 border border-amber-200"
+            : ad.type === "product"
+              ? "bg-sky-100 text-sky-800 border border-sky-200"
+              : "bg-gray-100 text-gray-800 border border-gray-200";
+
+    return `
+      <div class="feed-card">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${toneClass}">
+              ${(ad.type || "update").replace("_", " ")}
+            </span>
+            <p class="mt-3 text-sm leading-6 text-gray-800 font-medium">${ad.content}</p>
+          </div>
+          <i class="fas fa-arrow-right text-gray-400 mt-1"></i>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadDashboardData() {
+    try {
+      const response = await fetch("/user/dashboard-data", {
+        headers: getAuthHeaders(),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        updateDashboardUI(data);
+      } else {
+        document.getElementById("reminderText").textContent =
+          "Failed to load daily focus";
+        document.getElementById("currentTemp").textContent = "Err";
+        document.getElementById("currentCondition").textContent =
+          "Weather unavailable";
+        document.getElementById("currentHumidity").textContent = "Err";
+        document.getElementById("adsBanner").innerHTML =
+          '<div class="feed-card text-red-600 font-medium">Unable to load notices and offers.</div>';
+      }
+    } catch (error) {
+      document.getElementById("reminderText").textContent =
+        "Network error loading daily focus";
+      document.getElementById("currentTemp").textContent = "Net";
+      document.getElementById("currentCondition").textContent = "Network error";
+      document.getElementById("currentHumidity").textContent = "Err";
+      document.getElementById("adsBanner").innerHTML =
+        '<div class="feed-card text-red-600 font-medium">Network error while loading notices and offers.</div>';
+    }
+  }
+
+  function updateDashboardUI(data) {
+    if (data.reminder) {
+      document.getElementById("reminderText").textContent =
+        data.reminder.message || "No reminder for today";
+
+      if (data.reminder.time) {
+        document.getElementById("reminderTime").innerHTML =
+          `<i class="fas fa-clock text-green-600"></i><span>Scheduled for ${data.reminder.time}</span>`;
+      } else {
+        document.getElementById("reminderTime").innerHTML =
+          '<i class="fas fa-check-circle text-green-600"></i><span>No specific time set</span>';
+      }
+    } else {
+      document.getElementById("reminderText").textContent =
+        "No reminder for today";
+      document.getElementById("reminderTime").innerHTML =
+        '<i class="fas fa-check-circle text-green-600"></i><span>All caught up</span>';
+    }
+
+    if (data.weather) {
+      const tempEl = document.getElementById("currentTemp");
+      tempEl.className = "metric-value text-gray-900 font-extrabold text-2xl";
+      tempEl.textContent = `${data.weather.temperature}\u00B0C`;
+
+      const condEl = document.getElementById("currentCondition");
+      condEl.className = "mt-2 text-sm text-gray-500 font-medium";
+      condEl.textContent = data.weather.condition || "No weather condition available";
+
+      document.getElementById("currentHumidity").textContent =
+        `${data.weather.humidity}%`;
+    }
+
+    if (data.ads && data.ads.length > 0) {
+      document.getElementById("adsBanner").innerHTML = data.ads
+        .slice(0, 4)
+        .map(renderFeedItem)
+        .join("");
+    } else {
+      document.getElementById("adsBanner").innerHTML =
+        '<div class="feed-card text-muted">No notices or active offers available right now.</div>';
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("adsBanner").innerHTML = renderFeedSkeleton();
+    loadDashboardData();
+    window.setInterval(loadDashboardData, 60000);
+  });
+</script>
+{% endblock %}

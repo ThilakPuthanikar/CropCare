@@ -20,10 +20,15 @@ from ..services.land_lease_report import generate_land_lease_pdf
 from ..utils.auth import get_current_user
 from ..config.settings import settings
 
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/user/land-leasing", tags=["Land Leasing"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=PROJECT_ROOT / "frontend" / "templates")
+
 
 
 @router.get("", response_class=HTMLResponse)

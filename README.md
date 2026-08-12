@@ -4,29 +4,24 @@ An advanced AI-powered precision agriculture web platform designed for farmers, 
 
 ---
 
-## Architecture Overview
+## 📁 Architecture & Directory Structure
 
-- **Backend**: Python 3.11+ / FastAPI / SQLAlchemy ORM
-- **Frontend**: Responsive HTML5, Vanilla CSS, Tailwind CSS, JavaScript
-- **Database**: Neon PostgreSQL (Serverless Cloud PostgreSQL with SQLAlchemy connection pooling)
-
-- **AI Engine**: Groq API (Llama 3 / Vision analysis for Crop Recommendations, Disease Diagnosis, and Land Lease Strategic Assessments)
-- **PDF Report Engine**: ReportLab 5.0 (Automated, downloadable Land Lease Estimation reports)
-- **Persistent File Storage**: Cloudinary (Profiles & Diagnosis images)
-- **Weather Integration**: Open-Meteo Geocoding & Historical/Forecast APIs
-
+For full architectural details and comprehensive explanations of every directory and file in the codebase, please see:
+- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
+- [docs/README.md](docs/README.md)
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ---
 
-## Quick Start (Local Development)
+## 🚀 Quick Start (Local Development)
 
-1. **Clone & Create Environment**:
+### One-Click Launch (Windows)
+Double-click `start.bat` (or run `.\start.bat` in terminal) to launch the backend server, health checks, and browser UI automatically. To stop all background processes, run `.\stop.bat`.
+
+### Manual Startup
+1. **Activate Virtual Environment**:
    ```bash
-   python -m venv venv
-   # On Windows:
-   venv\Scripts\activate
-   # On Linux/macOS:
-   source venv/bin/activate
+   .\venv\Scripts\activate
    ```
 
 2. **Install Dependencies**:
@@ -35,20 +30,10 @@ An advanced AI-powered precision agriculture web platform designed for farmers, 
    ```
 
 3. **Configure Environment Variables**:
-   Copy `.env.example` to `.env` and fill in your API keys:
+   Copy `.env.example` to `.env` and fill in your database and API credentials.
+
+4. **Launch Server**:
    ```bash
-   copy .env.example .env
+   python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
    ```
-
-4. **Run Development Server**:
-   ```bash
-   uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
----
-
-## Production Deployment
-
-CropCare is configured for high-performance production deployment across **Vercel** (Static CDN frontend) and **Railway** (Containerized FastAPI backend + MySQL).
-
-Please see [DEPLOYMENT.md](./DEPLOYMENT.md) for full step-by-step production setup instructions.
+   Open `http://127.0.0.1:8000` in your browser.

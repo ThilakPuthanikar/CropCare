@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CropCare - Contact Us</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root {
+        --primary: #059669;
+        --primary-dark: #047857;
+        --accent: #10B981;
+        --bg-main: #F4F7F4;
+        --surface: #FFFFFF;
+        --border-color: rgba(5, 150, 105, 0.12);
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        color: var(--text-primary);
+        background-color: var(--bg-main);
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.07) 0px, transparent 50%),
+          radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
+        background-attachment: fixed;
+        overflow-x: hidden;
+      }
+
+      h1, h2, h3, h4, h5, h6, .eyebrow, .brand-font {
+        font-family: "Plus Jakarta Sans", "Manrope", sans-serif;
+      }
+
+      .glassmorphic {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05), inset 0 1px 1px 0 rgba(255, 255, 255, 0.8);
+      }
+
+      .navbar-scrolled {
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 0.92) !important;
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(5, 150, 105, 0.15);
+      }
+
+      .nav-pill {
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.925rem;
+        padding: 0.5rem 1.1rem;
+        border-radius: 9999px;
+        transition: var(--transition-base);
+      }
+
+      .nav-pill:hover,
+      .nav-pill.active {
+        color: var(--primary);
+        background: rgba(5, 150, 105, 0.1);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-base);
+        box-shadow: 0 8px 20px -4px rgba(5, 150, 105, 0.35);
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px -4px rgba(5, 150, 105, 0.45);
+      }
+
+      .btn-secondary {
+        border: 2px solid rgba(5, 150, 105, 0.3);
+        color: var(--primary);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-base);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(5, 150, 105, 0.25);
+      }
+
+      .section {
+        padding: 5.5rem 0;
+      }
+
+      .contact-bg {
+        position: relative;
+        background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+      }
+
+      .impact-cards-wrap {
+        position: relative;
+        padding-top: 1rem;
+        padding-bottom: 0.8rem;
+        overflow: visible;
+      }
+
+      .impact-card {
+        position: relative;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        min-height: 270px;
+        height: 270px;
+        padding: 2rem 1.6rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+        transition: var(--transition-base);
+        z-index: 2;
+      }
+
+      .impact-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 35px -10px rgba(5, 150, 105, 0.12);
+        border-color: rgba(16, 185, 129, 0.4);
+      }
+
+      .impact-card.glass {
+        background: rgba(244, 247, 244, 0.8);
+        backdrop-filter: blur(12px);
+        border-color: rgba(5, 150, 105, 0.2);
+      }
+
+      .impact-card.plain {
+        background: rgba(255, 255, 255, 0.95);
+      }
+
+      .impact-item {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 2;
+        align-items: stretch;
+      }
+
+      .impact-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 0.4rem;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+
+      .impact-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .impact-copy {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      .dot-row {
+        margin-top: 1.25rem;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #CBD5E1;
+        transition: all 0.3s ease;
+      }
+
+      .dot.active {
+        background: var(--primary);
+        width: 22px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(8px);
+      }
+
+      .modal-content {
+        background-color: var(--surface);
+        margin: 5% auto;
+        padding: 2.75rem;
+        border-radius: 24px;
+        width: 90%;
+        max-width: 620px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--border-color);
+        position: relative;
+        color: var(--text-secondary);
+        scrollbar-width: none;
+      }
+
+      .modal-content::-webkit-scrollbar {
+        display: none;
+      }
+
+      .close {
+        position: absolute;
+        right: 24px;
+        top: 24px;
+        color: var(--text-secondary);
+        font-size: 24px;
+        cursor: pointer;
+        background: rgba(241, 245, 249, 0.8);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-base);
+      }
+
+      .close:hover {
+        color: var(--text-primary);
+        background: #E2E8F0;
+        transform: rotate(90deg);
+      }
+
+      .modal-title {
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.75rem;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body class="bg-[var(--bg-main)] text-[var(--text-primary)] font-sans antialiased">
+    <nav
+      id="navbar"
+      class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md transition-all duration-300 border-b border-[var(--border-color)]"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+          <div class="flex items-center space-x-3">
+            <img
+              src="/static/images/logo1.jpeg"
+              alt="CropCare Logo"
+              class="w-10 h-10 rounded-xl shadow-sm border border-emerald-900/10 object-cover"
+              onerror="
+                this.style.display = 'none';
+                document.querySelector('.logo-placeholder').style.display =
+                  'block';
+              "
+            />
+            <div class="logo-placeholder" style="display: none">
+              <div class="w-10 h-10 bg-emerald-700/10 rounded-xl flex items-center justify-center border border-emerald-700/20">
+                <svg
+                  class="w-6 h-6 text-emerald-700"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <span class="text-2xl font-extrabold tracking-tight text-slate-900 brand-font">CropCare</span>
+          </div>
+          <div
+            class="hidden md:flex items-center gap-1.5 bg-slate-100/80 border border-emerald-900/10 rounded-full px-3 py-1.5 backdrop-blur-md shadow-inner"
+          >
+            <a href="/" class="nav-pill">Home</a>
+            <a href="/about" class="nav-pill">About Us</a>
+            <a href="/features" class="nav-pill">Features</a>
+            <a href="/contact" class="nav-pill active">Contact</a>
+          </div>
+          <div class="flex items-center space-x-3">
+            <a href="/auth/login" class="btn-secondary !py-2.5 !px-6 text-sm">Login</a>
+            <a href="/auth/register" class="btn-primary !py-2.5 !px-6 text-sm">Signup</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="section contact-bg pt-36 pb-24">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <span class="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-3 block">We're Here For You</span>
+          <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+            Contact Us
+          </h1>
+          <p class="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed font-normal">
+            Reach out to CropCare for product support, partnership discussions,
+            and onboarding guidance. Our team is dedicated to supporting your farming success.
+          </p>
+        </div>
+
+        <section class="impact-cards-wrap mb-16">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7">
+            <div class="impact-item">
+              <article class="impact-card glass">
+                <div class="impact-value">24x6</div>
+                <h2 class="impact-title">Support</h2>
+                <p class="impact-copy">
+                  Always-available help for account access, onboarding, and
+                  feature guidance.
+                </p>
+              </article>
+              <div class="dot-row" aria-hidden="true">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+              </div>
+            </div>
+
+            <div class="impact-item">
+              <article class="impact-card plain">
+                <div class="impact-value">&lt; 10h</div>
+                <h2 class="impact-title">Response Time</h2>
+                <p class="impact-copy">
+                  Most support requests receive a first response within half a
+                  day.
+                </p>
+              </article>
+              <div class="dot-row" aria-hidden="true">
+                <span class="dot"></span>
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+              </div>
+            </div>
+
+            <div class="impact-item">
+              <article class="impact-card glass">
+                <div class="impact-value">3</div>
+                <h2 class="impact-title">Contact Channels</h2>
+                <p class="impact-copy">
+                  Email, phone, and in-app support channels for fast issue
+                  resolution.
+                </p>
+              </article>
+              <div class="dot-row" aria-hidden="true">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot active"></span>
+                <span class="dot"></span>
+              </div>
+            </div>
+
+            <div class="impact-item">
+              <article class="impact-card plain">
+                <div class="impact-value">99%</div>
+                <h2 class="impact-title">Query Closure</h2>
+                <p class="impact-copy">
+                  High-resolution success through guided troubleshooting and
+                  follow-up.
+                </p>
+              </article>
+              <div class="dot-row" aria-hidden="true">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot active"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="glassmorphic rounded-3xl p-8 sm:p-10 shadow-md border border-emerald-500/20"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div class="p-6 rounded-2xl bg-white/80 border border-emerald-900/10 shadow-sm transition-all hover:border-emerald-500/30">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+                <i data-lucide="mail" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-1.5">Email</h3>
+              <p class="text-slate-600 font-semibold text-sm">support@cropcare.com</p>
+            </div>
+            <div class="p-6 rounded-2xl bg-white/80 border border-emerald-900/10 shadow-sm transition-all hover:border-emerald-500/30">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+                <i data-lucide="phone" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-1.5">Phone</h3>
+              <p class="text-slate-600 font-semibold text-sm">+91-9019280220</p>
+            </div>
+            <div class="p-6 rounded-2xl bg-white/80 border border-emerald-900/10 shadow-sm transition-all hover:border-emerald-500/30">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+                <i data-lucide="clock" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-1.5">
+                Office Hours
+              </h3>
+              <p class="text-slate-600 font-semibold text-sm">Mon - Sat, 9:00 AM - 7:00 PM</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    {% include "partials/footer.html" %} {% include
+    "partials/common_modals.html" %}
+
+    <script>
+      window.addEventListener("scroll", function () {
+        const navbar = document.getElementById("navbar");
+        if (window.scrollY > 50) {
+          navbar.classList.add("navbar-scrolled");
+        } else {
+          navbar.classList.remove("navbar-scrolled");
+        }
+      });
+
+      class ModalManager {
+        constructor() {
+          this.modals = document.querySelectorAll(".modal");
+          this.triggers = document.querySelectorAll(".modal-trigger");
+          this.closes = document.querySelectorAll(".close");
+          this.init();
+        }
+
+        init() {
+          this.triggers.forEach((trigger) => {
+            trigger.addEventListener("click", (e) => {
+              e.preventDefault();
+              const modalId = trigger.getAttribute("data-modal");
+              this.openModal(modalId);
+            });
+          });
+
+          this.closes.forEach((close) => {
+            close.addEventListener("click", () => this.closeAllModals());
+          });
+
+          window.addEventListener("click", (e) => {
+            if (e.target.classList.contains("modal")) {
+              this.closeAllModals();
+            }
+          });
+
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+              this.closeAllModals();
+            }
+          });
+        }
+
+        openModal(modalId) {
+          this.closeAllModals();
+          const modal = document.getElementById(modalId);
+          if (modal) {
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
+          }
+        }
+
+        closeAllModals() {
+          this.modals.forEach((modal) => {
+            modal.style.display = "none";
+          });
+          document.body.style.overflow = "auto";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        new ModalManager();
+        if (typeof lucide !== "undefined") { lucide.createIcons(); }
+      });
+    </script>
+  </body>
+</html>

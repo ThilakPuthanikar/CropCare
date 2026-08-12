@@ -1,0 +1,788 @@
+<!-- templates/user/input_suggestions.html -->
+{% extends "base.html" %}
+{% block title %}Input Suggestions - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Input Suggestions{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item active">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+
+{% endblock %} {% block content %}
+<div class="space-y-6 input-suggestions-page">
+  <section class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm">
+    <div class="absolute inset-0 pointer-events-none hero-wash"></div>
+    <div class="relative z-10 grid gap-6 xl:grid-cols-[1.45fr,0.95fr]">
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800"
+          >
+            <i class="fas fa-flask-vial text-green-600"></i>
+            Field Input Planner
+          </span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-700"
+          >
+            <i class="fas fa-location-dot text-sky-600"></i>
+            {{ user.district or "District not set" }}, {{ user.state or "Karnataka" }}
+          </span>
+          <button
+            type="button"
+            onclick="openHistoryModal('input_suggestions', 'Past Input Suggestions')"
+            class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white px-4 py-2 text-xs font-semibold text-green-700 hover:bg-green-50 shadow-2xs transition-all cursor-pointer"
+          >
+            <i class="fas fa-history"></i>
+            View Past Suggestions
+          </button>
+        </div>
+
+        <div>
+          <h1 class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900">
+            Plan seeds, nutrients, and crop protection before you buy.
+          </h1>
+          <p class="mt-4 max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+            Select a Karnataka crop and CropCare will size the required seed,
+            fertilizer, and pesticide recommendations to your saved land area.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Land Size</p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">
+              {{ user.land_size or "--" }}
+              <span class="text-base font-normal text-gray-500">acres</span>
+            </p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Coverage</p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">11 crops</p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Output</p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">3 input groups</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="rounded-[28px] border border-green-200 bg-gradient-to-br from-green-50/80 to-emerald-50/80 p-6 shadow-sm">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">What You Get</p>
+              <p class="text-xl font-extrabold text-gray-900">Ready-to-scan input mix</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-green-200 text-green-700 shadow-sm">
+              <i class="fas fa-seedling"></i>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-3">
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Seed quantity scaled to your acreage.
+            </div>
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Fertilizer guidance with three product options.
+            </div>
+            <div class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs">
+              Pesticide suggestions presented with quick brand references.
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+          <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Operator Note</p>
+          <p class="text-sm leading-6 text-gray-600">
+            The land size on this page comes from your profile. Update it in your
+            profile if you want the quantities recalculated for a different farm size.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-[0.92fr,1.08fr]">
+    <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 fade-up stagger-1">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Planning Console</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Build an input pack</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 border border-green-100 text-green-700">
+          <i class="fas fa-sliders"></i>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-5">
+        <div class="planner-panel rounded-[28px] p-5">
+          <label for="cropSelect" class="block text-sm font-bold text-gray-900">
+            Choose crop
+          </label>
+          <p class="mt-1.5 text-sm text-gray-600">
+            Only Karnataka-focused crops with configured recommendations are shown.
+          </p>
+          <div id="cropSelectContainer" class="mt-4"></div>
+          <input type="hidden" id="cropSelect" name="crop" required />
+        </div>
+
+        <div class="planner-panel rounded-[28px] p-5">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <label for="landSize" class="block text-sm font-bold text-gray-900">
+                Land size
+              </label>
+              <p class="mt-1.5 text-sm text-gray-600">
+                Pulled directly from your farmer profile.
+              </p>
+            </div>
+            <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700">
+              Read only
+            </span>
+          </div>
+          <div class="mt-4 field-stat">
+            <div>
+              <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">Current size</p>
+              <p class="mt-2 text-3xl font-extrabold text-gray-900">
+                <span id="landSizePreview">{{ user.land_size or "--" }}</span>
+                <span class="text-base font-normal text-gray-500">acres</span>
+              </p>
+            </div>
+            <div class="field-stat-icon">
+              <i class="fas fa-ruler-combined"></i>
+            </div>
+          </div>
+          <input
+            type="number"
+            id="landSize"
+            value="{{ user.land_size }}"
+            step="0.1"
+            class="sr-only"
+            readonly
+          />
+        </div>
+
+        <div class="planner-panel rounded-[28px] p-5">
+          <p class="text-sm font-bold text-gray-900">Included recommendation blocks</p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-3">
+            <div class="mini-tile">
+              <i class="fas fa-seedling text-green-600"></i>
+              <span class="font-semibold text-gray-800">Seeds</span>
+            </div>
+            <div class="mini-tile">
+              <i class="fas fa-flask text-sky-600"></i>
+              <span class="font-semibold text-gray-800">Fertilizers</span>
+            </div>
+            <div class="mini-tile">
+              <i class="fas fa-shield-virus text-amber-500"></i>
+              <span class="font-semibold text-gray-800">Pesticides</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onclick="getInputSuggestions()"
+            class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 input-cta"
+          >
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Generate Input Plan
+          </button>
+          <button
+            type="button"
+            onclick="resetSuggestionState()"
+            class="btn-secondary inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-4 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm"
+          >
+            <i class="fas fa-rotate-left"></i>
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 fade-up stagger-2">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Output Board</p>
+          <h2 class="text-2xl font-extrabold text-gray-900">Recommended input bundle</h2>
+        </div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 border border-sky-100 text-sky-600">
+          <i class="fas fa-box-open"></i>
+        </div>
+      </div>
+
+      <div id="suggestionsContainer" class="mt-6 result-shell">
+        <div class="result-empty">
+          <div class="result-empty-icon">
+            <i class="fas fa-toolbox"></i>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Ready to prepare inputs</h3>
+          <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+            Pick a crop and generate a quantity plan tuned to your saved acreage.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  .input-suggestions-page .hero-wash {
+    background:
+      radial-gradient(circle at top left, rgba(67, 160, 71, 0.08), transparent 38%),
+      radial-gradient(circle at top right, rgba(79, 195, 247, 0.08), transparent 30%);
+  }
+
+  .input-suggestions-page .planner-panel {
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+  }
+
+  .input-suggestions-page .planner-field {
+    width: 100%;
+  }
+
+  .input-suggestions-page .field-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 24px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 1.15rem 1.1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .input-suggestions-page .field-stat-icon {
+    display: inline-flex;
+    height: 3.4rem;
+    width: 3.4rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.2rem;
+    background: #E1F5FE;
+    color: #0288D1;
+    font-size: 1.1rem;
+  }
+
+  .input-suggestions-page .mini-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 20px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 0.95rem 1rem;
+    color: #1F2937;
+    font-size: 0.92rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .input-suggestions-page .input-cta {
+    min-width: 240px;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+  }
+
+  .input-suggestions-page .result-shell {
+    min-height: 520px;
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+    padding: 1.5rem;
+  }
+
+  .input-suggestions-page .result-empty,
+  .input-suggestions-page .loading-panel {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .input-suggestions-page .result-empty-icon {
+    display: inline-flex;
+    height: 5rem;
+    width: 5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.6rem;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 1.8rem;
+    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.12);
+  }
+
+  .input-suggestions-page .loading-ring {
+    position: relative;
+    display: flex;
+    height: 4.8rem;
+    width: 4.8rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+  }
+
+  .input-suggestions-page .loading-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0.2rem;
+    border-radius: inherit;
+    border: 3px solid #E8F5E9;
+    border-top-color: #2E7D32;
+    animation: spin 1s linear infinite;
+  }
+
+  .input-suggestions-page .loading-ring span {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    height: 2.2rem;
+    width: 2.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #E8F5E9;
+  }
+
+  .input-suggestions-page .loading-ring span::before {
+    content: "\f6cf";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #2E7D32;
+  }
+
+  .input-suggestions-page .loading-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    border-radius: 20px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 0.95rem 1rem;
+    color: #1F2937;
+    font-weight: 600;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .input-suggestions-page .result-stack {
+    display: grid;
+    gap: 1.1rem;
+    min-height: 100%;
+  }
+
+  .input-suggestions-page .result-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 24px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  .input-suggestions-page .summary-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: 999px;
+    background: #E8F5E9;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1B5E20;
+  }
+
+  .input-suggestions-page .summary-stat {
+    text-align: right;
+  }
+
+  .input-suggestions-page .summary-stat-value {
+    font-size: 1.9rem;
+    line-height: 1;
+    font-weight: 800;
+    color: #2E7D32;
+  }
+
+  .input-suggestions-page .recommendation-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .input-suggestions-page .recommendation-card {
+    border-radius: 26px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: all 0.25s ease;
+  }
+
+  .input-suggestions-page .recommendation-card:hover {
+    border-color: #2E7D32;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .input-suggestions-page .recommendation-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .input-suggestions-page .recommendation-icon {
+    display: inline-flex;
+    height: 3.25rem;
+    width: 3.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.1rem;
+    font-size: 1.15rem;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  }
+
+  .input-suggestions-page .recommendation-icon.seed {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  .input-suggestions-page .recommendation-icon.fertilizer {
+    background: #E1F5FE;
+    color: #0288D1;
+  }
+
+  .input-suggestions-page .recommendation-icon.pesticide {
+    background: #FEF3C7;
+    color: #D97706;
+  }
+
+  .input-suggestions-page .recommendation-quantity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: #F8FAF5;
+    border: 1px solid var(--border-color);
+    padding: 0.55rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .input-suggestions-page .brand-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1rem;
+  }
+
+  .input-suggestions-page .brand-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    background: #F8FAF5;
+    border: 1px solid var(--border-color);
+    padding: 0.6rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1F2937;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .input-suggestions-page .error-icon {
+    background: #FEE2E2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .input-suggestions-page .input-cta {
+      width: 100%;
+    }
+
+    .input-suggestions-page .result-shell {
+      min-height: 420px;
+      padding: 1rem;
+    }
+
+    .input-suggestions-page .summary-stat {
+      text-align: left;
+    }
+  }
+</style>
+
+<script>
+  function renderEmptyState() {
+    return `
+      <div class="result-empty">
+        <div class="result-empty-icon">
+          <i class="fas fa-toolbox"></i>
+        </div>
+        <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Ready to prepare inputs</h3>
+        <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+          Pick a crop and generate a quantity plan tuned to your saved acreage.
+        </p>
+      </div>
+    `;
+  }
+
+  function renderLoadingState() {
+    return `
+      <div class="space-y-6 w-full py-4">
+        <div class="loading-panel mb-4">
+          <div class="loading-ring">
+            <span></span>
+          </div>
+          <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Building your input pack</h3>
+          <div class="mt-5 grid gap-3 w-full max-w-lg">
+            <div class="loading-step">
+              <i class="fas fa-seedling text-green-600"></i>
+              Scaling seed requirement to your land size
+            </div>
+            <div class="loading-step">
+              <i class="fas fa-flask text-sky-600"></i>
+              Preparing fertilizer recommendations
+            </div>
+            <div class="loading-step">
+              <i class="fas fa-shield-virus text-amber-500"></i>
+              Finalizing pesticide references
+            </div>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="skeleton-card p-5 rounded-[24px] border border-gray-200 bg-gray-50 space-y-3">
+            <div class="skeleton-circle bg-gray-200"></div>
+            <div class="skeleton-block w-24 h-5 rounded-full bg-gray-200"></div>
+            <div class="skeleton-block w-3/4 h-6 rounded-lg bg-gray-200"></div>
+            <div class="skeleton-line w-full bg-gray-200"></div>
+          </div>
+          <div class="skeleton-card p-5 rounded-[24px] border border-gray-200 bg-gray-50 space-y-3">
+            <div class="skeleton-circle bg-gray-200"></div>
+            <div class="skeleton-block w-24 h-5 rounded-full bg-gray-200"></div>
+            <div class="skeleton-block w-3/4 h-6 rounded-lg bg-gray-200"></div>
+            <div class="skeleton-line w-full bg-gray-200"></div>
+          </div>
+          <div class="skeleton-card p-5 rounded-[24px] border border-gray-200 bg-gray-50 space-y-3">
+            <div class="skeleton-circle bg-gray-200"></div>
+            <div class="skeleton-block w-24 h-5 rounded-full bg-gray-200"></div>
+            <div class="skeleton-block w-3/4 h-6 rounded-lg bg-gray-200"></div>
+            <div class="skeleton-line w-full bg-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderErrorState(message) {
+    return `
+      <div class="result-empty">
+        <div class="result-empty-icon error-icon">
+          <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="mt-5 text-2xl font-extrabold text-gray-900">Unable to build suggestions</h3>
+        <p class="mt-3 max-w-md text-sm leading-6 text-gray-600">
+          ${message}
+        </p>
+        <div class="mt-6">
+          <button onclick="resetSuggestionState()" class="btn-secondary inline-flex items-center gap-3 rounded-2xl px-6 py-3.5 font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm">
+            <i class="fas fa-rotate-left"></i>
+            Start over
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function createBrandChips(brands) {
+    return brands
+      .map(
+        (brand, index) => `
+          <span class="brand-chip">
+            <i class="fas fa-circle-check ${index === 0 ? "text-green-600" : "text-gray-400"}"></i>
+            ${brand}
+          </span>
+        `,
+      )
+      .join("");
+  }
+
+  function createRecommendationCard(title, subtitle, quantity, brands, iconClass, toneClass) {
+    return `
+      <article class="recommendation-card">
+        <div class="recommendation-top">
+          <div class="flex items-start gap-4">
+            <div class="recommendation-icon ${toneClass}">
+              <i class="${iconClass}"></i>
+            </div>
+            <div>
+              <p class="text-xs uppercase font-bold tracking-[0.18em] text-gray-400">${title}</p>
+              <h3 class="mt-2 text-xl font-extrabold text-gray-900">${subtitle}</h3>
+            </div>
+          </div>
+          <span class="recommendation-quantity">
+            <i class="fas fa-scale-balanced text-sky-600"></i>
+            ${quantity}
+          </span>
+        </div>
+        <div class="mt-5">
+          <p class="text-xs uppercase font-bold tracking-[0.16em] text-gray-400">Suggested options</p>
+          <div class="brand-row">
+            ${createBrandChips(brands)}
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function displaySuggestions(data) {
+    const cropLabel = document.getElementById("cropSelect").value || "Selected crop";
+    const landSize = document.getElementById("landSize").value || "--";
+
+    document.getElementById("suggestionsContainer").innerHTML = `
+      <div class="result-stack">
+        <div class="result-summary">
+          <div>
+            <span class="summary-badge">
+              <i class="fas fa-circle-check text-green-600"></i>
+              Input plan generated
+            </span>
+            <h3 class="mt-4 text-2xl font-extrabold text-gray-900">${cropLabel} input bundle</h3>
+            <p class="mt-2 text-sm leading-6 text-gray-600">
+              Quantities are scaled for your saved holding and grouped into the three main purchase buckets.
+            </p>
+          </div>
+          <div class="summary-stat">
+            <p class="text-xs uppercase font-bold tracking-[0.18em] text-gray-400">Land size used</p>
+            <p class="summary-stat-value mt-2">${landSize}</p>
+            <p class="mt-1 text-sm text-gray-500 font-medium">acres</p>
+          </div>
+        </div>
+
+        <div class="recommendation-grid">
+          ${createRecommendationCard("Seed plan", data.seeds.name, data.seeds.quantity, data.seeds.brands, "fas fa-seedling", "seed")}
+          ${createRecommendationCard("Fertilizer plan", data.fertilizers.name, data.fertilizers.quantity, data.fertilizers.brands, "fas fa-flask", "fertilizer")}
+          ${createRecommendationCard("Protection plan", data.pesticides.name, data.pesticides.quantity, data.pesticides.brands, "fas fa-shield-virus", "pesticide")}
+        </div>
+      </div>
+    `;
+  }
+
+  async function getInputSuggestions() {
+    const crop = document.getElementById("cropSelect").value;
+    const landSizeInput = document.getElementById("landSize");
+    const landSize = parseFloat(landSizeInput.value);
+
+    if (!crop) {
+      alert("Please select a crop");
+      return;
+    }
+
+    if (isNaN(landSize) || landSize <= 0) {
+      alert("Please enter a valid land size");
+      return;
+    }
+
+    document.getElementById("suggestionsContainer").innerHTML = renderLoadingState();
+
+    try {
+      const response = await fetch("/user/input-suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          crop: crop,
+          land_size: landSize,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        displaySuggestions(data);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `HTTP ${response.status} error`);
+      }
+    } catch (error) {
+      console.error("Error fetching input suggestions:", error);
+      document.getElementById("suggestionsContainer").innerHTML = renderErrorState(
+        `Failed to fetch suggestions: ${error.message}`,
+      );
+    }
+  }
+
+  function resetSuggestionState() {
+    document.getElementById("cropSelect").value = "";
+    if (window.inputCropSelect) {
+      window.inputCropSelect.btn.querySelector("span").textContent = "Select a crop...";
+    }
+    document.getElementById("suggestionsContainer").innerHTML = renderEmptyState();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    window.inputCropSelect = new CascadingCropSelect("cropSelectContainer", "cropSelect", "Select a crop...");
+  });
+</script>
+
+{% endblock %}

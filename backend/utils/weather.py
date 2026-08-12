@@ -1,5 +1,6 @@
 import requests
 from datetime import date
+from functools import lru_cache
 from typing import Dict, Any, Optional
 
 
@@ -12,7 +13,7 @@ def _request_json(url: str, params: Dict[str, Any]) -> Dict[str, Any]:
     try:
         with requests.Session() as session:
             session.trust_env = False
-            response = session.get(url, params=params, timeout=10)
+            response = session.get(url, params=params, timeout=2.5)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -91,18 +92,24 @@ KARNATAKA_DISTRICT_COORDS = {
 }
 
 
+@lru_cache(maxsize=128)
 def _geocode_location(location: str) -> Dict[str, Any]:
     raw_parts = [part.strip() for part in location.split(",") if part.strip()]
     district = raw_parts[0] if raw_parts else location.strip()
     state = raw_parts[1] if len(raw_parts) > 1 else ""
-
-    candidates = [location.strip(), district]
 
     simplified_district = district
     for suffix in (" Urban", " Rural", " district", " District"):
         if simplified_district.endswith(suffix):
             simplified_district = simplified_district[: -len(suffix)].strip()
 
+    # 1. Fast Path: Check known Karnataka district coordinates first (0ms)
+    fallback = KARNATAKA_DISTRICT_COORDS.get(district) or KARNATAKA_DISTRICT_COORDS.get(simplified_district)
+    if fallback:
+        return fallback
+
+    # 2. Slow Path: External API geocoding for unknown locations
+    candidates = [location.strip(), district]
     if simplified_district and simplified_district not in candidates:
         candidates.append(simplified_district)
 
@@ -129,17 +136,6 @@ def _geocode_location(location: str) -> Dict[str, Any]:
         results = geocode_response.get("results")
         if isinstance(results, list) and results:
             return results[0]
-
-    # Fallback: use hardcoded Karnataka district coordinates
-    fallback = KARNATAKA_DISTRICT_COORDS.get(district)
-    if fallback:
-        return fallback
-
-    # Also try the simplified district name for fallback
-    if simplified_district and simplified_district != district:
-        fallback = KARNATAKA_DISTRICT_COORDS.get(simplified_district)
-        if fallback:
-            return fallback
 
     return {}
 

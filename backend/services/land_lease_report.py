@@ -1,8 +1,7 @@
 import io
-import os
 import json
-import re
 from pathlib import Path
+
 from datetime import datetime
 from typing import Dict, Any
 
@@ -122,7 +121,8 @@ def generate_land_lease_pdf(estimate: LandLeaseEstimate, user_name: str = "Farme
     )
 
     # 1. Header Banner with Clean Logo & Brand Title
-    logo_path = Path(__file__).resolve().parent.parent.parent / "static" / "images" / "logo.png"
+    logo_path = Path(__file__).resolve().parent.parent.parent / "frontend" / "static" / "images" / "logo.png"
+
 
     logo_cell = P("<font size=18 color='#064e3b'><b>🌱 CropCare</b></font>", brand_title_style)
     if logo_path.exists():

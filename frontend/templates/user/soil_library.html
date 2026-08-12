@@ -1,0 +1,996 @@
+<!-- templates/user/soil_library.html -->
+{% extends "base.html" %}
+{% block title %}Soil Library - CropCare{% endblock %}
+{% block user_role %}Farmer Dashboard{% endblock %}
+{% block page_heading %}Soil Library & Reports{% endblock %}
+
+{% block sidebar %}
+<a href="/user/dashboard" class="sidebar-item">
+  <i class="fas fa-home"></i>
+  <span>Dashboard</span>
+</a>
+<a href="/user/profile" class="sidebar-item">
+  <i class="fas fa-user"></i>
+  <span>Profile</span>
+</a>
+<a href="/user/soil-library" class="sidebar-item active">
+  <i class="fas fa-seedling"></i>
+  <span>Soil Library</span>
+</a>
+<a href="/user/weather" class="sidebar-item">
+  <i class="fas fa-cloud-sun"></i>
+  <span>Weather</span>
+</a>
+<a href="/user/crop-recommendation" class="sidebar-item">
+  <i class="fas fa-leaf"></i>
+  <span>Crop Suggestion</span>
+</a>
+<a href="/user/input-suggestions" class="sidebar-item">
+  <i class="fas fa-tools"></i>
+  <span>Input Suggestions</span>
+</a>
+<a href="/user/disease-diagnosis" class="sidebar-item">
+  <i class="fas fa-heartbeat"></i>
+  <span>Disease Diagnosis</span>
+</a>
+<a href="/user/crop-planner" class="sidebar-item">
+  <i class="fas fa-calendar-check"></i>
+  <span>Crop Planner</span>
+</a>
+<a href="/user/mandi-tracking" class="sidebar-item">
+  <i class="fas fa-chart-line"></i>
+  <span>Price Tracker</span>
+</a>
+<a href="/user/land-leasing" class="sidebar-item">
+  <i class="fas fa-file-contract"></i>
+  <span>Land Leasing</span>
+</a>
+<a href="/user/gov-schemes" class="sidebar-item">
+  <i class="fas fa-hand-holding-heart"></i>
+  <span>Gov Schemes</span>
+</a>
+
+{% endblock %} {% block content %}
+<div class="space-y-6 soil-library-page">
+  <section
+    class="dashboard-card rounded-[32px] p-6 lg:p-8 fade-up overflow-hidden bg-white border border-gray-200 shadow-sm"
+  >
+    <div class="absolute inset-0 pointer-events-none soil-hero-wash"></div>
+    <div class="relative z-10 grid gap-6 xl:grid-cols-[1.5fr,0.9fr]">
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold text-green-800"
+          >
+            <i class="fas fa-layer-group text-green-600"></i>
+            Soil Knowledge Base
+          </span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-700"
+          >
+            <i class="fas fa-location-dot text-sky-600"></i>
+            Use with {{ user.district or "your district" }} crop planning
+          </span>
+        </div>
+
+        <div>
+          <h1
+            class="text-3xl md:text-5xl font-extrabold tracking-[-0.03em] text-gray-900"
+          >
+            Understand soil behavior before making the next field decision.
+          </h1>
+          <p class="mt-4 max-w-2xl text-sm md:text-base text-gray-600 leading-relaxed">
+            Compare soil types, review pH and water-holding behavior, and see
+            what crops and management practices fit each soil profile best.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Profiles
+            </p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">
+              6 Karnataka soils
+            </p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Reference
+            </p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">pH + retention</p>
+          </div>
+          <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Planning
+            </p>
+            <p class="mt-3 text-2xl font-extrabold text-gray-900">
+              Crop-fit guidance
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div
+          class="rounded-[28px] border border-green-200 bg-gradient-to-br from-green-50/80 to-emerald-50/80 p-6 shadow-sm"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">How To Use</p>
+              <p class="text-xl font-extrabold text-gray-900">
+                Reference, compare, then act
+              </p>
+            </div>
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-green-200 text-green-700 shadow-sm"
+            >
+              <i class="fas fa-book-open"></i>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-3">
+            <div
+              class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs"
+            >
+              Search by soil name, crop fit, pH behavior, or water retention.
+            </div>
+            <div
+              class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs"
+            >
+              Open any profile to review nutrients, practical field notes, and
+              best crops.
+            </div>
+            <div
+              class="rounded-2xl bg-white border border-green-200 px-4 py-3 text-sm text-green-800 font-medium shadow-2xs"
+            >
+              Use these profiles alongside crop suggestion and input planning.
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 shadow-sm rounded-[28px] p-6">
+          <p class="eyebrow mb-1 text-sky-600 font-bold uppercase tracking-wider text-xs">Quick Hint</p>
+          <p class="text-sm leading-6 text-gray-600">
+            Soil type is a starting point, not the full answer. Use local soil
+            test values whenever available before making a planting decision.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-6 lg:p-7 fade-up stagger-1">
+    <div
+      class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between"
+    >
+      <div>
+        <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Explore</p>
+        <h2 class="text-2xl font-extrabold text-gray-900">
+          Search and compare soil profiles
+        </h2>
+      </div>
+      <div class="flex w-full flex-col gap-3 xl:w-auto xl:min-w-[460px]">
+        <div class="soil-search-shell">
+          <i class="fas fa-magnifying-glass text-gray-400"></i>
+          <input
+            type="text"
+            id="soilSearch"
+            placeholder="Search by soil name, crop, pH, nutrient, or water behavior"
+            class="soil-search-input"
+          />
+        </div>
+        <div id="filterPills" class="flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div id="soilGrid" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"></div>
+    <div
+      id="emptyState"
+      class="hidden dashboard-card bg-white border border-gray-200 shadow-sm rounded-[30px] p-10 text-center"
+    >
+      <div
+        class="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-green-50 border border-green-200 text-2xl text-green-600"
+      >
+        <i class="fas fa-seedling"></i>
+      </div>
+      <h3 class="mt-5 text-2xl font-extrabold text-gray-900">
+        No matching soil profiles
+      </h3>
+      <p class="mt-3 text-sm leading-6 text-gray-600">
+        Try a different search term or remove some filters.
+      </p>
+    </div>
+  </section>
+</div>
+
+<div
+  id="soilModal"
+  class="fixed inset-0 z-50 hidden items-center justify-center p-4 soil-modal-backdrop"
+>
+  <div class="soil-modal-shell">
+    <button
+      type="button"
+      onclick="closeSoilModal()"
+      class="soil-modal-close"
+      aria-label="Close soil details"
+    >
+      <i class="fas fa-times"></i>
+    </button>
+
+    <div class="grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
+      <div class="space-y-5">
+        <div class="soil-modal-image-shell">
+          <img
+            id="modalImage"
+            src=""
+            alt="Soil Type"
+            class="soil-modal-image"
+          />
+          <div class="soil-modal-image-overlay"></div>
+          <div class="soil-modal-title-wrap">
+            <span id="modalTag" class="soil-modal-tag font-bold shadow-sm"></span>
+            <h3
+              id="modalTitle"
+              class="text-3xl md:text-4xl font-extrabold tracking-[-0.03em] text-white drop-shadow-md"
+            ></h3>
+          </div>
+        </div>
+
+        <div class="rounded-[26px] bg-gray-50 border border-gray-200 p-6">
+          <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Overview</p>
+          <p id="modalContent" class="text-sm leading-7 text-gray-700"></p>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="dashboard-card bg-white border border-gray-200 shadow-2xs rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              pH Range
+            </p>
+            <p id="modalPH" class="mt-2.5 text-lg font-bold text-gray-900"></p>
+          </div>
+          <div class="dashboard-card bg-white border border-gray-200 shadow-2xs rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Water Holding
+            </p>
+            <p id="modalWHC" class="mt-2.5 text-lg font-bold text-gray-900"></p>
+          </div>
+          <div class="dashboard-card bg-white border border-gray-200 shadow-2xs rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Nutrient Profile
+            </p>
+            <p
+              id="modalNutrients"
+              class="mt-2.5 text-sm leading-6 text-gray-600 font-medium"
+            ></p>
+          </div>
+          <div class="dashboard-card bg-white border border-gray-200 shadow-2xs rounded-[24px] p-5">
+            <p class="text-xs uppercase font-bold tracking-[0.15em] text-gray-400">
+              Best Crops
+            </p>
+            <p id="modalCrops" class="mt-2.5 text-sm leading-6 text-gray-600 font-medium"></p>
+          </div>
+        </div>
+
+        <div class="dashboard-card bg-white border border-gray-200 shadow-2xs rounded-[26px] p-6">
+          <p class="eyebrow mb-1 text-green-700 font-bold uppercase tracking-wider text-xs">Field Guidance</p>
+          <p id="modalGuidance" class="text-sm leading-7 text-gray-700"></p>
+        </div>
+
+        <div class="dashboard-card bg-white border border-gray-200 shadow-2xs rounded-[26px] p-6">
+          <p class="eyebrow mb-3 text-sky-600 font-bold uppercase tracking-wider text-xs">Quick Traits</p>
+          <div id="modalTraits" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .soil-library-page .soil-hero-wash {
+    background:
+      radial-gradient(
+        circle at top left,
+        rgba(67, 160, 71, 0.08),
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at right center,
+        rgba(79, 195, 247, 0.08),
+        transparent 26%
+      );
+  }
+
+  .soil-library-page .soil-search-shell {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: #F8FAF5;
+    padding: 0.95rem 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .soil-library-page .soil-search-input {
+    width: 100%;
+    background: transparent;
+    color: #1F2937;
+  }
+
+  .soil-library-page .soil-search-input:focus {
+    outline: none;
+  }
+
+  .soil-library-page .soil-search-input::placeholder {
+    color: #9CA3AF;
+  }
+
+  .soil-library-page .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    padding: 0.72rem 1rem;
+    font-size: 0.82rem;
+    color: #4B5563;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition:
+      transform 0.25s ease,
+      background 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease;
+  }
+
+  .soil-library-page .filter-pill.is-active {
+    background: #E8F5E9;
+    border-color: #2E7D32;
+    color: #1B5E20;
+    font-weight: 700;
+  }
+
+  .soil-library-page .filter-pill:hover {
+    transform: translateY(-1px);
+    color: #1F2937;
+    border-color: #2E7D32;
+  }
+
+  .soil-library-page .soil-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition:
+      transform 0.28s ease,
+      box-shadow 0.28s ease,
+      border-color 0.28s ease;
+  }
+
+  .soil-library-page .soil-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    border-color: #2E7D32;
+  }
+
+  .soil-library-page .soil-card-top {
+    position: relative;
+    height: 210px;
+  }
+
+  .soil-library-page .soil-card-image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .soil-library-page .soil-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 20%,
+      rgba(0, 0, 0, 0.65) 100%
+    );
+  }
+
+  .soil-library-page .soil-accent-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 6px;
+  }
+
+  .soil-library-page .soil-card-title {
+    position: absolute;
+    right: 1.2rem;
+    bottom: 1.2rem;
+    left: 1.2rem;
+  }
+
+  .soil-library-page .soil-card-body {
+    padding: 1.5rem;
+  }
+
+  .soil-library-page .soil-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 1rem;
+  }
+
+  .soil-library-page .soil-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    background: #F8FAF5;
+    border: 1px solid var(--border-color);
+    padding: 0.58rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1F2937;
+  }
+
+  .soil-library-page .soil-card-footer {
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+  }
+
+  .soil-library-page .soil-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #2E7D32;
+  }
+
+  .soil-library-page .soil-card-note {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #4B5563;
+  }
+
+  .soil-modal-backdrop {
+    display: none;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+  }
+
+  .soil-modal-backdrop.is-open {
+    display: flex;
+  }
+
+  .soil-modal-shell {
+    position: relative;
+    width: min(1100px, 100%);
+    max-height: min(92vh, 980px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-radius: 32px;
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    padding: 2rem;
+    box-shadow: 0 32px 72px rgba(0, 0, 0, 0.2);
+  }
+
+  .soil-modal-shell::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .soil-modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 10;
+    display: inline-flex;
+    height: 2.8rem;
+    width: 2.8rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #F3F4F6;
+    color: #374151;
+    transition:
+      transform 0.25s ease,
+      background 0.25s ease;
+  }
+
+  .soil-modal-close:hover {
+    transform: rotate(90deg);
+    background: #E5E7EB;
+    color: #111827;
+  }
+
+  .soil-modal-image-shell {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    min-height: 300px;
+  }
+
+  .soil-modal-image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .soil-modal-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.75)
+    );
+  }
+
+  .soil-modal-title-wrap {
+    position: absolute;
+    right: 1.4rem;
+    bottom: 1.4rem;
+    left: 1.4rem;
+  }
+
+  .soil-modal-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.78rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    margin-bottom: 0.9rem;
+  }
+
+  .soil-modal-trait {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: #F8FAF5;
+    border: 1px solid var(--border-color);
+    padding: 0.62rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1F2937;
+  }
+
+  @media (max-width: 767px) {
+    .soil-library-page .soil-card-top {
+      height: 190px;
+    }
+
+    .soil-modal-shell {
+      padding: 1.25rem;
+    }
+
+    .soil-modal-image-shell {
+      min-height: 220px;
+    }
+  }
+</style>
+
+<script>
+  const SOIL_IMAGE_PATHS = {
+    redSoil: "{{ request.url_for('static', path='images/RED_SOIL.png') }}",
+    blackSoil:
+      "{{ request.url_for('static', path='images/BLACK_COTTON_SOIL.png') }}",
+    coastalAlluvialSoil:
+      "{{ request.url_for('static', path='images/COASTAL_ALLUVIAL_SOIL.png') }}",
+    lateriteSoil:
+      "{{ request.url_for('static', path='images/LATERITE_SOIL.png') }}",
+    forestSoil:
+      "{{ request.url_for('static', path='images/FOREST_SOIL.png') }}",
+    redSandyLoamSoil:
+      "{{ request.url_for('static', path='images/REED_SANDY_LOAM_SOIL.png') }}",
+  };
+
+  const SOIL_LIBRARY_DATA = [
+    {
+      title: "Red Soil",
+      summary:
+        "Widely found across eastern and southern Karnataka, this iron-rich soil suits millets, groundnut, pulses, and cotton with proper nutrient support.",
+      description:
+        "Red soils are formed by weathering of ancient crystalline and metamorphic rocks. They are rich in iron oxide, which gives them their characteristic red color.",
+      accent: "#FF6B6B",
+      image: SOIL_IMAGE_PATHS.redSoil,
+      ph: "5.5 - 6.5 (Slightly acidic)",
+      whc: "Moderate water retention",
+      nutrients: "Rich in iron, usually low in nitrogen and phosphorus.",
+      crops: "Ragi, groundnut, pulses, cotton",
+      guidance:
+        "Add farmyard manure and balanced fertilizer to improve productivity. In rainfed Karnataka belts, moisture conservation and timely sowing are important.",
+      traits: ["Acidic tendency", "Moderate retention", "Iron-rich"],
+      filters: [
+        "acidic",
+        "moderate retention",
+        "cotton",
+        "millets",
+        "ragi",
+        "groundnut",
+        "karnataka",
+      ],
+      tag: "Karnataka staple",
+    },
+    {
+      title: "Black Soil",
+      summary:
+        "Common in northern Karnataka, this deep clay soil stores moisture well and supports cotton, jowar, pulses, and oilseeds.",
+      description:
+        "Black soils are rich in lime, iron, magnesia and alumina. They have high water retention capacity and are ideal for growing cotton.",
+      accent: "#4ECDC4",
+      image: SOIL_IMAGE_PATHS.blackSoil,
+      ph: "6.0 - 7.5 (Neutral to alkaline)",
+      whc: "High water retention capacity",
+      nutrients:
+        "Rich in calcium, magnesium and potash; can need drainage attention.",
+      crops: "Cotton, jowar, pigeon pea, sunflower",
+      guidance:
+        "Manage cracking and temporary waterlogging carefully. Broad-bed furrow systems and drainage support are useful in heavier black soil zones.",
+      traits: ["Neutral to alkaline", "High retention", "Clay-rich"],
+      filters: [
+        "neutral",
+        "alkaline",
+        "high retention",
+        "cotton",
+        "jowar",
+        "pigeon pea",
+        "north karnataka",
+      ],
+      tag: "Northern belt",
+    },
+    {
+      title: "Coastal Alluvial Soil",
+      summary:
+        "Found in Karnataka river valleys and coastal stretches, this fertile soil supports paddy, sugarcane, banana, and vegetables.",
+      description:
+        "Coastal and riverine alluvial soils in Karnataka are formed by the deposition of sediments along rivers and lowland stretches. They are productive but still need nutrient balancing under intensive cultivation.",
+      accent: "#F7DC6F",
+      image: SOIL_IMAGE_PATHS.coastalAlluvialSoil,
+      ph: "6.0 - 7.5 (Neutral to slightly alkaline)",
+      whc: "Good water retention",
+      nutrients:
+        "Generally fertile and responsive, but nitrogen and phosphorus replacement is important after repeated cropping.",
+      crops: "Rice, sugarcane, banana, vegetables",
+      guidance:
+        "These soils perform well in irrigated and lowland systems, but nutrient replacement and flood/drainage management need close attention.",
+      traits: ["Fertile", "Good retention", "River-deposited"],
+      filters: [
+        "neutral",
+        "good retention",
+        "rice",
+        "sugarcane",
+        "banana",
+        "vegetables",
+        "coastal karnataka",
+      ],
+      tag: "Coastal valley",
+    },
+    {
+      title: "Laterite Soil",
+      summary:
+        "Typical of Malnad and coastal uplands, this leached soil is better for plantation crops than water-demanding grain systems.",
+      description:
+        "Laterite soils are formed under tropical conditions with alternating wet and dry periods. They are rich in iron and aluminum compounds.",
+      accent: "#E74C3C",
+      image: SOIL_IMAGE_PATHS.lateriteSoil,
+      ph: "4.5 - 6.0 (Acidic)",
+      whc: "Poor water retention",
+      nutrients:
+        "Rich in iron and aluminum; often poor in nitrogen, lime and organic matter.",
+      crops: "Coffee, arecanut, cashew, coconut",
+      guidance:
+        "Use mulching, organic matter, and moisture conservation. Liming may be needed in some fields, especially where acidity affects nutrient uptake.",
+      traits: ["Acidic", "Low retention", "Plantation fit"],
+      filters: [
+        "acidic",
+        "low retention",
+        "coffee",
+        "cashew",
+        "arecanut",
+        "coconut",
+        "malnad",
+        "plantation",
+      ],
+      tag: "Malnad belt",
+    },
+    {
+      title: "Forest Soil",
+      summary:
+        "Seen in Karnataka hill zones, this humus-rich acidic soil favors spices, coffee, and selected horticulture under good slope management.",
+      description:
+        "Forest soils are found in hilly and mountainous regions. They are acidic in nature and rich in humus.",
+      accent: "#27AE60",
+      image: SOIL_IMAGE_PATHS.forestSoil,
+      ph: "4.0 - 5.5 (Acidic)",
+      whc: "Good water retention",
+      nutrients:
+        "High in organic matter and humus, but nutrient balance varies by slope and rainfall.",
+      crops: "Coffee, pepper, cardamom, spices",
+      guidance:
+        "Protect topsoil and organic matter. In the Western Ghats and similar slopes, contour planting and erosion control are essential.",
+      traits: ["Acidic", "Humus-rich", "Good retention"],
+      filters: [
+        "acidic",
+        "good retention",
+        "coffee",
+        "spices",
+        "pepper",
+        "cardamom",
+        "humus",
+        "western ghats",
+      ],
+      tag: "Hill zone",
+    },
+    {
+      title: "Red Sandy Loam",
+      summary:
+        "Common in parts of central and southern Karnataka, this lighter soil drains quickly and works well for groundnut, pulses, and vegetables with moisture support.",
+      description:
+        "Red sandy loam soils occur in several Karnataka districts and are lighter than classic red soils. They warm quickly, drain fast, and respond well to organic matter and irrigation support.",
+      accent: "#F4D03F",
+      image: SOIL_IMAGE_PATHS.redSandyLoamSoil,
+      ph: "6.0 - 7.0 (Slightly acidic to neutral)",
+      whc: "Low to moderate water retention",
+      nutrients:
+        "Usually lower in organic carbon and available nutrients unless regularly improved.",
+      crops: "Groundnut, pulses, vegetables, mulberry",
+      guidance:
+        "Frequent light irrigation, mulching, and compost help these soils stay productive. They benefit quickly from organic amendments and micronutrient correction.",
+      traits: ["Light texture", "Low retention", "Responsive soil"],
+      filters: [
+        "neutral",
+        "low retention",
+        "groundnut",
+        "pulses",
+        "vegetables",
+        "mulberry",
+        "sandy loam",
+        "karnataka",
+      ],
+      tag: "Light-texture zone",
+    },
+  ];
+
+  const SOIL_FILTERS = [
+    "Acidic",
+    "Neutral",
+    "Alkaline",
+    "High retention",
+    "Low retention",
+    "Plantation",
+    "Food grains",
+  ];
+
+  let activeFilter = "";
+
+  function normalizeText(value) {
+    return String(value || "")
+      .toLowerCase()
+      .trim();
+  }
+
+  function getFilterIcon(filterLabel) {
+    const label = normalizeText(filterLabel);
+    if (label.includes("acidic")) return "fa-flask";
+    if (label.includes("neutral")) return "fa-circle";
+    if (label.includes("alkaline")) return "fa-sun";
+    if (label.includes("retention")) return "fa-droplet";
+    if (label.includes("plantation")) return "fa-mug-hot";
+    if (label.includes("food")) return "fa-wheat-awn";
+    return "fa-sliders";
+  }
+
+  function matchesSpecialFilter(soil, filterLabel) {
+    const filterValue = normalizeText(filterLabel);
+    if (!filterValue) return true;
+
+    const haystack = normalizeText(
+      [
+        soil.title,
+        soil.summary,
+        soil.description,
+        soil.ph,
+        soil.whc,
+        soil.nutrients,
+        soil.crops,
+        soil.guidance,
+        ...(soil.filters || []),
+        ...(soil.traits || []),
+      ].join(" "),
+    );
+
+    if (filterValue === "plantation") {
+      return /tea|coffee|rubber|cashew|spices|plantation/.test(haystack);
+    }
+
+    if (filterValue === "food grains") {
+      return /rice|wheat|millets|barley|food grains/.test(haystack);
+    }
+
+    return haystack.includes(filterValue);
+  }
+
+  function getFilteredSoils() {
+    const searchTerm = normalizeText(
+      document.getElementById("soilSearch").value,
+    );
+
+    return SOIL_LIBRARY_DATA.filter((soil) => {
+      const haystack = normalizeText(
+        [
+          soil.title,
+          soil.summary,
+          soil.description,
+          soil.ph,
+          soil.whc,
+          soil.nutrients,
+          soil.crops,
+          soil.guidance,
+          ...(soil.filters || []),
+          ...(soil.traits || []),
+        ].join(" "),
+      );
+
+      const matchesSearch = !searchTerm || haystack.includes(searchTerm);
+      const matchesFilter =
+        !activeFilter || matchesSpecialFilter(soil, activeFilter);
+      return matchesSearch && matchesFilter;
+    });
+  }
+
+  function renderFilterPills() {
+    const container = document.getElementById("filterPills");
+    container.innerHTML = SOIL_FILTERS.map(
+      (filterLabel) => `
+      <button
+        type="button"
+        class="filter-pill ${activeFilter === filterLabel ? "is-active" : ""}"
+        onclick="toggleFilter('${filterLabel}')"
+      >
+        <i class="fas ${getFilterIcon(filterLabel)}"></i>
+        ${filterLabel}
+      </button>
+    `,
+    ).join("");
+  }
+
+  function renderSoils() {
+    const grid = document.getElementById("soilGrid");
+    const emptyState = document.getElementById("emptyState");
+    const soils = getFilteredSoils();
+
+    if (!soils.length) {
+      grid.innerHTML = "";
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+    grid.innerHTML = soils
+      .map(
+        (soil) => `
+      <button type="button" class="soil-card text-left" onclick="openSoilModal('${soil.title}')">
+        <div class="soil-card-top">
+          <img src="${soil.image}" alt="${soil.title}" class="soil-card-image" />
+          <div class="soil-card-overlay"></div>
+          <div class="soil-accent-bar" style="background:${soil.accent};"></div>
+          <div class="soil-card-title">
+            <span class="inline-flex rounded-full bg-black/40 backdrop-blur-xs px-3 py-1.5 text-xs font-semibold text-white">${soil.tag}</span>
+            <h3 class="mt-2.5 text-2xl font-extrabold text-white drop-shadow-md">${soil.title}</h3>
+          </div>
+        </div>
+        <div class="soil-card-body">
+          <p class="text-sm leading-6 text-gray-600">${soil.summary}</p>
+          <div class="soil-chip-row">
+            <span class="soil-chip"><i class="fas fa-vial text-sky-600"></i>${soil.ph}</span>
+            <span class="soil-chip"><i class="fas fa-droplet text-green-600"></i>${soil.whc}</span>
+          </div>
+          <div class="soil-card-footer">
+            <span class="soil-card-link">
+              View profile
+              <i class="fas fa-arrow-right"></i>
+            </span>
+            <span class="soil-card-note">${soil.crops}</span>
+          </div>
+        </div>
+      </button>
+    `,
+      )
+      .join("");
+  }
+
+  function renderTraitChips(traits, accent) {
+    return (traits || [])
+      .map(
+        (trait) => `
+      <span class="soil-modal-trait" style="border-color: ${accent}44; background: ${accent}11;">
+        <i class="fas fa-circle" style="font-size:0.45rem;color:${accent};"></i>
+        ${trait}
+      </span>
+    `,
+      )
+      .join("");
+  }
+
+  function openSoilModal(title) {
+    const soil = SOIL_LIBRARY_DATA.find((item) => item.title === title);
+    if (!soil) return;
+
+    document.getElementById("modalTitle").textContent = soil.title;
+    document.getElementById("modalTag").textContent = soil.tag;
+    document.getElementById("modalContent").textContent = soil.description;
+    document.getElementById("modalImage").src = soil.image;
+    document.getElementById("modalImage").alt = soil.title;
+    document.getElementById("modalPH").textContent = soil.ph;
+    document.getElementById("modalWHC").textContent = soil.whc;
+    document.getElementById("modalNutrients").textContent = soil.nutrients;
+    document.getElementById("modalCrops").textContent = soil.crops;
+    document.getElementById("modalGuidance").textContent = soil.guidance;
+    document.getElementById("modalTraits").innerHTML = renderTraitChips(
+      soil.traits,
+      soil.accent,
+    );
+    document.getElementById("modalTag").style.background = `${soil.accent}CC`;
+    document.getElementById("modalTag").style.color = "#FFFFFF";
+
+    const modal = document.getElementById("soilModal");
+    modal.classList.add("is-open");
+    const shell = modal.querySelector(".soil-modal-shell");
+    if (shell) {
+      shell.scrollTop = 0;
+    }
+  }
+
+  function closeSoilModal() {
+    document.getElementById("soilModal").classList.remove("is-open");
+  }
+
+  function toggleFilter(filterLabel) {
+    activeFilter = activeFilter === filterLabel ? "" : filterLabel;
+    renderFilterPills();
+    renderSoils();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    renderFilterPills();
+    renderSoils();
+
+    document
+      .getElementById("soilSearch")
+      .addEventListener("input", renderSoils);
+
+    document
+      .getElementById("soilModal")
+      .addEventListener("click", function (event) {
+        if (event.target === this) {
+          closeSoilModal();
+        }
+      });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeSoilModal();
+      }
+    });
+  });
+</script>
+
+{% endblock %}
