@@ -1,6 +1,6 @@
 CropCare - How to Run
 
-1. Open PowerShell or Terminal in the main folder (d:\Project\CropCare).
+1. Open PowerShell or Terminal in the main folder (P:\Project\CropCare).
 
 2. Run the automated launcher:
    .\start.bat
